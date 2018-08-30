@@ -101,6 +101,7 @@ class Tool(TestToolBase):
         max_limits = self._get_bisect_limits()
         overall_limit = sum(max_limits)
         prev_score = 1.0
+        prev_steps_str = None
 
         for current_limit in range(overall_limit + 1):
             # Take the overall limit number and split it across buckets for
@@ -177,14 +178,19 @@ class Tool(TestToolBase):
             if options.verbose:
                 self.context.o.auto(heuristic_verbose_output)
 
+            steps_str = str(steps)
+            steps_changed = steps_str != prev_steps_str
+            prev_steps_str = steps_str
+
             # If this is the first pass, or something has changed, write a text
             # file containing verbose information on the current status.
-            if current_limit == 0 or score_difference:
+            if current_limit == 0 or score_difference or steps_changed:
                 file_name = '-'.join(
                     str(s) for s in [
                         'status', test_name, '{{:0>{}}}'.format(
                             len(str(overall_limit))).format(current_limit),
-                        pass_info[1]
+                        '{:.4f}'.format(heuristic.score).replace(
+                            '.', '_'), pass_info[1]
                     ] if s is not None)
 
                 file_name = ''.join(
