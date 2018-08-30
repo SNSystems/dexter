@@ -65,7 +65,7 @@ def tool_main(context, tool, args):
 
         if options.version:
             context.o.green('{}\n'.format(context.version))
-            raise SystemExit(0)
+            return 0
 
         if (options.unittest != 'off' and not unit_tests_ok(context)):
             raise Error('<d>unit test failures</>')
