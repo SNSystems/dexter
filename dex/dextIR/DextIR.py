@@ -27,6 +27,7 @@ import json
 import os
 import unittest
 
+from dex.dextIR.BuilderIR import BuilderIR
 from dex.dextIR.CommandIR import CommandIR
 from dex.dextIR.CommandListIR import CommandListIR
 from dex.dextIR.DebuggerIR import DebuggerIR
@@ -66,7 +67,7 @@ class DextIR(SrObject):
         SrField('executable_path', string_types),
         SrField('source_paths', string_types, list_of=True),
         SrField(
-            'builder', DebuggerIR, can_be_none=True, required_in_init=False),
+            'builder', BuilderIR, can_be_none=True, required_in_init=False),
         SrField(
             'debugger', DebuggerIR, can_be_none=True, required_in_init=False),
         SrField(
@@ -138,6 +139,8 @@ class TestDextIR(unittest.TestCase):
             class options(object):
                 source_files = []
 
+        builder = BuilderIR(
+            name='MockBuilder', cflags=['-O0', '-O2'], ldflags='--link')
         debugger = DebuggerIR(name='MockDebugger', version='1.0')
 
         commands = {'DexWatch': CommandListIR()}
@@ -152,6 +155,7 @@ class TestDextIR(unittest.TestCase):
 
         sc = DextIR(
             dexter_version='',
+            builder=builder,
             debugger=debugger,
             commands=commands,
             executable_path='',
