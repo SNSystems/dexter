@@ -25,6 +25,7 @@
 
 import imp
 import os
+import platform
 from subprocess import CalledProcessError, check_output, STDOUT
 import sys
 
@@ -85,9 +86,17 @@ class LLDB(DebuggerBase):
                 sys.exc_info())
 
         if not os.path.isdir(pythonpath):
-            raise LoadDebuggerException(
-                'path "{}" does not exist [result of {}]'.format(
-                    pythonpath, args), sys.exc_info())
+            if "Ubuntu" in platform.linux_distribution():
+                pythonpath = os.path.join("/usr", "lib")
+                pythonpath = os.path.join(pythonpath, "llvm-6.0")
+                pythonpath = os.path.join(pythonpath, "lib")
+                pythonpath = os.path.join(pythonpath, "python2.7")
+                pythonpath = os.path.join(pythonpath, "site-packages")
+                # pythonpath = "/usr/lib/llvm-6.0/lib/python2.7/site-packages/"
+            else:
+                raise LoadDebuggerException(
+                    'path "{}" does not exist [result of {}]'.format(
+                        pythonpath, args), sys.exc_info())
 
         try:
             module_info = imp.find_module('lldb', [pythonpath])
