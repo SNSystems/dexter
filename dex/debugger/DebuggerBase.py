@@ -23,6 +23,7 @@
 """Base class for all debugger interface implementations."""
 
 import abc
+from itertools import chain
 import sys
 import time
 import traceback
@@ -110,8 +111,13 @@ class DebuggerBase(object):
 
     def _update_step_watches(self, step_info):
         loc = step_info.current_location
+        watch_cmds = ['DexWatch', 'DexUnreachable']
+        towatch = chain.from_iterable(self.steps.commands[x]
+                                      for x in watch_cmds
+                                      if x in self.steps.commands)
         try:
-            for watch in self.steps.commands['DexWatch']:
+            # Iterate over all watches of the types named in watch_cmds
+            for watch in towatch:
                 if (watch.loc.path == loc.path
                         and watch.loc.lineno == loc.lineno):
                     step_info.watches.update(get_command_object(watch)(self))
