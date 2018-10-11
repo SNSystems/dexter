@@ -26,9 +26,10 @@ Assign penalties based on different commands to decrease the score.
 0.000 is the worst theoretical score possible.
 """
 
-from collections import defaultdict, namedtuple
+from collections import defaultdict, namedtuple, Counter
+import difflib
 import os
-from itertools import repeat, chain
+from itertools import repeat, chain, groupby
 
 from dex.command import get_command_object
 
@@ -106,6 +107,19 @@ def add_heuristic_tool_arguments(parser):
         help='set the penalty for each line stepped onto that should'
         ' have been unreachable.',
         metavar='<int>')
+    parser.add_argument(
+        '--penalty-misordered-steps',
+        type=int,
+        default=2,  # XXX XXX XXX selected by random
+        help='set the penalty for differences in the order of steps'
+        ' the program was expected to observe.',
+        metavar='<int>')
+    parser.add_argument(
+        '--penalty-missing-step',
+        type=int,
+        default=4,  # XXX XXX XXX selected by random
+        help='set the penalty for the program skipping over a step.',
+        metavar='<int>')
 
 
 class Heuristic(object):
@@ -116,7 +130,8 @@ class Heuristic(object):
         worst_penalty = max([
             self.penalty_variable_optimized, self.penalty_irretrievable,
             self.penalty_not_evaluatable, self.penalty_incorrect_values,
-            self.penalty_missing_values, self.penalty_unreachable
+            self.penalty_missing_values, self.penalty_unreachable,
+            self.penalty_missing_step, self.penalty_misordered_steps
         ])
 
         # Get DexExpectWatchValue results.
@@ -186,6 +201,119 @@ class Heuristic(object):
             total = PenaltyCommand(d, len(cmds) * upen)
 
             self.penalties['unreachable lines'] = total
+
+        if 'DexExpectStepOrder' in steps.commands:
+            cmds = steps.commands['DexExpectStepOrder'].command_list
+            cmds = [(c, get_command_object(c)) for c in cmds]
+
+            # Form a list of which line/cmd we _should_ have seen
+            cmd_num_lst = [(x, c.loc.lineno) for c, co in cmds
+                           for x in co.sequence]
+            # Order them by the sequence number
+            cmd_num_lst.sort(key=lambda t: t[0])
+            # Strip out sequence key
+            cmd_num_lst = [y for x, y in cmd_num_lst]
+
+            # Now do the same, but for the actually observed lines/cmds
+            ss = steps.steps
+            deso = [s for s in ss if 'DexExpectStepOrder' in s.watches.keys()]
+            deso = [s.watches['DexExpectStepOrder'] for s in deso]
+            # We rely on the steps remaining in order here
+            order_list = [int(x.expression) for x in deso]
+
+            # First off, check to see whether or not there are missing items
+            expected = Counter(cmd_num_lst)
+            seen = Counter(order_list)
+
+            unseen_line_dict = dict()
+            skipped_line_dict = dict()
+
+            mispen = self.penalty_missing_step
+            num_missing = 0
+            num_repeats = 0
+            for k, v in expected.items():
+                if k not in seen:
+                    msg = 'Line {} not seen'.format(k)
+                    unseen_line_dict[msg] = [PenaltyInstance(mispen, mispen)]
+                    num_missing += v
+                elif v > seen[k]:
+                    msg = 'Line {} skipped at least once'.format(k)
+                    skipped_line_dict[msg] = [PenaltyInstance(mispen, mispen)]
+                    num_missing += v - seen[k]
+                elif v < seen[k]:
+                    # Don't penalise unexpected extra sightings of a line
+                    # for now
+                    num_repeats = seen[k] - v
+                    pass
+
+            if len(unseen_line_dict) == 0:
+                pi = PenaltyInstance(0, 0)
+                unseen_line_dict['<g>All lines were seen</>'] = [pi]
+
+            if len(skipped_line_dict) == 0:
+                pi = PenaltyInstance(0, 0)
+                skipped_line_dict['<g>No lines were skipped</>'] = [pi]
+
+            total = PenaltyCommand(unseen_line_dict, len(expected) * mispen)
+            self.penalties['Unseen lines'] = total
+            total = PenaltyCommand(skipped_line_dict, len(expected) * mispen)
+            self.penalties['Skipped lines'] = total
+
+            ordpen = self.penalty_misordered_steps
+            cmd_num_lst = [str(x) for x in cmd_num_lst]
+            order_list = [str(x) for x in order_list]
+            lst = list(difflib.Differ().compare(cmd_num_lst, order_list))
+            diff_detail = Counter(l[0] for l in lst)
+
+            assert '?' not in diff_detail
+
+            # Diffs are hard to interpret; there are many algorithms for
+            # condensing them. Ignore all that, and just print out the changed
+            # sequences, it's up to the user to interpret what's going on.
+
+            def filt_lines(s, seg, e, key):
+                lst = [s]
+                for x in seg:
+                    if x[0] == key:
+                        lst.append(int(x[2:]))
+                lst.append(e)
+                return lst
+
+            diff_msgs = dict()
+
+            def reportdiff(start_idx, segment, end_idx):
+                msg = 'Order mismatch, expected linenos {}, saw {}'
+                expected_linenos = filt_lines(start_idx, segment, end_idx, '-')
+                seen_linenos = filt_lines(start_idx, segment, end_idx, '+')
+                msg = msg.format(expected_linenos, seen_linenos)
+                diff_msgs[msg] = [PenaltyInstance(ordpen, ordpen)]
+
+            # Group by changed segments.
+            start_expt_step = 0
+            end_expt_step = 0
+            to_print_lst = []
+            for k, subit in groupby(lst, lambda x: x[0] == ' '):
+                if k:  # Whitespace group
+                    nochanged = [x for x in subit]
+                    end_expt_step = int(nochanged[0][2:])
+                    if len(to_print_lst) > 0:
+                        reportdiff(start_expt_step, to_print_lst,
+                                   end_expt_step)
+                    start_expt_step = int(nochanged[-1][2:])
+                    to_print_lst = []
+                else:  # Diff group, save for printing
+                    to_print_lst = [x for x in subit]
+
+            # If there was a dangling different step, print that too.
+            if len(to_print_lst) > 0:
+                reportdiff(start_expt_step, to_print_lst, '[End]')
+
+            if len(diff_msgs) == 0:
+                diff_msgs['<g>No lines misordered</>'] = [
+                    PenaltyInstance(0, 0)
+                ]
+            total = PenaltyCommand(diff_msgs, len(cmd_num_lst) * ordpen)
+            self.penalties['Misordered lines'] = total
 
         return
 
@@ -346,3 +474,11 @@ class Heuristic(object):
     @property
     def penalty_unreachable(self):
         return self.context.options.penalty_unreachable
+
+    @property
+    def penalty_missing_step(self):
+        return self.context.options.penalty_missing_step
+
+    @property
+    def penalty_misordered_steps(self):
+        return self.context.options.penalty_misordered_steps
