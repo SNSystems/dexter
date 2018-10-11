@@ -218,16 +218,16 @@ class Heuristic(object):
         result = 0
 
         maximum_allowed_penalty = 0
-        for name in self.penalties:
-            maximum_allowed_penalty += self.penalties[name].max_penalty
-            value = self.penalties[name].pen_dict
-            for category in value:
-                result += sum(x.the_penalty for x in value[category])
+        for name, pen_cmd in self.penalties.iteritems():
+            maximum_allowed_penalty += pen_cmd.max_penalty
+            value = pen_cmd.pen_dict
+            for category, inst_list in value.iteritems():
+                result += sum(x.the_penalty for x in inst_list)
         return min(result, maximum_allowed_penalty)
 
     @property
     def max_penalty(self):
-        return sum(self.penalties[p].max_penalty for p in self.penalties)
+        return sum(p_cat.max_penalty for p_cat in self.penalties.values())
 
     @property
     def score(self):
@@ -253,14 +253,14 @@ class Heuristic(object):
         string = ''
         string += ('\n')
         for command in sorted(self.penalties):
-            maximum_possible_penalty = self.penalties[command].max_penalty
+            pen_cmd = self.penalties[command]
+            maximum_possible_penalty = pen_cmd.max_penalty
             total_penalty = 0
             lines = []
-            for category in sorted(self.penalties[command].pen_dict):
+            for category in sorted(pen_cmd.pen_dict):
                 lines.append('    <r>{}</>:\n'.format(category))
 
-                for result, penalty in self.penalties[command].pen_dict[
-                        category]:
+                for result, penalty in pen_cmd.pen_dict[category]:
                     if isinstance(result, StepValueInfo):
                         text = 'step {}'.format(result.step_index)
                         if result.value_info.value:
