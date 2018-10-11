@@ -26,10 +26,14 @@ Assign penalties based on different commands to decrease the score.
 0.000 is the worst theoretical score possible.
 """
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 import os
 
 from dex.command import get_command_object
+
+PenaltyCommand = namedtuple('PenaltyCommand', ['pen_dict', 'max_penalty'])
+# 'meta' field used in different ways by different things
+PenaltyInstance = namedtuple('PenaltyInstance', ['meta', 'the_penalty'])
 
 
 class StepValueInfo(object):
@@ -117,7 +121,8 @@ class Heuristic(object):
                     command.values)) * worst_penalty
                 name, p = self._calculate_expect_watch_penalties(
                     command, maximum_possible_penalty)
-                self.penalties[name] = (p, maximum_possible_penalty)
+                self.penalties[name] = PenaltyCommand(p,
+                                                      maximum_possible_penalty)
         except KeyError:
             pass
 
@@ -140,9 +145,9 @@ class Heuristic(object):
                 actual_penalty = min(penalty, maximum_possible_penalty)
                 key = (command.name
                        if actual_penalty else '<g>{}</>'.format(command.name))
-                penalties[key] = [(penalty, actual_penalty)]
+                penalties[key] = [PenaltyInstance(penalty, actual_penalty)]
                 maximum_possible_penalty_all += maximum_possible_penalty
-            self.penalties['step kind differences'] = (
+            self.penalties['step kind differences'] = PenaltyCommand(
                 penalties, maximum_possible_penalty_all)
         except KeyError:
             pass
@@ -171,10 +176,12 @@ class Heuristic(object):
                 current_penalty = min(penalty_available,
                                       self.penalty_missing_values)
                 penalty_available -= current_penalty
-                penalties['missing values'].append((v, current_penalty))
+                penalties['missing values'].append(
+                    PenaltyInstance(v, current_penalty))
 
         for v in c.encountered_values:
-            penalties['<g>expected encountered values</>'].append((v, 0))
+            penalties['<g>expected encountered values</>'].append(
+                PenaltyInstance(v, 0))
 
         penalty_descriptions = [
             (self.penalty_not_evaluatable, c.invalid_watches,
@@ -199,7 +206,8 @@ class Heuristic(object):
                 times_to_penalize -= 1
                 penalty_score = min(penalty_available, penalty_score)
                 penalty_available -= penalty_score
-                penalties[description].append((w, penalty_score))
+                penalties[description].append(
+                    PenaltyInstance(w, penalty_score))
                 if not times_to_penalize:
                     penalty_score = 0
 
@@ -211,15 +219,15 @@ class Heuristic(object):
 
         maximum_allowed_penalty = 0
         for name in self.penalties:
-            maximum_allowed_penalty += self.penalties[name][1]
-            value = self.penalties[name][0]
+            maximum_allowed_penalty += self.penalties[name].max_penalty
+            value = self.penalties[name].pen_dict
             for category in value:
-                result += sum(x[1] for x in value[category])
+                result += sum(x.the_penalty for x in value[category])
         return min(result, maximum_allowed_penalty)
 
     @property
     def max_penalty(self):
-        return sum(self.penalties[p][1] for p in self.penalties)
+        return sum(self.penalties[p].max_penalty for p in self.penalties)
 
     @property
     def score(self):
@@ -245,13 +253,14 @@ class Heuristic(object):
         string = ''
         string += ('\n')
         for command in sorted(self.penalties):
-            maximum_possible_penalty = self.penalties[command][1]
+            maximum_possible_penalty = self.penalties[command].max_penalty
             total_penalty = 0
             lines = []
-            for category in sorted(self.penalties[command][0]):
+            for category in sorted(self.penalties[command].pen_dict):
                 lines.append('    <r>{}</>:\n'.format(category))
 
-                for result, penalty in self.penalties[command][0][category]:
+                for result, penalty in self.penalties[command].pen_dict[
+                        category]:
                     if isinstance(result, StepValueInfo):
                         text = 'step {}'.format(result.step_index)
                         if result.value_info.value:
