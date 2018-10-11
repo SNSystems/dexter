@@ -28,6 +28,7 @@ Assign penalties based on different commands to decrease the score.
 
 from collections import defaultdict, namedtuple
 import os
+from itertools import repeat, chain
 
 from dex.command import get_command_object
 
@@ -98,6 +99,13 @@ def add_heuristic_tool_arguments(parser):
         help='set the penalty multiplier for each'
         ' occurrence of an unexpected value.',
         metavar='<int>')
+    parser.add_argument(
+        '--penalty-unreachable',
+        type=int,
+        default=4,  # XXX XXX XXX selected by random
+        help='set the penalty for each line stepped onto that should'
+        ' have been unreachable.',
+        metavar='<int>')
 
 
 class Heuristic(object):
@@ -108,7 +116,7 @@ class Heuristic(object):
         worst_penalty = max([
             self.penalty_variable_optimized, self.penalty_irretrievable,
             self.penalty_not_evaluatable, self.penalty_incorrect_values,
-            self.penalty_missing_values
+            self.penalty_missing_values, self.penalty_unreachable
         ])
 
         # Get DexExpectWatchValue results.
@@ -151,6 +159,35 @@ class Heuristic(object):
                 penalties, maximum_possible_penalty_all)
         except KeyError:
             pass
+
+        if 'DexUnreachable' in steps.commands:
+            cmds = steps.commands['DexUnreachable'].command_list
+            unreach_count = 0
+
+            # Find steps with unreachable in them
+            ureachs = [
+                s for s in steps.steps if 'DexUnreachable' in s.watches.keys()
+            ]
+            assert len(ureachs) <= len(cmds)
+
+            # There's no need to match up cmds with the actual watches
+            upen = self.penalty_unreachable
+
+            count = upen * len(ureachs)
+            if count != 0:
+                d = dict()
+                for x in ureachs:
+                    msg = 'line {} reached'.format(x.current_location.lineno)
+                    d[msg] = [PenaltyInstance(upen, upen)]
+            else:
+                d = {
+                    '<g>No unreachable lines seen</>': [PenaltyInstance(0, 0)]
+                }
+            total = PenaltyCommand(d, len(cmds) * upen)
+
+            self.penalties['unreachable lines'] = total
+
+        return
 
     def _calculate_expect_watch_penalties(self, c, maximum_possible_penalty):
         penalties = defaultdict(list)
@@ -305,3 +342,7 @@ class Heuristic(object):
     @property
     def penalty_misordered_values(self):
         return self.context.options.penalty_misordered_values
+
+    @property
+    def penalty_unreachable(self):
+        return self.context.options.penalty_unreachable
