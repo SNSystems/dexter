@@ -100,65 +100,88 @@ class Tool(TestToolBase):
     def name(self):
         return 'DExTer test'
 
-    def _run_test(self, subdir, test_name):
+    def _build_test_case(self):
+        """invoke the specified builder script to build the test case
+           with the specified cflags and ldflags.
+        """
         options = self.context.options
-        test_name = os.path.relpath(subdir, options.tests_directory)
-        if os.path.split(test_name)[-1] == '.':
-            test_name = os.path.basename(subdir)
-
         compiler_options = [options.cflags for _ in options.source_files]
         linker_options = options.ldflags
-        try:
-            _, _, builderIR = run_external_build_script(
-                self.context,
-                script_path=self.context.build_script,
-                source_files=options.source_files,
-                compiler_options=compiler_options,
-                linker_options=linker_options,
-                executable_file=options.executable)
-        except BuildScriptException as e:
-            test_case = TestCase(self.context, test_name, None, e)
-            self.context.o.auto(test_case)
-            self._test_cases.append(test_case)
-            return
+        _, _, builderIR = run_external_build_script(
+            self.context,
+            script_path=self.context.build_script,
+            source_files=options.source_files,
+            compiler_options=compiler_options,
+            linker_options=linker_options,
+            executable_file=options.executable)
+        return builderIR
 
-        try:
-            steps = get_debugger_steps(self.context)
-            steps.builder = builderIR
-        except DebuggerException as e:
-            test_case = TestCase(self.context, test_name, None, e)
-            self.context.o.auto(test_case)
-            self._test_cases.append(test_case)
-            return
+    def _get_steps(self, builderIR):
+        """Generate a list of debugger steps from a test case.
+        """
+        steps = get_debugger_steps(self.context)
+        steps.builder = builderIR
+        return steps
 
-        test_results_path = os.path.join(options.results_directory, '_'.join(
+    def _get_results_path(self, test_name):
+        """Returns the path to the test results directory for
+           the test denoted by test_name
+        """
+        return os.path.join(self.context.options.results_directory, '_'.join(
             os.path.split(test_name)))
-        output_text_path = '{}.txt'.format(test_results_path)
+
+    def _get_results_text_path(self, test_name):
+        test_results_path = self._get_results_path(test_name)
+        return '{}.txt'.format(test_results_path)
+
+    def _get_results_json_path(self, test_name):
+        test_results_path = self._get_results_path(test_name)
+        return '{}.json'.format(test_results_path)
+
+    def _record_steps(self, test_name, steps):
+        output_text_path = self._get_results_text_path(test_name)
         with open(output_text_path, 'w') as fp:
             self.context.o.auto(str(steps), stream=Stream(fp))
 
-        output_json_path = '{}.json'.format(test_results_path)
+        output_json_path = self._get_results_json_path(test_name)
         with open(output_json_path, 'w') as fp:
             fp.write(steps.as_json)
 
-        try:
-            heuristic = Heuristic(self.context, steps)
-        except HeuristicException as e:
-            test_case = TestCase(self.context, test_name, None, e)
-            self.context.o.auto(test_case)
-            self._test_cases.append(test_case)
-            return
-
+    def _record_score(self, test_name, heuristic):
+        output_text_path = self._get_results_text_path(test_name)
         with open(output_text_path, 'a') as fp:
             self.context.o.auto(heuristic.verbose_output, stream=Stream(fp))
 
-        test_case = TestCase(self.context, test_name, heuristic, None)
+    def _record_test_and_display(self, test_case):
         self.context.o.auto(test_case)
         self._test_cases.append(test_case)
 
-        if options.verbose:
+    def _record_failed_test(self, test_name, exception):
+        test_case = TestCase(self.context, test_name, None, exception)
+        self._record_test_and_display(test_case)
+
+    def _record_successful_test(self, test_name, steps, heuristic):
+        test_case = TestCase(self.context, test_name, heuristic, None)
+        self._record_test_and_display(test_case)
+        if self.context.options.verbose:
             self.context.o.auto('\n{}\n'.format(steps))
             self.context.o.auto(heuristic.verbose_output)
+
+    def _run_test(self, test_dir):
+        test_name = self._get_test_name(test_dir)
+        try:
+            builderIR = self._build_test_case()
+            steps = self._get_steps(builderIR)
+            self._record_steps(test_name, steps)
+            heuristic_score = Heuristic(self.context, steps)
+            self._record_score(test_name, heuristic_score)
+        except (BuildScriptException, DebuggerException,
+                HeuristicException) as e:
+            self._record_failed_test(test_name, e)
+            return
+
+        self._record_successful_test(test_name, steps, heuristic_score)
+        return
 
     def _handle_results(self):
         options = self.context.options
