@@ -101,7 +101,7 @@ class Tool(TestToolBase):
         return 'DExTer test'
 
     def _build_test_case(self):
-        """invoke the specified builder script to build the test case
+        """Invoke the specified builder script to build the test case
            with the specified cflags and ldflags.
         """
         options = self.context.options
@@ -124,21 +124,28 @@ class Tool(TestToolBase):
         return steps
 
     def _get_results_path(self, test_name):
-        """Returns the path to the test results directory for
-           the test denoted by test_name
+        """Returns the path to the test results directory for the test denoted
+           by test_name.
         """
         return os.path.join(self.context.options.results_directory, '_'.join(
             os.path.split(test_name)))
 
     def _get_results_text_path(self, test_name):
+        """Returns path results .txt file for test denoted by test_name.
+        """
         test_results_path = self._get_results_path(test_name)
         return '{}.txt'.format(test_results_path)
 
     def _get_results_json_path(self, test_name):
+        """Returns path to results .json file for test denoted by test_name.
+        """
         test_results_path = self._get_results_path(test_name)
         return '{}.json'.format(test_results_path)
 
     def _record_steps(self, test_name, steps):
+        """Write out the set of steps out to the test's .txt and .json
+           results file.
+        """
         output_text_path = self._get_results_text_path(test_name)
         with open(output_text_path, 'w') as fp:
             self.context.o.auto(str(steps), stream=Stream(fp))
@@ -148,19 +155,30 @@ class Tool(TestToolBase):
             fp.write(steps.as_json)
 
     def _record_score(self, test_name, heuristic):
+        """Write out the test's heuristic score to the results .txt file.
+        """
         output_text_path = self._get_results_text_path(test_name)
         with open(output_text_path, 'a') as fp:
             self.context.o.auto(heuristic.verbose_output, stream=Stream(fp))
 
     def _record_test_and_display(self, test_case):
+        """Output test case to o stream and record test case internally for
+           handling later.
+        """
         self.context.o.auto(test_case)
         self._test_cases.append(test_case)
 
     def _record_failed_test(self, test_name, exception):
+        """Instantiate a failed test case with failure exception and
+           store internally.
+        """
         test_case = TestCase(self.context, test_name, None, exception)
         self._record_test_and_display(test_case)
 
     def _record_successful_test(self, test_name, steps, heuristic):
+        """Instantiate a successful test run, store test for handling later.
+           Display verbose output for test case if required.
+        """
         test_case = TestCase(self.context, test_name, heuristic, None)
         self._record_test_and_display(test_case)
         if self.context.options.verbose:
@@ -168,6 +186,9 @@ class Tool(TestToolBase):
             self.context.o.auto(heuristic.verbose_output)
 
     def _run_test(self, test_dir):
+        """Attempt to run test case found in test_dir. Store result internally
+           in self._test_cases.
+        """
         test_name = self._get_test_name(test_dir)
         try:
             builderIR = self._build_test_case()
