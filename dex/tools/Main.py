@@ -39,6 +39,7 @@ from dex.utils.UnitTests import unit_tests_ok
 from dex.utils.Version import version
 from dex.utils import WorkingDirectory
 
+
 def output_bug_report_message(context):
     """ In the event of a catastrophic failure, print bug report request to the
         user.
@@ -65,7 +66,7 @@ def output_bug_report_message(context):
         '<d>{}</>\n'
         '\n'.format(sys.platform, version('DExTer'),
                     [sys.executable] + sys.argv),
-                    stream=PrettyOutput.stderr)
+        stream=PrettyOutput.stderr)
 
 
 def get_tools_directory():
@@ -125,7 +126,8 @@ def is_valid_tool_name(tool_name):
     valid_tools = get_tool_names()
     if tool_name not in valid_tools:
         raise Error('invalid tool "{}" (choose from {})'.format(
-            tool_name, ', '.join([t for t in valid_tools if not t.endswith('-')])))
+            tool_name,
+            ', '.join([t for t in valid_tools if not t.endswith('-')])))
 
 
 def import_tool_module(tool_name):
@@ -196,7 +198,7 @@ def main():
             return tool_main(context, module.Tool(context), args)
         except Error as e:
             context.o.auto(
-              '\nerror: {}\n'.format(str(e)), stream=PrettyOutput.stderr)
+                '\nerror: {}\n'.format(str(e)), stream=PrettyOutput.stderr)
             try:
                 if context.options.error_debug:
                     raise
