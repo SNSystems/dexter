@@ -39,6 +39,34 @@ from dex.utils.UnitTests import unit_tests_ok
 from dex.utils.Version import version
 from dex.utils import WorkingDirectory
 
+def output_bug_report_message(context):
+    """ In the event of a catastrophic failure, print bug report request to the
+        user.
+    """
+    context.o.red(
+        '\n\n'
+        '<g>****************************************</>\n'
+        '<b>****************************************</>\n'
+        '****************************************\n'
+        '**                                    **\n'
+        '** <y>This is a bug in <a>DExTer</>.</>           **\n'
+        '**                                    **\n'
+        '**                  <y>Please report it.</> **\n'
+        '**                                    **\n'
+        '****************************************\n'
+        '<b>****************************************</>\n'
+        '<g>****************************************</>\n'
+        '\n'
+        '<b>system:</>\n'
+        '<d>{}</>\n\n'
+        '<b>version:</>\n'
+        '<d>{}</>\n\n'
+        '<b>args:</>\n'
+        '<d>{}</>\n'
+        '\n'.format(sys.platform, version('DExTer'),
+                    [sys.executable] + sys.argv),
+                    stream=PrettyOutput.stderr)
+
 
 def get_tools_directory():
     tools_directory = os.path.join(get_root_directory(), 'tools')
@@ -52,6 +80,65 @@ def get_tool_names():
         t.replace('_', '-') for t in os.listdir(tools_directory)
         if os.path.isfile(os.path.join(tools_directory, t, 'Tool.py'))
     ]
+
+
+def set_auto_highlights(context):
+    # Flag some strings for auto-highlighting.
+    context.o.auto_reds.extend([
+        r'[Ee]rror\:',
+        r'[Ee]xception\:',
+        r'un(expected|recognized) argument',
+    ])
+    context.o.auto_yellows.extend([
+        r'[Ww]arning\:',
+        r'\(did you mean ',
+        r'During handling of the above exception, another exception',
+    ])
+
+
+def get_options_and_args(context):
+    """ get the options and arguments from the commandline
+    """
+    parser = argparse.ExtArgumentParser(context, add_help=False)
+    parser.add_argument('tool', default=None, nargs='?')
+    options, args = parser.parse_known_args(sys.argv[1:])
+
+    return options, args
+
+
+def get_tool_name(options):
+    """ get the name of the dexter tool (if passed) specified on the command
+        line, otherwise return 'no_tool_'.
+    """
+    tool_name = options.tool
+    if tool_name is None:
+        tool_name = 'no_tool_'
+    else:
+        is_valid_tool_name(tool_name)
+    return tool_name
+
+
+def is_valid_tool_name(tool_name):
+    """ check tool name matches a tool directory within the dexter tools
+        directory.
+    """
+    valid_tools = get_tool_names()
+    if tool_name not in valid_tools:
+        raise Error('invalid tool "{}" (choose from {})'.format(
+            tool_name, ', '.join([t for t in valid_tools if not t.endswith('-')])))
+
+
+def import_tool_module(tool_name):
+    """ Imports the python module at the tool directory specificed by
+        tool_name.
+    """
+    # format tool argument to reflect tool directory form.
+    tool_name = tool_name.replace('-', '_')
+
+    tools_directory = get_tools_directory()
+    module_info = imp.find_module(tool_name, [tools_directory])
+
+    return imp.load_module(tool_name, *module_info)
 
 
 def tool_main(context, tool, args):
@@ -97,44 +184,19 @@ def main():
             context.root_directory = get_root_directory()
 
             # Flag some strings for auto-highlighting.
-            context.o.auto_reds.extend([
-                r'[Ee]rror\:',
-                r'[Ee]xception\:',
-                r'un(expected|recognized) argument',
-            ])
-            context.o.auto_yellows.extend([
-                r'[Ww]arning\:',
-                r'\(did you mean ',
-                r'During handling of the above exception, another exception',
-            ])
+            set_auto_highlights(context)
 
-            tools_directory = get_tools_directory()
+            options, args = get_options_and_args(context)
 
-            parser = argparse.ExtArgumentParser(context, add_help=False)
-            parser.add_argument('tool', default=None, nargs='?')
+            # raises 'Error' if command line tool is invalid.
+            tool_name = get_tool_name(options)
 
-            options, args = parser.parse_known_args(sys.argv[1:])
-            tool_name = options.tool
-
-            if tool_name is None:
-                tool_name = 'no_tool_'
-            else:
-                valid_tools = get_tool_names()
-                if tool_name not in valid_tools:
-                    raise Error('invalid tool "{}" (choose from {})'.format(
-                        tool_name, ', '.join(
-                            [t for t in valid_tools if not t.endswith('-')])))
-
-                tool_name = tool_name.replace('-', '_')
-
-            module_info = imp.find_module(tool_name, [tools_directory])
-            module = imp.load_module(tool_name, *module_info)
+            module = import_tool_module(tool_name)
 
             return tool_main(context, module.Tool(context), args)
         except Error as e:
             context.o.auto(
-                '\nerror: {}\n'.format(str(e)), stream=PrettyOutput.stderr)
-
+              '\nerror: {}\n'.format(str(e)), stream=PrettyOutput.stderr)
             try:
                 if context.options.error_debug:
                     raise
@@ -144,27 +206,5 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             raise
         except:  # noqa
-            context.o.red(
-                '\n\n'
-                '<g>****************************************</>\n'
-                '<b>****************************************</>\n'
-                '****************************************\n'
-                '**                                    **\n'
-                '** <y>This is a bug in <a>DExTer</>.</>           **\n'
-                '**                                    **\n'
-                '**                  <y>Please report it.</> **\n'
-                '**                                    **\n'
-                '****************************************\n'
-                '<b>****************************************</>\n'
-                '<g>****************************************</>\n'
-                '\n'
-                '<b>system:</>\n'
-                '<d>{}</>\n\n'
-                '<b>version:</>\n'
-                '<d>{}</>\n\n'
-                '<b>args:</>\n'
-                '<d>{}</>\n'
-                '\n'.format(sys.platform, version('DExTer'),
-                            [sys.executable] + sys.argv),
-                stream=PrettyOutput.stderr)
+            output_bug_report_message(context)
             raise
