@@ -96,3 +96,10 @@ class HeuristicException(Dexception):
 class ImportDextIRException(Dexception):
     """If there was a problem importing the dextIR json file."""
     pass
+
+class UnsafeEval(Dexception):
+    """If there was a problem safely evaluating a dexter command."""
+    def __init__(self, ast_node):
+        self.node = ast_node
+        message = ast_node.str + " is unsafe to evaluate"
+        super(UnsafeEval, self).__init__(message)
