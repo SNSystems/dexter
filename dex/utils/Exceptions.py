@@ -97,9 +97,11 @@ class ImportDextIRException(Dexception):
     """If there was a problem importing the dextIR json file."""
     pass
 
+
 class UnsafeEval(Dexception):
     """If there was a problem safely evaluating a dexter command."""
-    def __init__(self, syntax_error, command_node):
+
+    def __init__(self, command_node, syntax_error):
         self.command_node = command_node
         self.syntax_error = syntax_error
         super(UnsafeEval, self).__init__(command_node, syntax_error)

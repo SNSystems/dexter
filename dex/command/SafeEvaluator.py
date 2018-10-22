@@ -28,62 +28,68 @@ import ast
 
 from dex.utils.Exceptions import UnsafeEval
 
+
 class SafeEvaluator(object):
     def __init__(self, valid_commands):
         self._valid_commands = valid_commands
 
-
-    def _raise_syntax_error(self, command_node, syntax_error, command_text):
+    @staticmethod
+    def _raise_syntax_error(command_node, syntax_error, command_text):
         location = ('', command_node.lineno, command_node.col_offset + 1,
                     command_text)
         raise SyntaxError(syntax_error, location)
 
-
-    def _get_as_module(self, command_as_text):
+    @staticmethod
+    def _get_as_module(command_as_text):
         as_module = ast.parse(command_as_text)
         return as_module
 
-
-    def _get_as_expressions(self, as_module):
+    @staticmethod
+    def _get_as_expressions(as_module):
         if not isinstance(as_module, ast.Module):
-            raise UnsafeEval(as_module, "expected module")
+            raise UnsafeEval(as_module, 'expected module')
         as_expression = ast.iter_child_nodes(as_module)
         return as_expression
 
-
-    def _get_as_command_calls(self, as_expression):
+    @staticmethod
+    def _get_as_command_calls(as_expression):
         if not isinstance(as_expression, ast.Expr):
-            raise UnsafeEval(as_expression, "invalid expression")
+            raise UnsafeEval(as_expression, 'invalid expression')
         as_call = ast.iter_child_nodes(as_expression)
         return as_call
 
-
-    def _split_call(self, as_call):
+    @staticmethod
+    def _split_call(as_call):
         if not isinstance(as_call, ast.Call):
-            raise UnsafeEval(as_call, "expected function call")
-        as_call_and_args = as_call.ast.iter_child_nodes(as_call)
-        return as_call_and_args[0], as_call_and_args[:1]
-
+            raise UnsafeEval(as_call, 'expected a call')
+        as_call_and_args = (list)(ast.iter_child_nodes(as_call))
+        call = as_call_and_args[0]
+        args = as_call_and_args[1:]
+        return call, args
 
     def _check_valid_command_name(self, command_name):
-        if command_name.id not in self._valid_commands:
-            syntax_error = 'expected a call to {}'
-            syntax_error.format(', '.join(self._valid_commands))
-            raise UnsafeEval(syntax_error, command_name)
+        try:
+            if command_name.id not in self._valid_commands:
+                syntax_error = 'expected a call to '
+                syntax_error += "{}".format(', '.join(self._valid_commands))
+                raise UnsafeEval(command_name, syntax_error)
+        except AttributeError:
+            raise UnsafeEval(command_name, 'invalid syntax')
         return
 
-
-    def _check_valid_arguments(self, command_args):
+    @staticmethod
+    def _check_valid_arguments(command_args):
         for argument_index, argument in enumerate(command_args):
             # if an argument is keyword=<value> get the value for evaluation.
-            arg_value = argument.value if isinstance(argument, ast.keyword) else argument
+            arg_value = argument.value if isinstance(argument,
+                                                     ast.keyword) else argument
             try:
                 ast.literal_eval(arg_value)
             except ValueError:
-                syntax_error = 'argument #{}: expected literal value'
-                 # 1st argument is the 0th element.
-                syntax_error.format(argument_index + 1)
-                raise UnsafeEval(syntax_error, arg_value)
+                # 1st argument is the 0th element.
+                syntax_error = 'argument #{}'.format(argument_index + 1)
+                syntax_error += ': expected literal value'
+                raise UnsafeEval(arg_value, syntax_error)
 
     def evaluate_command(self, command_text):
         """Takes a string that should contain a valid DexTer command. The
@@ -94,7 +100,7 @@ class SafeEvaluator(object):
             for expression in self._get_as_expressions(command_as_module):
                 for call in self._get_as_command_calls(expression):
                     command_name, command_arguments = self._split_call(call)
-                    self._check_valid_command_name(call)
+                    self._check_valid_command_name(command_name)
                     self._check_valid_arguments(command_arguments)
         except UnsafeEval as e:
             self._raise_syntax_error(e.command_node, e.syntax_error,

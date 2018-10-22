@@ -37,6 +37,7 @@ from dex.command.SafeEvaluator import SafeEvaluator
 from dex.utils.compatibility import assertRaisesRegex
 from dex.utils.Exceptions import CommandParseError
 
+
 def _get_valid_commands():
     """Search the commands subdirectory for any classes which are subclasses of
     CommandBase and return a dict in the form of {name: class}.
@@ -67,8 +68,7 @@ def _get_valid_commands():
         return commands
 
 
-
-def _re_safe_eval(command_text, valid_commands):
+def _safe_eval(command_text, valid_commands):
     """Before evaling the command check that it's not doing anything
     potentially unsafe.  It should be a call only to one of our commands and
     should only contain literal values as arguments.
@@ -78,7 +78,7 @@ def _re_safe_eval(command_text, valid_commands):
     return evaluated_command
 
 
-def _safe_eval(command_text, valid_commands):  # noqa
+def old_safe_eval(command_text, valid_commands):  # noqa
     """Before evaling the command check that it's not doing anything
     potentially unsafe.  It should be a call only to one of our commands and
     should only contain literal values as arguments.
