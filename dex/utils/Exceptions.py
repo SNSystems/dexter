@@ -99,7 +99,7 @@ class ImportDextIRException(Dexception):
 
 class UnsafeEval(Dexception):
     """If there was a problem safely evaluating a dexter command."""
-    def __init__(self, ast_node):
-        self.node = ast_node
-        message = ast_node.str + " is unsafe to evaluate"
-        super(UnsafeEval, self).__init__(message)
+    def __init__(self, syntax_error, command_node):
+        self.command_node = command_node
+        self.syntax_error = syntax_error
+        super(UnsafeEval, self).__init__(command_node, syntax_error)

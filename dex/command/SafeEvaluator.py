@@ -28,37 +28,80 @@ import ast
 
 from dex.utils.Exceptions import UnsafeEval
 
-class DexCommandSafeEvaluator(object):
-
+class SafeEvaluator(object):
     def __init__(self, valid_commands):
         self._valid_commands = valid_commands
 
-    def _raise_exception_for(self, ast_node):
-        location = ast_node('', ast_node.lineno, ast_node.col_offset + 1, )
+
+    def _raise_syntax_error(self, command_node, syntax_error, command_text):
+        location = ('', command_node.lineno, command_node.col_offset + 1,
+                    command_text)
+        raise SyntaxError(syntax_error, location)
 
 
-    def _get_as_module(self, command_text):
-        as_module = ast.parse(command_text)
+    def _get_as_module(self, command_as_text):
+        as_module = ast.parse(command_as_text)
         return as_module
 
 
-    def _get_as_expression(self, command_as_module):
+    def _get_as_expressions(self, as_module):
         if not isinstance(as_module, ast.Module):
-            unsafe_exception = UnsafeEval(command_as_module)
-        as_expression = ast.iter_child_nodes(command_as_module)
+            raise UnsafeEval(as_module, "expected module")
+        as_expression = ast.iter_child_nodes(as_module)
         return as_expression
 
 
-    def _get_as_call_and_args(self, command_as_expression):
+    def _get_as_command_calls(self, as_expression):
         if not isinstance(as_expression, ast.Expr):
-            _raise_exception_for(command_as_module)
+            raise UnsafeEval(as_expression, "invalid expression")
+        as_call = ast.iter_child_nodes(as_expression)
+        return as_call
 
+
+    def _split_call(self, as_call):
+        if not isinstance(as_call, ast.Call):
+            raise UnsafeEval(as_call, "expected function call")
+        as_call_and_args = as_call.ast.iter_child_nodes(as_call)
+        return as_call_and_args[0], as_call_and_args[:1]
+
+
+    def _check_valid_command_name(self, command_name):
+        if command_name.id not in self._valid_commands:
+            syntax_error = 'expected a call to {}'
+            syntax_error.format(', '.join(self._valid_commands))
+            raise UnsafeEval(syntax_error, command_name)
+        return
+
+
+    def _check_valid_arguments(self, command_args):
+        for argument_index, argument in enumerate(command_args):
+            # if an argument is keyword=<value> get the value for evaluation.
+            arg_value = argument.value if isinstance(argument, ast.keyword) else argument
+            try:
+                ast.literal_eval(arg_value)
+            except ValueError:
+                syntax_error = 'argument #{}: expected literal value'
+                 # 1st argument is the 0th element.
+                syntax_error.format(argument_index + 1)
+                raise UnsafeEval(syntax_error, arg_value)
 
     def evaluate_command(self, command_text):
         """Takes a string that should contain a valid DexTer command. The
            command is checked for validity against the valid commands
         """
-        command_as_module = self._get_as_module(command_text)
-        for expressions in self._commands_as_expressions(command_as_module):
-            for call_and_args in self._get_as_call_and_args(command_as_expressions):
+        try:
+            command_as_module = self._get_as_module(command_text)
+            for expression in self._get_as_expressions(command_as_module):
+                for call in self._get_as_command_calls(expression):
+                    command_name, command_arguments = self._split_call(call)
+                    self._check_valid_command_name(call)
+                    self._check_valid_arguments(command_arguments)
+        except UnsafeEval as e:
+            self._raise_syntax_error(e.command_node, e.syntax_error,
+                                     command_text)
 
+        # eval can modify the contents of this dict so only pass a copy.
+        valid_commands_copy = self._valid_commands.copy()
+        # pylint: disable=eval-used
+        return (command_name, eval(command_text, valid_commands_copy))
+        # pylint: enable=eval-used

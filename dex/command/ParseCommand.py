@@ -33,10 +33,9 @@ import os
 import unittest
 
 from dex.command.CommandBase import CommandBase
+from dex.command.SafeEvaluator import SafeEvaluator
 from dex.utils.compatibility import assertRaisesRegex
-from dex.utils.Exceptions import CommandParseError, UnsafeEval
-from dex.command.SafeEvaluator import DexCommandSafeEvaluator
-
+from dex.utils.Exceptions import CommandParseError
 
 def _get_valid_commands():
     """Search the commands subdirectory for any classes which are subclasses of
@@ -74,11 +73,8 @@ def _re_safe_eval(command_text, valid_commands):
     potentially unsafe.  It should be a call only to one of our commands and
     should only contain literal values as arguments.
     """
-    safe_evaluator = DexCommandSafeEvaluator(valid_commands)
-    try:
-        evaluated_command = safe_evaluator.evaluate_command(command_text)
-    except UnsafeEval as e:
-        raise SyntaxError(e)
+    safe_evaluator = SafeEvaluator(valid_commands)
+    evaluated_command = safe_evaluator.evaluate_command(command_text)
     return evaluated_command
 
 
