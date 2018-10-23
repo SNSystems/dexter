@@ -67,11 +67,12 @@ class SafeEvaluator(object):
         args = as_call_and_args[1:]
         return call, args
 
-    def _check_valid_command_name(self, command_name):
+    @staticmethod
+    def _check_valid_command_name(command_name, valid_commands):
         try:
-            if command_name.id not in self._valid_commands:
+            if command_name.id not in valid_commands:
                 syntax_error = 'expected a call to '
-                syntax_error += "{}".format(', '.join(self._valid_commands))
+                syntax_error += "{}".format(', '.join(valid_commands))
                 raise UnsafeEval(command_name, syntax_error)
         except AttributeError:
             raise UnsafeEval(command_name, 'invalid syntax')
@@ -100,7 +101,7 @@ class SafeEvaluator(object):
             for expression in self._get_as_expressions(command_as_module):
                 for call in self._get_as_command_calls(expression):
                     command_name, command_arguments = self._split_call(call)
-                    self._check_valid_command_name(command_name)
+                    self._check_valid_command_name(command_name, self._valid_commands)
                     self._check_valid_arguments(command_arguments)
         except UnsafeEval as e:
             self._raise_syntax_error(e.command_node, e.syntax_error,
