@@ -74,8 +74,7 @@ def _safe_eval(command_text, valid_commands):
     should only contain literal values as arguments.
     """
     safe_evaluator = SafeEvaluator(valid_commands)
-    evaluated_command = safe_evaluator.evaluate_command(command_text)
-    return evaluated_command
+    return safe_evaluator.evaluate_command(command_text)
 
 
 def old_safe_eval(command_text, valid_commands):  # noqa
