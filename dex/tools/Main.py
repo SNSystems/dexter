@@ -40,7 +40,7 @@ from dex.utils.Version import version
 from dex.utils import WorkingDirectory
 
 
-def output_bug_report_message(context):
+def _output_bug_report_message(context):
     """ In the event of a catastrophic failure, print bug report request to the
         user.
     """
@@ -83,8 +83,9 @@ def get_tool_names():
     ]
 
 
-def set_auto_highlights(context):
-    # Flag some strings for auto-highlighting.
+def _set_auto_highlights(context):
+    """Flag some strings for auto-highlighting.
+    """
     context.o.auto_reds.extend([
         r'[Ee]rror\:',
         r'[Ee]xception\:',
@@ -97,7 +98,7 @@ def set_auto_highlights(context):
     ])
 
 
-def get_options_and_args(context):
+def _get_options_and_args(context):
     """ get the options and arguments from the commandline
     """
     parser = argparse.ExtArgumentParser(context, add_help=False)
@@ -107,7 +108,7 @@ def get_options_and_args(context):
     return options, args
 
 
-def get_tool_name(options):
+def _get_tool_name(options):
     """ get the name of the dexter tool (if passed) specified on the command
         line, otherwise return 'no_tool_'.
     """
@@ -115,11 +116,11 @@ def get_tool_name(options):
     if tool_name is None:
         tool_name = 'no_tool_'
     else:
-        is_valid_tool_name(tool_name)
+        _is_valid_tool_name(tool_name)
     return tool_name
 
 
-def is_valid_tool_name(tool_name):
+def _is_valid_tool_name(tool_name):
     """ check tool name matches a tool directory within the dexter tools
         directory.
     """
@@ -130,7 +131,7 @@ def is_valid_tool_name(tool_name):
             ', '.join([t for t in valid_tools if not t.endswith('-')])))
 
 
-def import_tool_module(tool_name):
+def _import_tool_module(tool_name):
     """ Imports the python module at the tool directory specificed by
         tool_name.
     """
@@ -184,17 +185,12 @@ def main():
     with PrettyOutput() as context.o:
         try:
             context.root_directory = get_root_directory()
-
             # Flag some strings for auto-highlighting.
-            set_auto_highlights(context)
-
-            options, args = get_options_and_args(context)
-
+            _set_auto_highlights(context)
+            options, args = _get_options_and_args(context)
             # raises 'Error' if command line tool is invalid.
-            tool_name = get_tool_name(options)
-
-            module = import_tool_module(tool_name)
-
+            tool_name = _get_tool_name(options)
+            module = _import_tool_module(tool_name)
             return tool_main(context, module.Tool(context), args)
         except Error as e:
             context.o.auto(
@@ -208,5 +204,5 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             raise
         except:  # noqa
-            output_bug_report_message(context)
+            _output_bug_report_message(context)
             raise
