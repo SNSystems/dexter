@@ -105,3 +105,12 @@ class UnsafeEval(Dexception):
         self.command_node = command_node
         self.syntax_error = syntax_error
         super(UnsafeEval, self).__init__(command_node, syntax_error)
+
+
+class InvalidCommandName(Dexception):
+    """If an attempted dexter command name is not found in the list of
+       of valid dexter commands
+    """
+    def __init__(self, syntax_error):
+        self.syntax_error = syntax_error
+        super(InvalidCommandName, self).__init__(syntax_error)
