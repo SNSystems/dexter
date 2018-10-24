@@ -68,12 +68,20 @@ class SafeEvaluator(object):
         return call, args
 
     @staticmethod
-    def _check_valid_command_name(command_name_as_string, valid_commands):
-        if command_name.id not in valid_commands:
+    def _get_name_as_string(command_name):
+        try:
+            as_string = command_name.id
+        except AttributeError:
+            raise UnsafeEval(command_name, 'invalid syntax')
+        return as_string
+
+    @staticmethod
+    def _check_valid_command_name(command_name, valid_commands):
+        name_as_string = self._get_name_as_string(command_name)
+        if name_as_string not in valid_commands:
             syntax_error = 'expected a call to '
             syntax_error += "{}".format(', '.join(valid_commands))
-            raise UnsafeEval(command_name, syntax_error)
-        return
+            raise UnsafeEval(name_as_string, syntax_error)
 
     @staticmethod
     def _check_valid_arguments(command_args):
@@ -90,12 +98,8 @@ class SafeEvaluator(object):
                 raise UnsafeEval(arg_value, syntax_error)
 
     @staticmethod
-    def _get_name_as_string(command_name):
-        try:
-            name_as_string = command_name.id
-        except AttributeError:
-            raise UnsafeEval(command_name, 'invalid syntax')
-        return name_as_string
+    def _check_valid_call(call):
+        
 
     def evaluate_command(self, command_text):
         """Takes a string that should contain a valid DexTer command. The
@@ -106,8 +110,9 @@ class SafeEvaluator(object):
             for expression in self._get_as_expressions(command_as_module):
                 for call in self._get_as_command_calls(expression):
                     command_name, command_arguments = self._split_call(call)
-                    command_name_string = self._get_name_as_string(command_name)
-                    self._check_valid_command_name(command_name, self._valid_commands)
+                    check_valid_call(call)
+                    self._check_valid_command_name(name_as_string,
+                                                   self._valid_commands)
                     self._check_valid_arguments(command_arguments)
         except UnsafeEval as e:
             self._raise_syntax_error(e.command_node, e.syntax_error,
