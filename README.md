@@ -14,13 +14,6 @@ The following command evaluates your environment, listing the available and comp
 
 ## Dependencies
 
-### six python package
-
-This is required for compatibility with both Python 2.7 and Python 3.
-
-    <python-executable> -m pip install six
-
-
 ### pywin32 python package
 
 This is required to access the DTE interface for the Visual Studio debuggers.

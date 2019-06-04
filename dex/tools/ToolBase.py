@@ -29,11 +29,9 @@ import tempfile
 from dex import __version__
 from dex.utils import ExtArgParse
 from dex.utils import PrettyOutput
-from dex.utils.compatibility import add_metaclass
 
 
-@add_metaclass(abc.ABCMeta)
-class ToolBase(object):
+class ToolBase(object, metaclass=abc.ABCMeta):
     def __init__(self, context):
         self.context = context
         self.parser = None

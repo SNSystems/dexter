@@ -27,11 +27,7 @@ which will then be executed by DExTer during debugging.
 
 import abc
 
-from dex.utils.compatibility import add_metaclass
-
-
-@add_metaclass(abc.ABCMeta)
-class CommandBase(object):
+class CommandBase(object, metaclass=abc.ABCMeta):
     def __init__(self):
         self.path = None
         self.lineno = None

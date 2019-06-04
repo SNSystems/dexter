@@ -29,7 +29,6 @@ from dex.builder import run_external_build_script
 from dex.debugger.Debuggers import get_debugger_steps
 from dex.heuristic import Heuristic
 from dex.tools import TestToolBase
-from dex.utils.compatibility import open_csv
 from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import BuildScriptException, HeuristicException
 from dex.utils.PrettyOutputBase import Stream
@@ -167,7 +166,7 @@ class Tool(TestToolBase):
             self.context.o.auto('\n')
 
         summary_path = os.path.join(options.results_directory, 'summary.csv')
-        with open_csv(summary_path, 'w') as fp:
+        with open(summary_path, mode='w', newline='') as fp:
             writer = csv.writer(fp, delimiter=',')
             writer.writerow(['Test Case', 'Score', 'Error'])
 

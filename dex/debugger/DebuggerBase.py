@@ -31,11 +31,9 @@ from dex.command import get_command_object
 from dex.dextIR import DebuggerIR
 from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import NotYetLoadedDebuggerException
-from dex.utils.compatibility import add_metaclass
 
 
-@add_metaclass(abc.ABCMeta)
-class DebuggerBase(object):
+class DebuggerBase(object, metaclass=abc.ABCMeta):
     def __init__(self, context, step_collection):
         self.context = context
         self.steps = step_collection

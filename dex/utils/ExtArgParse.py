@@ -29,7 +29,6 @@ import difflib
 import unittest
 
 from dex.utils import PrettyOutput
-from dex.utils.compatibility import assertRaisesRegex, string_types
 from dex.utils.Exceptions import Error
 
 # re-export all of argparse
@@ -113,15 +112,14 @@ class ExtArgumentParser(argparse.ArgumentParser):
             if default is None:
                 default = kwargs.pop('display_default', None)
 
-            if (default and isinstance(default, (string_types, int, float))
+            if (default and isinstance(default, (str, int, float))
                     and default != argparse.SUPPRESS):
                 assert (
                     'choices' not in kwargs or default in kwargs['choices']), (
                         "default value '{}' is not one of allowed choices: {}".
                         format(default, kwargs['choices']))
                 if 'help' in kwargs and kwargs['help'] != argparse.SUPPRESS:
-                    assert isinstance(kwargs['help'],
-                                      string_types), type(kwargs['help'])
+                    assert isinstance(kwargs['help'], str), type(kwargs['help'])
                     kwargs['help'] = ('{} (default:{})'.format(
                         kwargs['help'], default))
 
@@ -144,7 +142,7 @@ class TestExtArgumentParser(unittest.TestCase):
         expected = (r"^unrecognized argument\: <y>'\-\-doo'</>\s+"
                     r"\(did you mean <y>'\-\-foo'</>\?\)\n"
                     r"\s*<g>usage:</>")
-        with assertRaisesRegex(self, Error, expected):
+        with self.assertRaisesRegex(Error, expected):
             parser.parse_args(['--doo'])
 
         parser.add_argument('--noo')
@@ -152,15 +150,15 @@ class TestExtArgumentParser(unittest.TestCase):
         expected = (r"^unrecognized argument\: <y>'\-\-doo'</>\s+"
                     r"\(did you mean <y>'\-\-noo'</> or <y>'\-\-foo'</>\?\)\n"
                     r"\s*<g>usage:</>")
-        with assertRaisesRegex(self, Error, expected):
+        with self.assertRaisesRegex(Error, expected):
             parser.parse_args(['--doo'])
 
         expected = (r"^unrecognized argument\: <y>'\-\-bar'</>\n"
                     r"\s*<g>usage:</>")
-        with assertRaisesRegex(self, Error, expected):
+        with self.assertRaisesRegex(Error, expected):
             parser.parse_args(['--bar'])
 
         expected = (r"^unexpected argument\: <y>'\-\-foo'</>\n"
                     r"\s*<g>usage:</>")
-        with assertRaisesRegex(self, Error, expected):
+        with self.assertRaisesRegex(Error, expected):
             parser.parse_args(['--', 'x', '--foo'])

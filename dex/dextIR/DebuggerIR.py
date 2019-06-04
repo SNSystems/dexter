@@ -22,13 +22,12 @@
 # THE SOFTWARE.
 """Serialization of information related to the debugger itself."""
 
-from dex.utils.compatibility import string_types
 from dex.utils.serialize import SrField, SrObject
 
 
 class DebuggerIR(SrObject):
 
     sr_fields = [
-        SrField('name', string_types),
-        SrField('version', string_types, can_be_none=True),
+        SrField('name', str),
+        SrField('version', str, can_be_none=True),
     ]

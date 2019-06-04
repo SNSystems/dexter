@@ -25,7 +25,6 @@ expressions on the current source line.
 """
 
 from dex.command.CommandBase import CommandBase
-from dex.utils.compatibility import string_types
 
 
 class DexWatch(CommandBase):
@@ -34,7 +33,7 @@ class DexWatch(CommandBase):
             raise TypeError('expected some arguments')
 
         for arg in args:
-            if not isinstance(arg, string_types):
+            if not isinstance(arg, str):
                 raise TypeError('invalid argument type')
 
         self._args = args

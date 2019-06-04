@@ -24,14 +24,13 @@
 
 import os
 
-from dex.utils.compatibility import string_types
 from dex.utils.serialize import SrField, SrObject
 
 
 # pylint: disable=no-member
 class LocIR(SrObject):
     sr_fields = [
-        SrField('path', string_types, can_be_none=True),
+        SrField('path', str, can_be_none=True),
         SrField('lineno', int, can_be_none=True),
         SrField('column', int, can_be_none=True),
     ]

@@ -29,7 +29,6 @@ from dex.dextIR.FrameIR import FrameIR
 from dex.dextIR.LocIR import LocIR
 from dex.dextIR.ValueIR import ValueIR
 from dex.utils import create_named_enum
-from dex.utils.compatibility import string_types
 from dex.utils.serialize import SrField, SrObject
 
 StopReason = create_named_enum('BREAKPOINT', 'STEP', 'PROGRAM_EXIT', 'ERROR',
@@ -46,14 +45,14 @@ class StepIR(SrObject):
         SrField('step_index', int),
         SrField(
             'step_kind',
-            string_types,
+            str,
             required_in_init=False,
             default_value=StepKind.UNKNOWN,
             can_be_none=True,
             possible_values=StepKind.possible_values),
         SrField(
             'stop_reason',
-            string_types,
+            str,
             possible_values=StopReason.possible_values,
             can_be_none=True),
         SrField('frames', FrameIR, list_of=True),
