@@ -209,21 +209,21 @@ class TestParseCommand(unittest.TestCase):
 
         # Unknown string (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               r'^expected a call \(, line 1\)$'):
+                                    r'^expected a call \(, line 1\)$'):
             _safe_eval('MockCommand3', valid_commands)
 
         # Known command, but not a call (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               r'^expected a call \(, line 1\)$'):
+                                    r'^expected a call \(, line 1\)$'):
             _safe_eval('MockCommand1', valid_commands)
 
         # Python assignment (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               r'^invalid expression \(, line 1\)$'):
+                                    r'^invalid expression \(, line 1\)$'):
             _safe_eval('MockCommand3 = 3', valid_commands)
 
         with self.assertRaisesRegex(SyntaxError,
-                               r'^invalid expression \(, line 1\)$'):
+                                    r'^invalid expression \(, line 1\)$'):
             _safe_eval('MockCommand1 = 3', valid_commands)
 
         # Command expects args (invalid)
@@ -241,27 +241,28 @@ class TestParseCommand(unittest.TestCase):
         _safe_eval('MockCommand2(x = 2)', valid_commands)
 
         # Command receives named args (invalid)
-        with self.assertRaisesRegex(TypeError,
-                               r" got an unexpected keyword argument 'x'$"):
+        with self.assertRaisesRegex(
+                TypeError,
+                r" got an unexpected keyword argument 'x'$"):
             _safe_eval('MockCommand1(3, x = 2)', valid_commands)
 
         # Preceding characters (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               r'^invalid syntax \(<unknown>, line 1\)$'):
+                                    r'^invalid syntax \(<unknown>, line 1\)$'):
             _safe_eval('abc MockCommand2()', valid_commands)
 
         # Trailing characters (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               r'^invalid syntax \(<unknown>, line 1\)$'):
+                                    r'^invalid syntax \(<unknown>, line 1\)$'):
             _safe_eval('MockCommand2() abc', valid_commands)
 
         with self.assertRaisesRegex(SyntaxError,
-                               r'^invalid syntax \(<unknown>, line 1\)$'):
+                                    r'^invalid syntax \(<unknown>, line 1\)$'):
             _safe_eval('MockCommand2() MockCommand2()', valid_commands)
 
         # Second expression embedded (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               r'^invalid syntax \(<string>, line 1\)$'):
+                                    r'^invalid syntax \(<string>, line 1\)$'):
             _safe_eval('MockCommand2(); MockCommand2()', valid_commands)
 
         # Command expects args (invalid)
@@ -277,8 +278,8 @@ class TestParseCommand(unittest.TestCase):
 
         # Unexpected EOF (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               (r'^unexpected EOF while parsing'
-                                r' \(<unknown>, line 1\)$')):
+                                    (r'^unexpected EOF while parsing'
+                                    r' \(<unknown>, line 1\)$')):
             _safe_eval('MockCommand2(', valid_commands)
 
         for expression in [
@@ -302,13 +303,14 @@ class TestParseCommand(unittest.TestCase):
                 'MockCommand1(str(1))',
                 '''MockCommand1(eval('print("HACKED!")'))''',
         ]:
-            with self.assertRaisesRegex(SyntaxError,
-                                   (r'^argument #1: expected literal value'
-                                    r' \(, line 1\)$')):
+            with self.assertRaisesRegex(
+                    SyntaxError,
+                    (r'^argument #1: expected literal value'
+                    r' \(, line 1\)$')):
                 _safe_eval(expression, valid_commands)
 
         # unsafe argument 2 (invalid)
         with self.assertRaisesRegex(SyntaxError,
-                               (r'^argument #2: expected literal value'
-                                r' \(, line 1\)$')):
+                                    (r'^argument #2: expected literal value'
+                                    r' \(, line 1\)$')):
             _safe_eval('MockCommand1(0, MockCommand2())', valid_commands)
