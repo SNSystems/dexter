@@ -70,16 +70,20 @@ def _output_bug_report_message(context):
 
 
 def get_tools_directory():
+    """ Returns directory path where DExTer tool imports can be
+        found.
+    """
     tools_directory = os.path.join(get_root_directory(), 'tools')
     assert os.path.isdir(tools_directory), tools_directory
     return tools_directory
 
 
 def get_tool_names():
-    tools_directory = get_tools_directory()
+    """ Returns a list of expected DExTer Tools
+    """
     return [
-        t.replace('_', '-') for t in os.listdir(tools_directory)
-        if os.path.isfile(os.path.join(tools_directory, t, 'Tool.py'))
+        'annotate-expected-values', 'clang-opt-bisect', 'help',
+        'list-debuggers', 'no-tool', 'run-debugger-internal-', 'test', 'view'
     ]
 
 

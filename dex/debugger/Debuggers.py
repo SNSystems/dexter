@@ -23,8 +23,6 @@
 """Discover potential/available debugger interfaces."""
 
 from collections import OrderedDict
-import imp
-import inspect
 import os
 import pickle
 import subprocess
@@ -32,7 +30,6 @@ import sys
 from tempfile import NamedTemporaryFile
 
 from dex.command import find_all_commands
-from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import CommandIR, CommandListIR, DextIR, LocIR
 from dex.dextIR.DextIR import importDextIR
 from dex.utils import get_root_directory, Timer
@@ -41,44 +38,20 @@ from dex.utils.Exceptions import CommandParseError, DebuggerException
 from dex.utils.Exceptions import ToolArgumentError
 from dex.utils.Warning import warn
 
+from dex.debugger.lldb.LLDB import LLDB
+from dex.debugger.visualstudio.VisualStudio2015 import VisualStudio2015
+from dex.debugger.visualstudio.VisualStudio2017 import VisualStudio2017
+
 
 def _get_potential_debuggers():  # noqa
     """Search the debugger directory for any classes which are subclasses of
     DebuggerBase and return a dict.
     """
-    try:
-        return _get_potential_debuggers.cached
-    except AttributeError:
-        _get_potential_debuggers.cached = {}
-        for dir_, _, files in os.walk(os.path.join(os.path.dirname(__file__))):
-            potential_modules = [
-                os.path.splitext(f)[0] for f in files
-                if f.endswith('.py') and not f.startswith('__')
-            ]
-
-            for m in potential_modules:
-                try:
-                    module_info = imp.find_module(m, [dir_])
-                    module = imp.load_module(m, *module_info)
-                except ImportError:
-                    continue
-
-                for _, c in inspect.getmembers(module, inspect.isclass):
-                    if issubclass(c, DebuggerBase):
-                        try:
-                            key = c.get_option_name()
-                        except NotImplementedError:
-                            continue
-
-                        if key in _get_potential_debuggers.cached:
-                            assert (_get_potential_debuggers.cached[
-                                key].__name__ == c.__name__), (
-                                    key, _get_potential_debuggers.cached[key],
-                                    c)
-                        else:
-                            _get_potential_debuggers.cached[key] = c
-
-        return _get_potential_debuggers.cached
+    return {
+        LLDB.get_option_name(): LLDB,
+        VisualStudio2015.get_option_name(): VisualStudio2015,
+        VisualStudio2017.get_option_name(): VisualStudio2017
+    }
 
 
 def _warn_meaningless_option(context, option):
