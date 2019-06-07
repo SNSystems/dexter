@@ -25,15 +25,12 @@ subset of Python is allowed, in order to prevent the possibility of unsafe
 Python code being embedded within DExTer commands.
 """
 
-import ast
 from collections import defaultdict
 import imp
 import inspect
 import os
-import unittest
 
 from dex.command.CommandBase import CommandBase
-from dex.utils.compatibility import assertRaisesRegex
 from dex.utils.Exceptions import CommandParseError
 
 
@@ -67,68 +64,25 @@ def _get_valid_commands():
         return commands
 
 
-def _safe_eval(command_text, valid_commands):  # noqa
-    """Before evaling the command check that it's not doing anything
-    potentially unsafe.  It should be a call only to one of our commands and
-    should only contain literal values as arguments.
-    """
-    module = ast.parse(command_text)
-    assert isinstance(module, ast.Module), type(module)
-
-    command_name = None
-    for node1 in ast.iter_child_nodes(module):
-        if not isinstance(node1, ast.Expr):
-            location = ('', node1.lineno, node1.col_offset + 1, command_text)
-            raise SyntaxError('invalid expression', location)
-
-        for node2 in ast.iter_child_nodes(node1):
-            location = ('', node2.lineno, node2.col_offset + 1, command_text)
-
-            if not isinstance(node2, ast.Call):
-                raise SyntaxError('expected a call', location)
-
-            children = list(ast.iter_child_nodes(node2))
-            try:
-                command_name = children[0].id
-            except AttributeError:
-                location = ('', children[0].lineno, children[0].col_offset + 1,
-                            command_text)
-                raise SyntaxError('invalid syntax', location)
-
-            if command_name not in valid_commands:
-                raise SyntaxError(
-                    'expected a call to {}'.format(', '.join(valid_commands)),
-                    location)
-
-            children = children[1:]
-            for i, node3 in enumerate(children):
-                if isinstance(node3, ast.keyword):
-                    node3 = node3.value
-                location = ('', node3.lineno, node3.col_offset + 1,
-                            command_text)
-
-                try:
-                    ast.literal_eval(node3)
-                except ValueError:
-                    raise SyntaxError(
-                        'argument #{}: expected literal value'.format(i + 1),
-                        location)
-
-    # eval can modify the contents of this dict so only pass a copy.
-    valid_commands_copy = valid_commands.copy()
-    # pylint: disable=eval-used
-    return (command_name, eval(command_text, valid_commands_copy))
-    # pylint: enable=eval-used
-
-
 def get_command_object(commandIR):
     """Externally visible version of _safe_eval.  Only returns the Command
     object itself.
     """
-    command = _safe_eval(commandIR.raw_text, _get_valid_commands())[1]
+    valid_commands = _get_valid_commands()
+    # pylint: disable=eval-used
+    command = eval(commandIR.raw_text, valid_commands)
+    # pylint: enable=eval-used
     command.path = commandIR.loc.path
     command.lineno = commandIR.loc.lineno
     return command
+
+
+def _get_command_name(command_raw):
+    """Return command name by splitting up DExTer command contained in
+       command_raw on the first opening paranthesis
+    """
+    command_name = command_raw.split('(', 1)[0]
+    return command_name
 
 
 def _find_all_commands_in_file(path, file_lines, valid_commands):
@@ -151,7 +105,10 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
 
         to_eval = line[column:].rstrip()
         try:
-            command_name, command = _safe_eval(to_eval, valid_commands)
+            # pylint: disable=eval-used
+            command = eval(to_eval, valid_commands)
+            # pylint: enable=eval-used
+            command_name = _get_command_name(to_eval)
             command.path = path
             command.lineno = lineno
             command.raw_text = to_eval
@@ -183,133 +140,3 @@ def find_all_commands(source_files):
             commands[command_name].update(file_commands[command_name])
 
     return dict(commands)
-
-
-class TestParseCommand(unittest.TestCase):
-    class MockBase(CommandBase):
-        def __call__(self):
-            pass
-
-    class MockCommand1(MockBase):
-        def __init__(self, *args):
-            super(TestParseCommand.MockCommand1, self).__init__()
-            if not args:
-                raise TypeError('expected some args')
-
-    class MockCommand2(MockBase):
-        def __init__(self, *args, **kwargs):  # pylint: disable=unused-argument
-            super(TestParseCommand.MockCommand2, self).__init__()
-            if args:
-                raise TypeError('did not expect any args')
-
-    def test_safe_eval(self):
-        valid_commands = {
-            'MockCommand1': TestParseCommand.MockCommand1,
-            'MockCommand2': TestParseCommand.MockCommand2
-        }
-
-        # Unknown string (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^expected a call \(, line 1\)$'):
-            _safe_eval('MockCommand3', valid_commands)
-
-        # Known command, but not a call (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^expected a call \(, line 1\)$'):
-            _safe_eval('MockCommand1', valid_commands)
-
-        # Python assignment (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^invalid expression \(, line 1\)$'):
-            _safe_eval('MockCommand3 = 3', valid_commands)
-
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^invalid expression \(, line 1\)$'):
-            _safe_eval('MockCommand1 = 3', valid_commands)
-
-        # Command expects args (invalid)
-        with assertRaisesRegex(self, TypeError, r'^expected some args$'):
-            _safe_eval('MockCommand1()', valid_commands)
-
-        # Command expects args (valid)
-        _safe_eval('MockCommand1(0)', valid_commands)
-        _safe_eval('MockCommand1("abc")', valid_commands)
-
-        # Command doesn't expect args (valid)
-        _safe_eval('MockCommand2()', valid_commands)
-
-        # Command receives named args (valid)
-        _safe_eval('MockCommand2(x = 2)', valid_commands)
-
-        # Command receives named args (invalid)
-        with assertRaisesRegex(self, TypeError,
-                               r" got an unexpected keyword argument 'x'$"):
-            _safe_eval('MockCommand1(3, x = 2)', valid_commands)
-
-        # Preceding characters (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^invalid syntax \(<unknown>, line 1\)$'):
-            _safe_eval('abc MockCommand2()', valid_commands)
-
-        # Trailing characters (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^invalid syntax \(<unknown>, line 1\)$'):
-            _safe_eval('MockCommand2() abc', valid_commands)
-
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^invalid syntax \(<unknown>, line 1\)$'):
-            _safe_eval('MockCommand2() MockCommand2()', valid_commands)
-
-        # Second expression embedded (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               r'^invalid syntax \(<string>, line 1\)$'):
-            _safe_eval('MockCommand2(); MockCommand2()', valid_commands)
-
-        # Command expects args (invalid)
-        with assertRaisesRegex(self, TypeError, r'^did not expect any args$'):
-            _safe_eval('MockCommand2(1)', valid_commands)
-
-        # Call unknown function (invalid)
-        with assertRaisesRegex(
-                self, SyntaxError,
-                r'^expected a call to MockCommand[12], MockCommand[12]'
-                r' \(, line 1\)$'):
-            _safe_eval('MockCommand3()', valid_commands)
-
-        # Unexpected EOF (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               (r'^unexpected EOF while parsing'
-                                r' \(<unknown>, line 1\)$')):
-            _safe_eval('MockCommand2(', valid_commands)
-
-        for expression in [
-                'MockCommand2()()',
-                'MockCommand2()[]',
-                'MockCommand2[]',
-                'MockCommand2[]()',
-                '[MockCommand2]()',
-        ]:
-            with assertRaisesRegex(
-                    self, SyntaxError,
-                    r'^invalid syntax \((<unknown>)?, line 1\)$'):
-                _safe_eval(expression, valid_commands)
-
-        # unsafe args (invalid)
-        for expression in [
-                'MockCommand1(MockCommand2())',
-                'MockCommand1(foo)',
-                'MockCommand2(foo=bar())',
-                'MockCommand1(int(2))',
-                'MockCommand1(str(1))',
-                '''MockCommand1(eval('print("HACKED!")'))''',
-        ]:
-            with assertRaisesRegex(self, SyntaxError,
-                                   (r'^argument #1: expected literal value'
-                                    r' \(, line 1\)$')):
-                _safe_eval(expression, valid_commands)
-
-        # unsafe argument 2 (invalid)
-        with assertRaisesRegex(self, SyntaxError,
-                               (r'^argument #2: expected literal value'
-                                r' \(, line 1\)$')):
-            _safe_eval('MockCommand1(0, MockCommand2())', valid_commands)
