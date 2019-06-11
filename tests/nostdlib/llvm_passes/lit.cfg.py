@@ -5,15 +5,19 @@ import lit.formats
 from lit.llvm.subst import ToolSubst
 from lit.llvm import llvm_config
 
-#PATHTODEXTER='/fast/fs/dexter/dexter.py'
-PATHTODEXTER='/home/jmorse/dexter_gh/dexter.py'
-PATHTOTESTER='/home/jmorse/dextests/dexwrapper.sh'
+import site
+site.addsitedir(os.path.dirname(__file__))
+
+import dummy_format
+
+PATHTODEXTER='/fast/fs/dexter_gh/dexter.py'
+PATHTOTESTER='/fast/fs/dexter_gh/tests/nostdlib/llvm_passes/dexwrapper.sh'
 
 config.name = 'DexTests'
-config.test_format = lit.formats.ShTest(False)
+config.test_format = dummy_format.DummyFormat()
 config.suffixes = ['.cpp']
 config.test_source_root = os.path.dirname(__file__)
-config.test_exec_root = os.path.dirname(__file__) # XXX dexter-results-dir?
+config.test_exec_root = os.path.dirname(__file__)
 
 if 'opt' not in lit_config.params:
     raise Exception('Please specify opt={0,2} with --param')
@@ -25,4 +29,4 @@ if 'clang' in lit_config.params:
 
 options = '-fno-inline -g {}'.format(optlevel)
 
-config.substitutions.append(('%dexter', '{} {} test --debugger lldb --builder clang --cflags "{}" .'.format(PATHTOTESTER, PATHTODEXTER, options)))
+config.substitutions.append(('%dexter', '{} {} test --results-directory %T --debugger lldb --builder clang --cflags "{}" .'.format(PATHTOTESTER, PATHTODEXTER, options)))
