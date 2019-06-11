@@ -88,9 +88,18 @@ def tool_main(context, tool, args):
         return 0
 
 
+class Context(object):
+
+    def __init__(self):
+        self.o: PrettyOutput = None
+        self.working_directory: str = None
+        self.options: dict = None
+        self.version: str = None
+        self.root_directory: str = None
+
 def main():
-    class context(object):
-        pass
+
+    context = Context()
 
     with PrettyOutput() as context.o:
         try:
