@@ -10,9 +10,15 @@ import lit.formats
 import lit.Test
 import lit.TestRunner as TestRunner
 
+PATHTODEXTER='{}/../dexter.py'.format(os.path.dirname(__file__))
+PATHTOTESTER='{}/dexwrapper.sh'.format(os.path.dirname(__file__))
+
+def get_dexter_substitution(config):
+  return '{} {} test --results-directory %T --debugger lldb --builder clang --cflags "{}" .'.format(PATHTOTESTER, PATHTODEXTER, config.dexter_cflags)
+
 class DummyFormat(lit.formats.ShTest):
     def execute(self, test, lit_config):
-      result = super(DummyFormat, self).execute(test, lit_config)
+      result = lit.TestRunner.executeShTest(test, lit_config, False, [('%dexter', get_dexter_substitution(test.config))])
       tmpDir, tmpBase = TestRunner.getTempPaths(test)
       try:
         with open(tmpDir + '/summary.csv', 'r') as f:

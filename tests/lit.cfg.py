@@ -10,9 +10,6 @@ site.addsitedir(os.path.dirname(__file__))
 
 import dummy_format
 
-PATHTODEXTER='{}/../dexter.py'.format(os.path.dirname(__file__))
-PATHTOTESTER='{}/dexwrapper.sh'.format(os.path.dirname(__file__))
-
 config.name = 'DexTests'
 config.test_format = dummy_format.DummyFormat()
 config.suffixes = ['.cpp']
@@ -27,6 +24,6 @@ if 'clang' in lit_config.params:
     clang_location = lit_config.params['clang']
     config.environment['PATHTOCLANG'] = clang_location
 
-options = '-fno-inline -g {}'.format(optlevel)
+options = '-g {}'.format(optlevel)
 
-config.substitutions.append(('%dexter', '{} {} test --results-directory %T --debugger lldb --builder clang --cflags "{}" .'.format(PATHTOTESTER, PATHTODEXTER, options)))
+config.dexter_cflags = options
