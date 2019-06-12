@@ -91,27 +91,19 @@ class TestToolBase(ToolBase):
 
     def go(self):  # noqa
         options = self.context.options
+        subdir = options.tests_directory
+        test_name = os.path.basename(subdir)
 
-        subdirs = sorted([
-            r for r, _, f in os.walk(options.tests_directory)
-            if 'test.cfg' in f
-        ])
+        options.source_files = [
+            os.path.normcase(os.path.join(subdir, f))
+            for f in os.listdir(subdir) if any(
+                f.endswith(ext) for ext in ['.c', '.cpp'])
+        ]
 
-        for subdir in subdirs:
-            test_name = os.path.basename(subdir)
+        options.executable = os.path.join(
+            self.context.working_directory.path, 'tmp.exe')
 
-            # TODO: read file extensions from the test.cfg file instead so that
-            # this isn't just limited to C and C++.
-            options.source_files = [
-                os.path.normcase(os.path.join(subdir, f))
-                for f in os.listdir(subdir) if any(
-                    f.endswith(ext) for ext in ['.c', '.cpp'])
-            ]
-
-            options.executable = os.path.join(
-                self.context.working_directory.path, 'tmp.exe')
-
-            self._run_test(subdir, test_name)
+        self._run_test(subdir, test_name)
 
         self._handle_results()
 

@@ -87,14 +87,14 @@ class TestCase(object):
 
 
 class Tool(TestToolBase):
-    """Run the specified DExTer test(s) with the specified compiler and linker
+    """Run the specified DExTer test with the specified compiler and linker
     options and produce dextIR output as a JSON file as well as printing out
     the debugging experience score calculated by the DExTer heuristic.
     """
 
     def __init__(self, *args, **kwargs):
         super(Tool, self).__init__(*args, **kwargs)
-        self._test_cases = []
+        self.test_case = None
 
     @property
     def name(self):
@@ -119,7 +119,7 @@ class Tool(TestToolBase):
         except BuildScriptException as e:
             test_case = TestCase(self.context, test_name, None, e)
             self.context.o.auto(test_case)
-            self._test_cases.append(test_case)
+            self.test_case = test_case
             return
 
         try:
@@ -128,7 +128,7 @@ class Tool(TestToolBase):
         except DebuggerException as e:
             test_case = TestCase(self.context, test_name, None, e)
             self.context.o.auto(test_case)
-            self._test_cases.append(test_case)
+            self.test_case = test_case
             return
 
         test_results_path = os.path.join(options.results_directory, '_'.join(
@@ -146,7 +146,7 @@ class Tool(TestToolBase):
         except HeuristicException as e:
             test_case = TestCase(self.context, test_name, None, e)
             self.context.o.auto(test_case)
-            self._test_cases.append(test_case)
+            self.test_case = test_case
             return
 
         with open(output_text_path, 'a') as fp:
@@ -154,7 +154,7 @@ class Tool(TestToolBase):
 
         test_case = TestCase(self.context, test_name, heuristic, None)
         self.context.o.auto(test_case)
-        self._test_cases.append(test_case)
+        self.test_case = test_case
 
         if options.verbose:
             self.context.o.auto('\n{}\n'.format(steps))
@@ -171,10 +171,9 @@ class Tool(TestToolBase):
             writer = csv.writer(fp, delimiter=',')
             writer.writerow(['Test Case', 'Score', 'Error'])
 
-            for test_case in self._test_cases:
-                writer.writerow([
-                    test_case.name, '{:.4f}'.format(test_case.score),
-                    test_case.error
-                ])
+            writer.writerow([
+                self.test_case.name, '{:.4f}'.format(self.test_case.score),
+               self.test_case.error
+            ])
 
         return 0
