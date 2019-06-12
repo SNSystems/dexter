@@ -20,16 +20,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""dextIR: DExTer Intermediate Representation.
-JSON Serializable representation of DExTer's debugger trace output.
+"""dextIR: DExTer Intermediate Representation of DExTer's debugger trace output.
 """
 
 from dex.dextIR.BuilderIR import BuilderIR
-from dex.dextIR.CommandIR import CommandIR
-from dex.dextIR.CommandListIR import CommandListIR
 from dex.dextIR.DextIR import DextIR
 from dex.dextIR.DebuggerIR import DebuggerIR
 from dex.dextIR.FrameIR import FrameIR
 from dex.dextIR.LocIR import LocIR
 from dex.dextIR.StepIR import StepIR, StepKind, StopReason
 from dex.dextIR.ValueIR import ValueIR
+from dex.dextIR.CommandIR import CommandIR

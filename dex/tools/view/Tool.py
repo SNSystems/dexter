@@ -24,17 +24,14 @@
 
 import os
 
+import pickle
 from dex.heuristic import Heuristic
 from dex.heuristic.Heuristic import add_heuristic_tool_arguments
 from dex.tools import ToolBase
-from dex.dextIR.DextIR import importDextIR
 from dex.utils.Exceptions import Error, HeuristicException
-from dex.utils.Exceptions import ImportDextIRException
-
 
 class Tool(ToolBase):
-    """Given a JSON dextIR file, display the information in a human-readable
-    form.
+    """Given a dextIR file, display the information in a human-readable form.
     """
 
     @property
@@ -44,31 +41,26 @@ class Tool(ToolBase):
     def add_tool_arguments(self, parser, defaults):
         add_heuristic_tool_arguments(parser)
         parser.add_argument(
-            'json_file',
-            metavar='json-file',
+            'input_path',
+            metavar='dextIR-file',
             type=str,
             default=None,
-            help='dexter json file to view')
+            help='dexter dextIR file to view')
         parser.description = Tool.__doc__
 
     def handle_options(self, defaults):
         options = self.context.options
 
-        options.json_file = os.path.abspath(options.json_file)
-        if not os.path.isfile(options.json_file):
-            raise Error('<d>could not find json file</> <r>"{}"</>'.format(
-                options.json_file))
+        options.input_path = os.path.abspath(options.input_path)
+        if not os.path.isfile(options.input_path):
+            raise Error('<d>could not find dextIR file</> <r>"{}"</>'.format(
+                options.input_path))
 
     def go(self):
         options = self.context.options
 
-        with open(options.json_file, 'r') as fp:
-            try:
-                steps = importDextIR(fp.read())
-            except (ImportDextIRException) as e:
-                raise Error(
-                    '<d>could not import</> <r>"{}"</>: <d>{}</>'.format(
-                        options.json_file, e))
+        with open(options.input_path, 'rb') as fp:
+            steps = pickle.load(fp)
 
         try:
             heuristic = Heuristic(self.context, steps)

@@ -28,7 +28,6 @@ not bring down the entire DExTer tool.
 import pickle
 
 from dex.debugger import Debuggers
-from dex.dextIR.DextIR import importDextIR
 from dex.tools import ToolBase
 from dex.utils import Timer
 from dex.utils.Exceptions import DebuggerException, Error
@@ -44,13 +43,13 @@ class Tool(ToolBase):
         return 'DExTer run debugger internal'
 
     def add_tool_arguments(self, parser, defaults):
-        parser.add_argument('json', type=str, help='json file')
+        parser.add_argument('dextIR_path', type=str, help='dextIR file')
         parser.add_argument(
             'pickled_options', type=str, help='pickled options file')
 
     def handle_options(self, defaults):
-        with open(self.context.options.json) as fp:
-            self.dextIR = importDextIR(fp.read())
+        with open(self.context.options.dextIR_path, 'rb') as fp:
+            self.dextIR = pickle.load(fp)
 
         with open(self.context.options.pickled_options, 'rb') as fp:
             poptions = pickle.load(fp)
@@ -58,7 +57,7 @@ class Tool(ToolBase):
                 self.context.options.working_directory[:])
             poptions.lint = self.context.options.lint
             poptions.unittest = self.context.options.unittest
-            poptions.json = self.context.options.json
+            poptions.dextIR_path = self.context.options.dextIR_path
             self.context.options = poptions
 
         Timer.display = self.context.options.time_report
@@ -86,5 +85,5 @@ class Tool(ToolBase):
                 except DebuggerException as e:
                     raise Error(e)
 
-        with open(self.context.options.json, 'w') as fp:
-            fp.write(self.dextIR.as_json)
+        with open(self.context.options.dextIR_path, 'wb') as fp:
+            pickle.dump(self.dextIR, fp)

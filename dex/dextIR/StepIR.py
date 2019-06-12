@@ -22,47 +22,52 @@
 # THE SOFTWARE.
 """Serialization of information related to a debugger step."""
 
-from collections import OrderedDict
 import json
 
+from collections import OrderedDict
+from typing import List
+from enum import Enum
 from dex.dextIR.FrameIR import FrameIR
 from dex.dextIR.LocIR import LocIR
-from dex.dextIR.ValueIR import ValueIR
-from dex.utils import create_named_enum
-from dex.utils.serialize import SrField, SrObject
-
-StopReason = create_named_enum('BREAKPOINT', 'STEP', 'PROGRAM_EXIT', 'ERROR',
-                               'OTHER')
-
-StepKind = create_named_enum('FUNC', 'FUNC_EXTERNAL', 'FUNC_UNKNOWN',
-                             'FORWARD', 'SAME', 'BACKWARD', 'UNKNOWN')
 
 
-# pylint: disable=no-member
-class StepIR(SrObject):
+class StopReason(Enum):
+    BREAKPOINT = 0
+    STEP = 1
+    PROGRAM_EXIT = 2
+    ERROR = 3
+    OTHER = 4
 
-    sr_fields = [
-        SrField('step_index', int),
-        SrField(
-            'step_kind',
-            str,
-            required_in_init=False,
-            default_value=StepKind.UNKNOWN,
-            can_be_none=True,
-            possible_values=StepKind.possible_values),
-        SrField(
-            'stop_reason',
-            str,
-            possible_values=StopReason.possible_values,
-            can_be_none=True),
-        SrField('frames', FrameIR, list_of=True),
-        SrField(
-            'watches',
-            ValueIR,
-            dict_of=True,
-            required_in_init=False,
-            default_value=OrderedDict),
-    ]
+
+class StepKind(Enum):
+    FUNC = 0
+    FUNC_EXTERNAL = 1
+    FUNC_UNKNOWN = 2
+    FORWARD = 3
+    SAME = 4
+    BACKWARD = 5
+    UNKNOWN = 6
+
+
+class StepIR:
+    # watches: OrderedDict[string, ValueIR]
+    def __init__(self,
+                 step_index: int,
+                 stop_reason: StopReason,
+                 frames: List[FrameIR],
+                 step_kind: StepKind = None,
+                 watches: OrderedDict = None):
+        self.step_index = step_index
+        self.step_kind = step_kind
+        self.stop_reason = stop_reason
+
+        if frames is None:
+            frames = []
+        self.frames = frames
+
+        if watches is None:
+            watches = {}
+        self.watches = watches
 
     def __str__(self):
         try:
@@ -72,10 +77,9 @@ class StepIR(SrObject):
         except AttributeError:
             frame_info = (None, None, None, None)
 
-        watches = OrderedDict((w, self.watches[w].value) for w in self.watches)
-
         step_info = (self.step_index, ) + frame_info + (
-            self.stop_reason, self.step_kind, watches)
+            str(self.stop_reason), str(self.step_kind),
+                                    [w for w in self.watches])
 
         return '{}{}'.format('.   ' * (self.num_frames - 1),
                              json.dumps(step_info))
@@ -86,10 +90,9 @@ class StepIR(SrObject):
 
     @property
     def current_frame(self):
-        try:
-            return self.frames[0]
-        except IndexError:
+        if not len(self.frames):
             return None
+        return self.frames[0]
 
     @property
     def current_function(self):

@@ -30,8 +30,7 @@ import sys
 from tempfile import NamedTemporaryFile
 
 from dex.command import find_all_commands
-from dex.dextIR import CommandIR, CommandListIR, DextIR, LocIR
-from dex.dextIR.DextIR import importDextIR
+from dex.dextIR import CommandIR, DextIR, LocIR
 from dex.utils import get_root_directory, Timer
 from dex.utils.Environment import is_native_windows
 from dex.utils.Exceptions import CommandParseError, DebuggerException
@@ -150,7 +149,7 @@ def _get_command_infos(context):
     for command_type in commands:
         for command in commands[command_type].values():
             if command_type not in command_infos:
-                command_infos[command_type] = CommandListIR()
+                command_infos[command_type] = []
 
             loc = LocIR(path=command.path, lineno=command.lineno, column=None)
             command_infos[command_type].append(
@@ -178,13 +177,13 @@ def get_debugger_steps(context):
 
     with NamedTemporaryFile(
             dir=context.working_directory.path, delete=False) as fp:
-        fp.write(step_collection.as_json.encode('utf-8'))
-        json_path = fp.name
+        pickle.dump(step_collection, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        steps_path = fp.name
 
     with NamedTemporaryFile(
             dir=context.working_directory.path, delete=False, mode='wb') as fp:
         pickle.dump(context.options, fp, protocol=pickle.HIGHEST_PROTOCOL)
-        pickle_path = fp.name
+        options_path = fp.name
 
     dexter_py = sys.argv[0]
     if not os.path.isfile(dexter_py):
@@ -193,8 +192,8 @@ def get_debugger_steps(context):
 
     with NamedTemporaryFile(dir=context.working_directory.path) as fp:
         args = [
-            sys.executable, dexter_py, 'run-debugger-internal-', json_path,
-            pickle_path, '--working-directory', context.working_directory.path,
+            sys.executable, dexter_py, 'run-debugger-internal-', steps_path,
+            options_path, '--working-directory', context.working_directory.path,
             '--unittest=off', '--lint=off',
             '--indent-timer-level={}'.format(Timer.indent + 2)
         ]
@@ -204,8 +203,8 @@ def get_debugger_steps(context):
         except subprocess.CalledProcessError as e:
             raise DebuggerException(e)
 
-    with open(json_path, 'r') as fp:
-        step_collection = importDextIR(fp.read())
+    with open(steps_path, 'rb') as fp:
+        step_collection = pickle.load(fp)
 
     return step_collection
 

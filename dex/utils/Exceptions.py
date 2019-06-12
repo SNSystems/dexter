@@ -54,8 +54,8 @@ class NotYetLoadedDebuggerException(LoadDebuggerException):
     """If specified debugger has not yet been attempted to load."""
 
     def __init__(self):
-        super(NotYetLoadedDebuggerException, self).__init__(
-            'not loaded', orig_exception=None)
+        super(NotYetLoadedDebuggerException,
+              self).__init__('not loaded', orig_exception=None)
 
 
 class CommandParseError(Dexception):
@@ -90,9 +90,4 @@ class BuildScriptException(Dexception):
 
 class HeuristicException(Dexception):
     """If there was a problem with the heuristic."""
-    pass
-
-
-class ImportDextIRException(Dexception):
-    """If there was a problem importing the dextIR json file."""
     pass

@@ -23,13 +23,10 @@
 """Serialization of information related to a call frame."""
 
 from dex.dextIR.LocIR import LocIR
-from dex.utils.serialize import SrField, SrObject
 
 
-class FrameIR(SrObject):
-
-    sr_fields = [
-        SrField('function', str, can_be_none=True),
-        SrField('is_inlined', bool),
-        SrField('loc', LocIR),
-    ]
+class FrameIR:
+    def __init__(self, function: str, is_inlined: bool, loc: LocIR):
+        self.function = function
+        self.is_inlined = is_inlined
+        self.loc = loc

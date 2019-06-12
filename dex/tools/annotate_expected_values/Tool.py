@@ -23,11 +23,11 @@
 """Annotate Expected Values Tool."""
 
 import os
+import pickle
 
-from dex.dextIR.DextIR import importDextIR
 from dex.dextIR.StepIR import StepKind
 from dex.tools import ToolBase
-from dex.utils.Exceptions import Error, ImportDextIRException
+from dex.utils.Exceptions import Error
 
 
 class ExpectedWatchValue(object):
@@ -88,7 +88,7 @@ class ExpectedStepKind(object):
 
 
 class Tool(ToolBase):
-    """Given a JSON dextIR file, attempt to automatically provide automatic
+    """Given a dextIR file, attempt to automatically provide automatic
     DExTer command annotations based on that output.  Typically, this would be
     from an unoptimized build.
 
@@ -105,10 +105,10 @@ class Tool(ToolBase):
     def add_tool_arguments(self, parser, defaults):
         parser.description = Tool.__doc__
         parser.add_argument(
-            'json_file',
-            metavar='dexter-json-file',
+            'dextIR_file',
+            metavar='dextIR-file',
             type=str,
-            help='dexter json file to read')
+            help='dexter dextIR file to read')
         parser.add_argument(
             'source_files',
             metavar='source-file',
@@ -119,10 +119,10 @@ class Tool(ToolBase):
     def handle_options(self, defaults):
         options = self.context.options
 
-        options.json_file = os.path.abspath(options.json_file)
-        if not os.path.isfile(options.json_file):
+        options.dextIR_file = os.path.abspath(options.dextIR_file)
+        if not os.path.isfile(options.dextIR_file):
             raise Error('<d>could not find</> <r>"{}"</>'.format(
-                options.json_file))
+                options.dextIR_file))
 
         options.source_files = [
             os.path.normcase(os.path.abspath(sf))
@@ -140,16 +140,11 @@ class Tool(ToolBase):
         exp_values = set()
         step_kinds = []
 
-        for step_kind in StepKind.possible_values:
+        for step_kind in StepKind:
             step_kinds.append(ExpectedStepKind(step_kind, 0))
 
-        with open(options.json_file) as fp:
-            try:
-                step_collection = importDextIR(fp.read())
-            except ImportDextIRException as e:
-                raise Error(
-                    '<d>could not import</> <r>"{}"</>: <d>{}</>'.format(
-                        options.json_file, e))
+        with open(options.dextIR_file, 'rb') as fp:
+            step_collection = pickle.load(fp)
 
         for step in getattr(step_collection, 'steps'):
             lineno = step.current_location.lineno

@@ -160,7 +160,6 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         else:
             raise DebuggerException(
                 'maximum number of steps reached ({})'.format(max_steps))
-
     @abc.abstractmethod
     def _load_interface(self):
         pass

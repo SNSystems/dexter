@@ -26,6 +26,7 @@ from collections import defaultdict
 import os
 import csv
 import re
+import pickle
 
 from dex.builder import run_external_build_script
 from dex.debugger.Debuggers import empty_debugger_steps, get_debugger_steps
@@ -206,10 +207,10 @@ class Tool(TestToolBase):
                     self.context.o.auto(
                         heuristic_verbose_output + '\n', stream=Stream(fp))
 
-                output_json_path = os.path.join(options.results_directory,
-                                                '{}.json'.format(file_name))
-                with open(output_json_path, 'w') as fp:
-                    fp.write(steps.as_json)
+                output_dextIR_path = os.path.join(options.results_directory,
+                                                '{}.dextIR'.format(file_name))
+                with open(output_dextIR_path, 'wb') as fp:
+                    pickle.dump(steps, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
             per_pass_score.append((source_file_path, pass_text,
                                    heuristic.score))

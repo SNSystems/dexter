@@ -22,13 +22,12 @@
 # THE SOFTWARE.
 """Serialization of information related to the builder."""
 
-from dex.utils.serialize import SrField, SrObject
+
+from typing import List
 
 
-class BuilderIR(SrObject):
-
-    sr_fields = [
-        SrField('name', str),
-        SrField('cflags', str, list_of=True),
-        SrField('ldflags', str),
-    ]
+class BuilderIR:
+    def __init__(self, name: str, cflags: str, ldflags: str):
+        self.name = name
+        self.cflags = cflags
+        self.ldflags = ldflags

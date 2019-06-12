@@ -136,8 +136,7 @@ class Heuristic(object):
 
         # Get DexExpectWatchValue results.
         try:
-            for watch in getattr(
-                    steps, 'commands')['DexExpectWatchValue'].command_list:
+            for watch in steps.commands["DexExpectWatchValue"]:
                 command = get_command_object(watch)
                 command(steps)
                 maximum_possible_penalty = min(3, len(
@@ -158,8 +157,7 @@ class Heuristic(object):
         penalties = defaultdict(list)
         maximum_possible_penalty_all = 0
         try:
-            for step_kind in getattr(
-                    steps, 'commands')['DexExpectStepKind'].command_list:
+            for step_kind in steps.commands['DexExpectStepKind']:
                 command = get_command_object(step_kind)
                 command()
                 # Cap the penalty at 2 * expected count or else 1
