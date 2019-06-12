@@ -24,21 +24,14 @@
 
 import os
 
-from dex.utils.serialize import SrField, SrObject
 
-
-# pylint: disable=no-member
-class LocIR(SrObject):
-    sr_fields = [
-        SrField('path', str, can_be_none=True),
-        SrField('lineno', int, can_be_none=True),
-        SrField('column', int, can_be_none=True),
-    ]
-
-    def __init__(self, **kwargs):
-        super(LocIR, self).__init__(**kwargs)
-        if getattr(self, 'path'):
-            self.path = os.path.normcase(self.path)
+class LocIR:
+    def __init__(self, path: str, lineno: int, column: int):
+        if path:
+            path = os.path.normcase(path)
+        self.path = path
+        self.lineno = lineno
+        self.column = column
 
     def __str__(self):
         return '{}({}:{})'.format(self.path, self.lineno, self.column)

@@ -22,12 +22,8 @@
 # THE SOFTWARE.
 """Serialization of information related to the debugger itself."""
 
-from dex.utils.serialize import SrField, SrObject
 
-
-class DebuggerIR(SrObject):
-
-    sr_fields = [
-        SrField('name', str),
-        SrField('version', str, can_be_none=True),
-    ]
+class DebuggerIR:
+    def __init__(self, name: str, version: str):
+        self.name = name
+        self.version = version

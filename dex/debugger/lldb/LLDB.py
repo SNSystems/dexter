@@ -220,7 +220,7 @@ class LLDB(DebuggerBase):
         return ValueIR(
             expression=expression,
             value=value,
-            type=str(result.type),
+            type_name=str(result.type),
             error_string=error_string,
             could_evaluate=could_evaluate,
             is_optimized_away=is_optimized_away,

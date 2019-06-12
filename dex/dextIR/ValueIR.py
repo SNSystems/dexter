@@ -24,20 +24,20 @@
 evaluation.
 """
 
-from dex.utils.serialize import SrField, SrObject
 
-
-class ValueIR(SrObject):
-
-    sr_fields = [
-        SrField('expression', str, can_be_none=True),
-        SrField('value', str, can_be_none=True),
-        SrField('type', str, can_be_none=True),
-        SrField('error_string', str, can_be_none=True),
-        SrField('could_evaluate', bool),
-        SrField('is_optimized_away', bool),
-        SrField('is_irretrievable', bool),
-    ]
-
-    def __str__(self):
-        return str(self.value)  # pylint: disable=no-member
+class ValueIR:
+    def __init__(self,
+                 expression: str,
+                 value: str,
+                 type_name: str,
+                 could_evaluate: bool,
+                 error_string: str = None,
+                 is_optimized_away: bool = False,
+                 is_irretrievable: bool = False):
+        self.expression = expression
+        self.value = value
+        self.type_name = type_name
+        self.could_evaluate = could_evaluate
+        self.error_string = error_string
+        self.is_optimized_away = is_optimized_away
+        self.is_irretrievable = is_irretrievable

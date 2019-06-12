@@ -24,6 +24,7 @@
 
 import os
 import csv
+import pickle
 
 from dex.builder import run_external_build_script
 from dex.debugger.Debuggers import get_debugger_steps
@@ -87,8 +88,8 @@ class TestCase(object):
 
 class Tool(TestToolBase):
     """Run the specified DExTer test(s) with the specified compiler and linker
-    options and produce dextIR output as a JSON file as well as printing out
-    the debugging experience score calculated by the DExTer heuristic.
+    options and produce a dextIR file as well as printing out the debugging
+    experience score calculated by the DExTer heuristic.
     """
 
     def __init__(self, *args, **kwargs):
@@ -149,9 +150,9 @@ class Tool(TestToolBase):
         with open(output_text_path, 'w') as fp:
             self.context.o.auto(str(steps), stream=Stream(fp))
 
-        output_json_path = self._get_results_json_path(test_name)
-        with open(output_json_path, 'w') as fp:
-            fp.write(steps.as_json)
+        output_dextIR_path = '{}.dextIR'.format(test_name)
+        with open(output_dextIR_path, 'wb') as fp:
+            pickle.dump(steps, fp)
 
     def _record_score(self, test_name, heuristic):
         """Write out the test's heuristic score to the results .txt file.
@@ -181,7 +182,7 @@ class Tool(TestToolBase):
         test_case = TestCase(self.context, test_name, heuristic, None)
         self._record_test_and_display(test_case)
         if self.context.options.verbose:
-            self.context.o.auto('\n{}\n'.format(steps)) 
+            self.context.o.auto('\n{}\n'.format(steps))
             self.context.o.auto(heuristic.verbose_output)
 
     def _run_test(self, test_dir):

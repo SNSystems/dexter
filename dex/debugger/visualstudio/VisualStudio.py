@@ -200,7 +200,7 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
         return ValueIR(
             expression=expression,
             value=value,
-            type=result.Type,
+            type_name=result.Type,
             error_string=None,
             is_optimized_away=is_optimized_away,
             could_evaluate=could_evaluate,

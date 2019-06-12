@@ -23,30 +23,11 @@
 """Root for dextIR serialization types."""
 
 from collections import OrderedDict
-import json
-import os
-import unittest
+from typing import List
 
 from dex.dextIR.BuilderIR import BuilderIR
-from dex.dextIR.CommandIR import CommandIR
-from dex.dextIR.CommandListIR import CommandListIR
 from dex.dextIR.DebuggerIR import DebuggerIR
-from dex.dextIR.FrameIR import FrameIR
-from dex.dextIR.LocIR import LocIR
-from dex.dextIR.StepIR import StepIR, StepKind, StopReason
-from dex.dextIR.ValueIR import ValueIR
-from dex.utils.Exceptions import ImportDextIRException, SrInitError
-from dex.utils.serialize import SrField, SrObject
-
-
-def importDextIR(json_string):
-    try:
-        return DextIR(
-            sr_data=json.loads(json_string, object_pairs_hook=OrderedDict))
-    except KeyError as e:
-        raise ImportDextIRException('missing key: <r>{}</>'.format(e))
-    except (SrInitError, ValueError) as e:
-        raise ImportDextIRException(e)
+from dex.dextIR.StepIR import StepIR, StepKind
 
 
 def _step_kind_func(context, step):
@@ -59,29 +40,22 @@ def _step_kind_func(context, step):
     return StepKind.FUNC_EXTERNAL
 
 
-# pylint: disable=no-member
-class DextIR(SrObject):
-    sr_fields = [
-        SrField('dexter_version', str),
-        SrField('executable_path', str),
-        SrField('source_paths', str, list_of=True),
-        SrField(
-            'builder', BuilderIR, can_be_none=True, required_in_init=False),
-        SrField(
-            'debugger', DebuggerIR, can_be_none=True, required_in_init=False),
-        SrField(
-            'steps',
-            StepIR,
-            list_of=True,
-            required_in_init=False,
-            default_value=list),
-        SrField(
-            'commands',
-            CommandListIR,
-            dict_of=True,
-            required_in_init=False,
-            default_value=OrderedDict)
-    ]
+class DextIR:
+    # commands: OrderedDict[str, list[CommandIR]]
+    def __init__(self,
+                 dexter_version: str,
+                 executable_path: str,
+                 source_paths: List[str],
+                 builder: BuilderIR = None,
+                 debugger: DebuggerIR = None,
+                 commands: OrderedDict = None):
+        self.dexter_version = dexter_version
+        self.executable_path = executable_path
+        self.source_paths = source_paths
+        self.builder = builder
+        self.debugger = debugger
+        self.commands = commands
+        self.steps: List[StepIR] = []
 
     def __str__(self):
         colors = 'rgby'
@@ -127,279 +101,4 @@ class DextIR(SrObject):
         return step
 
     def clear_steps(self):
-        setattr(self, 'steps', list())
-
-
-class TestDextIR(unittest.TestCase):
-    def test_json(self):
-        # Initialize a new DextIR and populate it with some data.
-
-        class context(object):
-            class options(object):
-                source_files = []
-
-        builder = BuilderIR(
-            name='MockBuilder', cflags=['-O0', '-O2'], ldflags='--link')
-        debugger = DebuggerIR(name='MockDebugger', version='1.0')
-
-        commands = {'DexWatch': CommandListIR()}
-        commands['DexWatch'].append(
-            CommandIR(
-                loc=LocIR(path='foo/bar', lineno=1, column=None),
-                raw_text="DexWatch('a')"))
-        commands['DexWatch'].append(
-            CommandIR(
-                loc=LocIR(path='foo/baz', lineno=75, column=None),
-                raw_text='DexWatch("b", "c")'))
-
-        sc = DextIR(
-            dexter_version='',
-            builder=builder,
-            debugger=debugger,
-            commands=commands,
-            executable_path='',
-            source_paths=[])
-        frames = [
-            FrameIR(
-                function='main',
-                is_inlined=False,
-                loc=LocIR(path='smain.c', lineno=12, column=4))
-        ]
-        step = sc.new_step(
-            context,
-            StepIR(
-                step_index=0, frames=frames[:], stop_reason=StopReason.STEP))
-        step.watches['xx'] = ValueIR(
-            expression='xx',
-            value='2',
-            type='int',
-            error_string=None,
-            could_evaluate=True,
-            is_optimized_away=False,
-            is_irretrievable=False)
-        frames.insert(
-            0,
-            FrameIR(
-                function='bar',
-                is_inlined=True,
-                loc=LocIR(path='sbar.c', lineno=12, column=3)))
-
-        step = sc.new_step(
-            context,
-            StepIR(
-                step_index=1, frames=frames[:], stop_reason=StopReason.STEP))
-        step.watches['yy'] = ValueIR(
-            expression='yy',
-            value='hello world',
-            type='std::string const&',
-            error_string=None,
-            could_evaluate=True,
-            is_optimized_away=False,
-            is_irretrievable=False)
-        frames.insert(
-            0,
-            FrameIR(
-                function='foo',
-                is_inlined=True,
-                loc=LocIR(path='sfoo.c', lineno=10, column=1)))
-        step = sc.new_step(
-            context,
-            StepIR(
-                step_index=2, frames=frames[:], stop_reason=StopReason.STEP))
-        step.watches['yy'] = ValueIR(
-            expression='yy',
-            value='hello cruel world',
-            type='std::string const&',
-            error_string=None,
-            could_evaluate=True,
-            is_optimized_away=False,
-            is_irretrievable=False)
-        step.watches['zz'] = ValueIR(
-            expression=None,
-            value=None,
-            type=None,
-            error_string=None,
-            could_evaluate=False,
-            is_optimized_away=False,
-            is_irretrievable=False)
-
-        # Write the DextIR out as json.
-        sc_json = sc.as_json
-
-        # Create a new DextIR and populate it with the json data.
-        sc2 = importDextIR(json_string=sc_json)
-        sc3 = importDextIR(json_string=sc2.as_json)
-
-        self.assertEqual(sc_json, sc2.as_json)
-        self.assertEqual(sc_json, sc3.as_json)
-
-        self.assertEqual(sc2.debugger.name, 'MockDebugger')
-        self.assertEqual(sc2.commands['DexWatch'][0].loc.path,
-                         os.path.join('foo', 'bar'))
-        self.assertEqual(sc2.commands['DexWatch'][0].loc.lineno, 1)
-        self.assertEqual(sc2.commands['DexWatch'][0].raw_text, "DexWatch('a')")
-        self.assertEqual(sc2.commands['DexWatch'][1].loc.path,
-                         os.path.join('foo', 'baz'))
-        self.assertEqual(sc2.commands['DexWatch'][1].loc.lineno, 75)
-        self.assertEqual(sc2.commands['DexWatch'][1].raw_text,
-                         'DexWatch("b", "c")')
-
-        # Check that we really do have the data in our new DextIR.
-        self.assertEqual(sc2.num_steps, 3)
-        self.assertEqual(sc2.steps[0].current_function, 'main')
-        self.assertEqual(sc2.steps[0].num_frames, 1)
-        self.assertFalse(sc2.steps[0].current_frame.is_inlined)
-
-        self.assertEqual(
-            sc2.steps[0].watches['xx'],
-            ValueIR(
-                expression='xx',
-                value='2',
-                type='int',
-                error_string=None,
-                could_evaluate=True,
-                is_optimized_away=False,
-                is_irretrievable=False))
-
-        self.assertEqual(sc2.steps[1].current_function, 'bar')
-        self.assertEqual(sc2.steps[1].num_frames, 2)
-        self.assertTrue(sc2.steps[1].current_frame.is_inlined)
-
-        with self.assertRaises(KeyError):
-            _ = sc2.steps[1].watches['xx']  # noqa
-
-        self.assertEqual(
-            sc2.steps[1].watches['yy'],
-            ValueIR(
-                expression='yy',
-                value='hello world',
-                type='std::string const&',
-                error_string=None,
-                could_evaluate=True,
-                is_optimized_away=False,
-                is_irretrievable=False))
-
-        self.assertEqual(sc2.steps[2].current_function, 'foo')
-        self.assertEqual(sc2.steps[2].num_frames, 3)
-        self.assertTrue(sc2.steps[2].current_frame.is_inlined)
-
-        self.assertEqual(
-            sc2.steps[2].watches['yy'],
-            ValueIR(
-                expression='yy',
-                value='hello cruel world',
-                type='std::string const&',
-                error_string=None,
-                could_evaluate=True,
-                is_optimized_away=False,
-                is_irretrievable=False))
-
-        self.assertEqual(
-            sc2.steps[2].watches['zz'],
-            ValueIR(
-                expression=None,
-                value=None,
-                type=None,
-                error_string=None,
-                could_evaluate=False,
-                is_optimized_away=False,
-                is_irretrievable=False))
-
-        self.assertEqual(sc2.steps[2].frames[0].loc,
-                         LocIR(path='sfoo.c', lineno=10, column=1))
-        self.assertEqual(sc2.steps[2].frames[1].loc,
-                         LocIR(path='sbar.c', lineno=12, column=3))
-        self.assertEqual(sc2.steps[2].frames[2].loc,
-                         LocIR(path='smain.c', lineno=12, column=4))
-
-    def test_valid_json(self):
-        with self.assertRaises(ImportDextIRException):
-            importDextIR('test')
-
-        with self.assertRaises(ImportDextIRException):
-            importDextIR('{ }')
-
-        with self.assertRaisesRegex(ImportDextIRException,
-                                    'unexpected serialized data '):
-            importDextIR('''{
-        "dexter_version": "",
-        "executable_path": "",
-        "source_paths": [],
-        "builder": null,
-        "debugger": null,
-        "steps": [],
-        "commands": {},
-        "test": [] }''')
-
-        with self.assertRaisesRegex(ImportDextIRException,
-                                    'field "steps" cannot be None'):
-            importDextIR('''{
-        "dexter_version": "",
-        "executable_path": "",
-        "source_paths": [],
-        "builder": null,
-        "debugger": null,
-        "steps" : null,
-        "commands": {} }''')
-
-        with self.assertRaisesRegex(ImportDextIRException,
-                                    'field "steps" is not a list'):
-            importDextIR('''{
-        "dexter_version": "",
-        "executable_path": "",
-        "source_paths": [],
-        "builder": null,
-        "debugger": null,
-        "steps" : { },
-        "commands": { } }''')
-
-        importDextIR('''{
-         "dexter_version": "",
-         "executable_path": "",
-         "source_paths": [],
-         "builder": null,
-         "debugger": null,
-          "commands": {
-            "DexWatch": {
-              "command_list": [
-                {
-                  "loc" : {
-                    "path": "foo/bar",
-                    "lineno": 1,
-                    "column": null
-                    },
-                  "raw_text": "DexWatch('a')"
-                  }
-                ]
-              }
-            },
-            "steps": [
-            {
-              "step_index": 0,
-              "step_kind": null,
-              "stop_reason": "BREAKPOINT",
-              "frames": [
-                {
-                  "function": null,
-                  "is_inlined": false,
-                  "loc": {
-                    "path": null,
-                    "lineno": null,
-                    "column": null
-                  }
-                }
-              ],
-              "watches": { }
-            }
-          ]
-        }''')
-
-        with self.assertRaises(ImportDextIRException):
-            importDextIR('''{
-        "dexter_version": "",
-        "executable_path": "",
-        "source_paths": [],
-        "builder": null,
-        "debugger": null,
-        "commands": { },
-        "steps" : [null] }''')
+        self.steps.clear()
