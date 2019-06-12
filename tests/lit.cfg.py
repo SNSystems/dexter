@@ -10,8 +10,8 @@ site.addsitedir(os.path.dirname(__file__))
 
 import dummy_format
 
-PATHTODEXTER='/fast/fs/dexter_gh/dexter.py'
-PATHTOTESTER='/fast/fs/dexter_gh/tests/nostdlib/llvm_passes/dexwrapper.sh'
+PATHTODEXTER='{}/../dexter.py'.format(os.path.dirname(__file__))
+PATHTOTESTER='{}/dexwrapper.sh'.format(os.path.dirname(__file__))
 
 config.name = 'DexTests'
 config.test_format = dummy_format.DummyFormat()
