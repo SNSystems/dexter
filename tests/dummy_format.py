@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 try:
     import ConfigParser
@@ -20,6 +21,9 @@ class DummyFormat(lit.formats.ShTest):
           rows = [x for x in reader]
           assert len(rows) == 2
           metric = float(rows[1][1])
+        if math.isnan(metric):
+          result = lit.Test.Result(lit.Test.FAIL, 'Test returned nan')
+        else:
           result.addMetric('score', lit.Test.RealMetricValue(metric))
       except IOError:
         msg = 'Failed to open summary from {}'.format(tmpDir)
