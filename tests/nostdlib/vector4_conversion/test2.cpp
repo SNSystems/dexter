@@ -1,3 +1,5 @@
+// RUN: %dexter
+
 #include "header.h"
 
 f4 get() {

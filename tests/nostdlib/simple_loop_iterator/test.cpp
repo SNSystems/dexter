@@ -1,3 +1,5 @@
+// RUN: %dexter
+
 struct iterator {
   int index_;
   iterator(int index) : index_(index) {}

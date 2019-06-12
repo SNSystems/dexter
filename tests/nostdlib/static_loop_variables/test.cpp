@@ -1,3 +1,5 @@
+// RUN: %dexter
+
 int Foo(const int iterations, const int initial)
 {
   static int val = initial; // DexWatch('iterations', 'initial')

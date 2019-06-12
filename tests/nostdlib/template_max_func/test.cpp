@@ -1,3 +1,5 @@
+// RUN: %dexter
+
 #ifdef _MSC_VER
 # define DEX_NOINLINE __declspec(noinline)
 #else

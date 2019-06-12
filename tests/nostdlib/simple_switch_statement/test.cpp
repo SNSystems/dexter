@@ -1,3 +1,5 @@
+// RUN: %dexter
+
 int calculate_result(const char* buffer)
 {
 

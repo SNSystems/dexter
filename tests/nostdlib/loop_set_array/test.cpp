@@ -1,3 +1,5 @@
+// RUN: %dexter
+
 int main()
 {
     int aiSizes[127];
