@@ -79,9 +79,11 @@ def get_command_object(commandIR):
 
 def _get_command_name(command_raw):
     """Return command name by splitting up DExTer command contained in
-       command_raw on the first opening paranthesis
+       command_raw on the first opening paranthesis and further stripping
+       any potential trailing whitespace.
     """
-    command_name = command_raw.split('(', 1)[0]
+    with_potential_whitespace = command_raw.split('(', 1)[0]
+    command_name = with_potential_whitespace.split(' ', 1)[0]
     return command_name
 
 
