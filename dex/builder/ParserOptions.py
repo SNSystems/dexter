@@ -49,11 +49,14 @@ def _find_build_scripts():
 
 
 def add_builder_tool_arguments(parser):
+    parser.add_argument('--binary',
+                        metavar="<file>",
+                        help='provide binary file to override --builder')
+
     parser.add_argument(
         '--builder',
         type=str,
         choices=sorted(_find_build_scripts().keys()),
-        required=True,
         help='test builder to use')
     parser.add_argument(
         '--cflags', type=str, default='', help='compiler flags')
