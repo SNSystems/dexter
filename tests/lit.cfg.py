@@ -17,8 +17,16 @@ config.test_source_root = os.path.dirname(__file__)
 config.test_exec_root = os.path.dirname(__file__)
 
 if 'opt' not in lit_config.params:
-    raise Exception('Please specify opt={0,2} with --param')
+    raise Exception('Please specify opt={0,1,2} with --param')
 optlevel = '-O{}'.format(lit_config.params['opt'])
+
+if 'builder' not in lit_config.params:
+    raise Exception('Please specify a builder with --param')
+builder = lit_config.params['builder']
+
+if 'debugger' not in lit_config.params:
+    raise Exception('Please specify a debugger with --param')
+debugger = lit_config.params['debugger']
 
 if 'clang' in lit_config.params:
     clang_location = lit_config.params['clang']
@@ -27,3 +35,5 @@ if 'clang' in lit_config.params:
 options = '-g {}'.format(optlevel)
 
 config.dexter_cflags = options
+config.dexter_builder = builder
+config.dexter_debugger = debugger

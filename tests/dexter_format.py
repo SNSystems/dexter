@@ -14,7 +14,7 @@ PATHTODEXTER='{}/../dexter.py'.format(os.path.dirname(__file__))
 PATHTOTESTER='{}/dexwrapper.sh'.format(os.path.dirname(__file__))
 
 def get_dexter_substitution(config):
-  return '{} {} test --results-directory %T --debugger lldb --builder clang --cflags "{}" .'.format(PATHTOTESTER, PATHTODEXTER, config.dexter_cflags)
+  return '{} {} test --results-directory %T --debugger {} --builder {} --cflags "{}" .'.format(PATHTOTESTER, PATHTODEXTER, config.dexter_debugger, config.dexter_builder, config.dexter_cflags)
 
 class DexterFormat(lit.formats.ShTest):
     def execute(self, test, lit_config):
