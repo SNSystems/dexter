@@ -20,3 +20,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+
+from dex.debugger.visualstudio.VisualStudio2015 import VisualStudio2015
+from dex.debugger.visualstudio.VisualStudio2017 import VisualStudio2017
