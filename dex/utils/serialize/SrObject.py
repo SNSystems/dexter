@@ -28,7 +28,6 @@ import json
 import unittest
 
 from dex.utils import create_named_enum
-from dex.utils.compatibility import add_metaclass, string_types
 from dex.utils.Exceptions import SrInitError
 from dex.utils.serialize import SrField
 
@@ -55,8 +54,7 @@ def _unserialize(value, type_):
         return value
 
 
-@add_metaclass(abc.ABCMeta)
-class SrObject(object):
+class SrObject(object, metaclass=abc.ABCMeta):
     @abc.abstractproperty
     def sr_fields(self):
         pass
@@ -183,7 +181,7 @@ class SrObject(object):
             # We don't allow unordered types (e.g. dicts) here.
             # All aggregate types must be ordered.
             assert isinstance(data[key],
-                              (list, OrderedDict, string_types, bool, int,
+                              (list, OrderedDict, str, bool, int,
                                type(None))), (key, data[key], type(data[key]))
 
         return data
@@ -207,7 +205,7 @@ class TestSrObject(unittest.TestCase):
         @property
         def sr_fields(self):
             return [
-                SrField('aa', string_types),
+                SrField('aa', str),
                 SrField('bb', int),
             ]
 
@@ -215,7 +213,7 @@ class TestSrObject(unittest.TestCase):
         @property
         def sr_fields(self):
             return [
-                SrField('cc', string_types),
+                SrField('cc', str),
                 SrField('dd', int, list_of=True),
             ]
 
@@ -223,7 +221,7 @@ class TestSrObject(unittest.TestCase):
         @property
         def sr_fields(self):
             return [
-                SrField('ee', string_types),
+                SrField('ee', str),
                 SrField('ff', int, dict_of=True, can_be_none=True),
             ]
 
@@ -426,10 +424,10 @@ class TestSrObject(unittest.TestCase):
             sr_fields = [
                 SrField(
                     'kk',
-                    string_types,
+                    str,
                     possible_values=e.possible_values,
                     can_be_none=True),
-                SrField('ll', string_types, possible_values=e.possible_values)
+                SrField('ll', str, possible_values=e.possible_values)
             ]
 
         t = TestObject(kk=e.FOO, ll=e.BAR)

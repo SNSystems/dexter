@@ -26,10 +26,11 @@ from fnmatch import fnmatch
 import os
 import unittest
 
+from io import StringIO
+
 from dex.utils import is_native_windows, has_pywin32
 from dex.utils import PreserveAutoColors, PrettyOutput
 from dex.utils import Timer
-from dex.utils.compatibility import StringIO
 
 
 class DexTestLoader(unittest.TestLoader):

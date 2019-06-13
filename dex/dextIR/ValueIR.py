@@ -24,17 +24,16 @@
 evaluation.
 """
 
-from dex.utils.compatibility import string_types
 from dex.utils.serialize import SrField, SrObject
 
 
 class ValueIR(SrObject):
 
     sr_fields = [
-        SrField('expression', string_types, can_be_none=True),
-        SrField('value', string_types, can_be_none=True),
-        SrField('type', string_types, can_be_none=True),
-        SrField('error_string', string_types, can_be_none=True),
+        SrField('expression', str, can_be_none=True),
+        SrField('value', str, can_be_none=True),
+        SrField('type', str, can_be_none=True),
+        SrField('error_string', str, can_be_none=True),
         SrField('could_evaluate', bool),
         SrField('is_optimized_away', bool),
         SrField('is_irretrievable', bool),
