@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import json
 import re
 import sys
@@ -16,9 +14,9 @@ else:
 # stdin (or file) -> stdout
 dump = json.load(f)
 for x in dump['tests']:
-    output = x['output'].split('\n')
-    for y in output:
-      m = score.match(y)
-      if m is not None:
-        assert m.group(1) in x['name'] # Ensure we picked out the name correctly
-        print('{},{}'.format(m.group(1), m.group(2)))
+    if 'metrics' in x:
+      metric = x['metrics']['score']
+    else:
+      metric = "NaN"
+    name = x['name']
+    print('{},{}'.format(name, metric))
