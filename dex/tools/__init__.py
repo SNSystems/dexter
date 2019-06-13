@@ -21,6 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from dex.tools.Main import get_tool_names, get_tools_directory, main, tool_main
+from dex.tools.Main import Context, get_tool_names, get_tools_directory, main, tool_main
 from dex.tools.TestToolBase import TestToolBase
 from dex.tools.ToolBase import ToolBase

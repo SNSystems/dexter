@@ -110,7 +110,7 @@ class Tool(TestToolBase):
         try:
             _, _, builderIR = run_external_build_script(
                 self.context,
-                script_path=self.context.build_script,
+                script_path=self.build_script,
                 source_files=options.source_files,
                 compiler_options=compiler_options,
                 linker_options=linker_options,

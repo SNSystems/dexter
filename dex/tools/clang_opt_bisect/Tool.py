@@ -263,7 +263,7 @@ class Tool(TestToolBase):
                 source_files=options.source_files,
                 compiler_options=compiler_options,
                 linker_options=linker_options,
-                script_path=self.context.build_script,
+                script_path=self.build_script,
                 executable_file=options.executable)
         except BuildScriptException as e:
             raise Error(e)
