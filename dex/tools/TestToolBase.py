@@ -25,6 +25,7 @@
 import abc
 from datetime import datetime
 import os
+import sys
 
 from dex.builder import add_builder_tool_arguments
 from dex.builder import handle_builder_tool_options
@@ -32,7 +33,7 @@ from dex.debugger.Debuggers import add_debugger_tool_arguments
 from dex.debugger.Debuggers import handle_debugger_tool_options
 from dex.heuristic.Heuristic import add_heuristic_tool_arguments
 from dex.tools.ToolBase import ToolBase
-from dex.utils import get_root_directory
+from dex.utils import get_root_directory, warn
 from dex.utils.Exceptions import Error, ToolArgumentError
 from dex.utils.ReturnCode import ReturnCode
 
@@ -67,17 +68,31 @@ class TestToolBase(ToolBase):
             help='directory to save results')
 
     def handle_options(self, defaults):
-        try:
-            self.build_script = handle_builder_tool_options(self.context)
-        except ToolArgumentError as e:
-            raise Error(e)
+        options = self.context.options
+
+        # We accept either or both of --binary and --builder.
+        if not options.binary and not options.builder:
+            raise Error('expected --builder or --binary')
+
+        # --binary overrides --builder
+        if options.binary:
+            if options.builder:
+                warn(self.context, "overriding --builder with --binary\n")
+
+            options.binary = os.path.abspath(options.binary)
+            if not os.path.isfile(options.binary):
+                raise Error('<d>could not find binary file</> <r>"{}"</>'
+                            .format(options.binary))
+        else:
+            try:
+                self.build_script = handle_builder_tool_options(self.context)
+            except ToolArgumentError as e:
+                raise Error(e)
 
         try:
             handle_debugger_tool_options(self.context, defaults)
         except ToolArgumentError as e:
             raise Error(e)
-
-        options = self.context.options
 
         options.tests_directory = os.path.abspath(options.tests_directory)
         if not os.path.isdir(options.tests_directory):

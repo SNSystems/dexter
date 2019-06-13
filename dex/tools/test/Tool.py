@@ -25,6 +25,7 @@
 import os
 import csv
 import pickle
+import shutil
 
 from dex.builder import run_external_build_script
 from dex.debugger.Debuggers import get_debugger_steps
@@ -34,6 +35,7 @@ from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import BuildScriptException, HeuristicException
 from dex.utils.PrettyOutputBase import Stream
 from dex.utils.ReturnCode import ReturnCode
+from dex.dextIR import BuilderIR
 
 
 class TestCase(object):
@@ -111,19 +113,31 @@ class Tool(TestToolBase):
         super(Tool, self).add_tool_arguments(parser, defaults)
 
     def _build_test_case(self):
-        """Invoke the specified builder script to build the test case
-           with the specified cflags and ldflags.
+        """Build an executable from the test source with the given --builder
+        script and flags (--cflags, --ldflags) in the working directory.
+        Or, if the --binary option has been given, copy the executable provided
+        into the working directory and rename it to match the --builder output.
         """
+
         options = self.context.options
-        compiler_options = [options.cflags for _ in options.source_files]
-        linker_options = options.ldflags
-        _, _, builderIR = run_external_build_script(
-            self.context,
-            script_path=self.build_script,
-            source_files=options.source_files,
-            compiler_options=compiler_options,
-            linker_options=linker_options,
-            executable_file=options.executable)
+        if options.binary:
+            # Copy user's binary into the tmp working directory
+            shutil.copy(options.binary, options.executable)
+            builderIR = BuilderIR(
+                name='binary',
+                cflags=[options.binary],
+                ldflags='')
+        else:
+            options = self.context.options
+            compiler_options = [options.cflags for _ in options.source_files]
+            linker_options = options.ldflags
+            _, _, builderIR = run_external_build_script(
+                self.context,
+                script_path=self.build_script,
+                source_files=options.source_files,
+                compiler_options=compiler_options,
+                linker_options=linker_options,
+                executable_file=options.executable)
         return builderIR
 
     def _get_steps(self, builderIR):

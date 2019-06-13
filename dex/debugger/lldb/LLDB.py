@@ -125,7 +125,7 @@ class LLDB(DebuggerBase):
 
     def launch(self):
         self._process = self._target.LaunchSimple(None, None, os.getcwd())
-        if not self._process:
+        if not self._process or self._process.GetNumThreads() == 0:
             raise DebuggerException('could not launch process')
         if self._process.GetNumThreads() != 1:
             raise DebuggerException('multiple threads not supported')
