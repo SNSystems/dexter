@@ -16,7 +16,7 @@ PATHTOTESTER='{}/dexwrapper.sh'.format(os.path.dirname(__file__))
 def get_dexter_substitution(config):
   return '{} {} test --results-directory %T --debugger lldb --builder clang --cflags "{}" .'.format(PATHTOTESTER, PATHTODEXTER, config.dexter_cflags)
 
-class DummyFormat(lit.formats.ShTest):
+class DexterFormat(lit.formats.ShTest):
     def execute(self, test, lit_config):
       result = lit.TestRunner.executeShTest(test, lit_config, False, [('%dexter', get_dexter_substitution(test.config))])
       tmpDir, tmpBase = TestRunner.getTempPaths(test)

@@ -8,10 +8,10 @@ from lit.llvm import llvm_config
 import site
 site.addsitedir(os.path.dirname(__file__))
 
-import dummy_format
+import dexter_format
 
 config.name = 'DexTests'
-config.test_format = dummy_format.DummyFormat()
+config.test_format = dexter_format.DexterFormat()
 config.suffixes = ['.cpp']
 config.test_source_root = os.path.dirname(__file__)
 config.test_exec_root = os.path.dirname(__file__)
