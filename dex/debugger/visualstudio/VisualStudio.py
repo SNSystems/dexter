@@ -29,7 +29,6 @@ import sys
 
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
-from dex.utils.compatibility import add_metaclass
 from dex.utils.Exceptions import LoadDebuggerException
 
 
@@ -43,8 +42,7 @@ def _load_com_module():
         raise LoadDebuggerException(e, sys.exc_info())
 
 
-@add_metaclass(abc.ABCMeta)
-class VisualStudio(DebuggerBase):  # pylint: disable=abstract-method
+class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
 
     # Constants for results of Debugger.CurrentMode
     # (https://msdn.microsoft.com/en-us/library/envdte.debugger.currentmode.aspx)

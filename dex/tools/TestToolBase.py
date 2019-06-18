@@ -37,6 +37,10 @@ from dex.utils.Exceptions import Error, ToolArgumentError
 
 
 class TestToolBase(ToolBase):
+    def __init__(self, *args, **kwargs):
+        super(TestToolBase, self).__init__(*args, **kwargs)
+        self.build_script: str = None
+
     def add_tool_arguments(self, parser, defaults):
         parser.description = self.__doc__
         add_builder_tool_arguments(parser)
@@ -63,7 +67,7 @@ class TestToolBase(ToolBase):
 
     def handle_options(self, defaults):
         try:
-            handle_builder_tool_options(self.context)
+            self.build_script = handle_builder_tool_options(self.context)
         except ToolArgumentError as e:
             raise Error(e)
 

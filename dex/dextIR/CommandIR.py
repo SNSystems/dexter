@@ -25,12 +25,11 @@ test.
 """
 
 from dex.dextIR.LocIR import LocIR
-from dex.utils.compatibility import string_types
 from dex.utils.serialize import SrField, SrObject
 
 
 class CommandIR(SrObject):
     sr_fields = [
-        SrField('raw_text', string_types),
+        SrField('raw_text', str),
         SrField('loc', LocIR),
     ]
