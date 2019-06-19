@@ -26,7 +26,8 @@
 import os
 import sys
 
-from dex.utils.compatibility import StringIO
+from io import StringIO
+
 from dex.utils import PreserveAutoColors, Timer, warn
 
 

@@ -32,8 +32,9 @@ import sys
 import threading
 import unittest
 
+from io import StringIO
+
 from dex.utils.Exceptions import Error
-from dex.utils.compatibility import add_metaclass, StringIO, assertRaisesRegex
 
 
 class _NullLock(object):
@@ -74,8 +75,7 @@ class Stream(object):
         self.color_enabled = self.py.isatty()
 
 
-@add_metaclass(abc.ABCMeta)
-class PrettyOutputBase(object):
+class PrettyOutputBase(object, metaclass=abc.ABCMeta):
     stdout = Stream(sys.stdout)
     stderr = Stream(sys.stderr)
 
@@ -392,17 +392,17 @@ class TestPrettyOutput(unittest.TestCase):
                 stream.py.getvalue(),
                 '[D][D][/D][R][R][/R][Y]a[/Y][R]b[/R][/R][D]c[/D][/D]')
 
-            with assertRaisesRegex(self, Error, 'tag mismatch'):
+            with self.assertRaisesRegex(Error, 'tag mismatch'):
                 o.auto('<r>hi', stream)
 
-            with assertRaisesRegex(self, Error, 'tag mismatch'):
+            with self.assertRaisesRegex(Error, 'tag mismatch'):
                 o.auto('hi</>', stream)
 
-            with assertRaisesRegex(self, Error, 'tag mismatch'):
+            with self.assertRaisesRegex(Error, 'tag mismatch'):
                 o.auto('<r><y>hi</>', stream)
 
-            with assertRaisesRegex(self, Error, 'tag mismatch'):
+            with self.assertRaisesRegex(Error, 'tag mismatch'):
                 o.auto('<r><y>hi</><r></>', stream)
 
-            with assertRaisesRegex(self, Error, 'tag mismatch'):
+            with self.assertRaisesRegex(Error, 'tag mismatch'):
                 o.auto('</>hi<r>', stream)

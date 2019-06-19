@@ -31,7 +31,6 @@ from dex.builder import run_external_build_script
 from dex.debugger.Debuggers import empty_debugger_steps, get_debugger_steps
 from dex.heuristic import Heuristic
 from dex.tools import TestToolBase
-from dex.utils.compatibility import iteritems, open_csv
 from dex.utils.Exceptions import DebuggerException, Error
 from dex.utils.Exceptions import BuildScriptException, HeuristicException
 from dex.utils.PrettyOutputBase import Stream
@@ -225,7 +224,7 @@ class Tool(TestToolBase):
             options.results_directory,
             '{}-per_pass_score.csv'.format(test_name))
 
-        with open_csv(per_pass_score_path, 'w') as fp:
+        with open(per_pass_score_path, mode='w', newline='') as fp:
             writer = csv.writer(fp, delimiter=',')
             writer.writerow(['Source File', 'Pass', 'Score'])
 
@@ -264,14 +263,14 @@ class Tool(TestToolBase):
                 source_files=options.source_files,
                 compiler_options=compiler_options,
                 linker_options=linker_options,
-                script_path=self.context.build_script,
+                script_path=self.build_script,
                 executable_file=options.executable)
         except BuildScriptException as e:
             raise Error(e)
 
     def _write_pass_summary(self, path, pass_summary):
         # Get a list of tuples.
-        pass_summary_list = list(iteritems(pass_summary))
+        pass_summary_list = list(pass_summary.items())
 
         for i, item in enumerate(pass_summary_list):
             # Add elems for the sum, min, and max of the values, as well as
@@ -292,7 +291,7 @@ class Tool(TestToolBase):
         pass_summary_list.sort(
             key=lambda tup: (not tup[5], tup[2], -len(tup[1]), tup[7], tup[6]))
 
-        with open_csv(path, 'w') as fp:
+        with open(path, mode='w', newline='') as fp:
             writer = csv.writer(fp, delimiter=',')
             writer.writerow(
                 ['Pass', 'Kind', 'Sum', 'Min', 'Max', 'Interesting'])

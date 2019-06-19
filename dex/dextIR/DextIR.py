@@ -35,7 +35,6 @@ from dex.dextIR.FrameIR import FrameIR
 from dex.dextIR.LocIR import LocIR
 from dex.dextIR.StepIR import StepIR, StepKind, StopReason
 from dex.dextIR.ValueIR import ValueIR
-from dex.utils.compatibility import assertRaisesRegex, string_types
 from dex.utils.Exceptions import ImportDextIRException, SrInitError
 from dex.utils.serialize import SrField, SrObject
 
@@ -63,9 +62,9 @@ def _step_kind_func(context, step):
 # pylint: disable=no-member
 class DextIR(SrObject):
     sr_fields = [
-        SrField('dexter_version', string_types),
-        SrField('executable_path', string_types),
-        SrField('source_paths', string_types, list_of=True),
+        SrField('dexter_version', str),
+        SrField('executable_path', str),
+        SrField('source_paths', str, list_of=True),
         SrField(
             'builder', BuilderIR, can_be_none=True, required_in_init=False),
         SrField(
@@ -320,8 +319,8 @@ class TestDextIR(unittest.TestCase):
         with self.assertRaises(ImportDextIRException):
             importDextIR('{ }')
 
-        with assertRaisesRegex(self, ImportDextIRException,
-                               'unexpected serialized data '):
+        with self.assertRaisesRegex(ImportDextIRException,
+                                    'unexpected serialized data '):
             importDextIR('''{
         "dexter_version": "",
         "executable_path": "",
@@ -332,8 +331,8 @@ class TestDextIR(unittest.TestCase):
         "commands": {},
         "test": [] }''')
 
-        with assertRaisesRegex(self, ImportDextIRException,
-                               'field "steps" cannot be None'):
+        with self.assertRaisesRegex(ImportDextIRException,
+                                    'field "steps" cannot be None'):
             importDextIR('''{
         "dexter_version": "",
         "executable_path": "",
@@ -343,8 +342,8 @@ class TestDextIR(unittest.TestCase):
         "steps" : null,
         "commands": {} }''')
 
-        with assertRaisesRegex(self, ImportDextIRException,
-                               'field "steps" is not a list'):
+        with self.assertRaisesRegex(ImportDextIRException,
+                                    'field "steps" is not a list'):
             importDextIR('''{
         "dexter_version": "",
         "executable_path": "",

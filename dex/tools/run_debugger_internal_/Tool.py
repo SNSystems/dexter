@@ -35,6 +35,10 @@ from dex.utils.Exceptions import DebuggerException, Error
 
 
 class Tool(ToolBase):
+    def __init__(self, *args, **kwargs):
+        super(Tool, self).__init__(*args, **kwargs)
+        self.dextIR = None
+
     @property
     def name(self):
         return 'DExTer run debugger internal'
@@ -46,7 +50,7 @@ class Tool(ToolBase):
 
     def handle_options(self, defaults):
         with open(self.context.options.json) as fp:
-            self.context.dextIR = importDextIR(fp.read())
+            self.dextIR = importDextIR(fp.read())
 
         with open(self.context.options.pickled_options, 'rb') as fp:
             poptions = pickle.load(fp)
@@ -64,8 +68,8 @@ class Tool(ToolBase):
 
         with Timer('loading debugger'):
             debugger = Debuggers(self.context).load(options.debugger,
-                                                    self.context.dextIR)
-            self.context.dextIR.debugger = debugger.debugger_info
+                                                    self.dextIR)
+            self.dextIR.debugger = debugger.debugger_info
 
         with Timer('running debugger'):
             if not debugger.is_available:
@@ -83,4 +87,4 @@ class Tool(ToolBase):
                     raise Error(e)
 
         with open(self.context.options.json, 'w') as fp:
-            fp.write(self.context.dextIR.as_json)
+            fp.write(self.dextIR.as_json)

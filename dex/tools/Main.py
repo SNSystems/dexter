@@ -41,16 +41,20 @@ from dex.utils import WorkingDirectory
 
 
 def get_tools_directory():
+    """ Returns directory path where DExTer tool imports can be
+        found.
+    """
     tools_directory = os.path.join(get_root_directory(), 'tools')
     assert os.path.isdir(tools_directory), tools_directory
     return tools_directory
 
 
 def get_tool_names():
-    tools_directory = get_tools_directory()
+    """ Returns a list of expected DExTer Tools
+    """
     return [
-        t.replace('_', '-') for t in os.listdir(tools_directory)
-        if os.path.isfile(os.path.join(tools_directory, t, 'Tool.py'))
+        'annotate-expected-values', 'clang-opt-bisect', 'help',
+        'list-debuggers', 'no-tool', 'run-debugger-internal-', 'test', 'view'
     ]
 
 
@@ -88,9 +92,18 @@ def tool_main(context, tool, args):
         return 0
 
 
+class Context(object):
+
+    def __init__(self):
+        self.o: PrettyOutput = None
+        self.working_directory: str = None
+        self.options: dict = None
+        self.version: str = None
+        self.root_directory: str = None
+
 def main():
-    class context(object):
-        pass
+
+    context = Context()
 
     with PrettyOutput() as context.o:
         try:

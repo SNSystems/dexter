@@ -24,6 +24,7 @@
 
 import os
 
+from dex.tools import Context
 from dex.utils import is_native_windows
 
 
@@ -59,5 +60,5 @@ def add_builder_tool_arguments(parser):
     parser.add_argument('--ldflags', type=str, default='', help='linker flags')
 
 
-def handle_builder_tool_options(context):
-    context.build_script = _find_build_scripts()[context.options.builder]
+def handle_builder_tool_options(context: Context) -> str:
+    return _find_build_scripts()[context.options.builder]
