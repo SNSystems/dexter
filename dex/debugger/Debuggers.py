@@ -44,9 +44,6 @@ from dex.debugger.visualstudio.VisualStudio2017 import VisualStudio2017
 
 
 def _get_potential_debuggers():  # noqa
-    """Search the debugger directory for any classes which are subclasses of
-    DebuggerBase and return a dict.
-    """
     return {
         LLDB.get_option_name(): LLDB,
         VisualStudio2015.get_option_name(): VisualStudio2015,
