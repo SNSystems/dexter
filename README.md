@@ -252,7 +252,7 @@ Each test requires a ```test.cfg``` file.  Currently the contents of this file a
 
 ## Additional tools
 
-For clang-based compilers, the ```clang-opt-bisect tool``` can be used to get a breakdown of which LLVM passes may be contributing to debugging experience issues.  For example:
+For clang-based compilers, the ```clang-opt-bisect``` tool can be used to get a breakdown of which LLVM passes may be contributing to debugging experience issues.  For example:
 
     $ dexter.py clang-opt-bisect tests/nostdlib/fibonacci --builder clang-cl --debugger vs2017 --cflags="/Ox /Zi" --ldflags="/Zi"
 
