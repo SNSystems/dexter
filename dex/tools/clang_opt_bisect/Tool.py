@@ -91,8 +91,7 @@ class Tool(TestToolBase):
 
         return limits
 
-    def _run_test(self, test_dir):  # noqa
-        test_name = self._get_test_name(test_dir)
+    def _run_test(self, subdir, test_name):  # noqa
         options = self.context.options
 
         per_pass_score = []
