@@ -383,10 +383,10 @@ class Heuristic(object):
         result = 0
 
         maximum_allowed_penalty = 0
-        for name, pen_cmd in self.penalties.iteritems():
+        for name, pen_cmd in self.penalties.items():
             maximum_allowed_penalty += pen_cmd.max_penalty
             value = pen_cmd.pen_dict
-            for category, inst_list in value.iteritems():
+            for category, inst_list in value.items():
                 result += sum(x.the_penalty for x in inst_list)
         return min(result, maximum_allowed_penalty)
 
