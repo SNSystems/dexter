@@ -33,6 +33,7 @@ from dex.tools import TestToolBase
 from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import BuildScriptException, HeuristicException
 from dex.utils.PrettyOutputBase import Stream
+from dex.utils.ReturnCode import ReturnCode
 
 
 class TestCase(object):
@@ -204,7 +205,7 @@ class Tool(TestToolBase):
         self._record_successful_test(test_name, steps, heuristic_score)
         return
 
-    def _handle_results(self):
+    def _handle_results(self) -> ReturnCode:
         options = self.context.options
 
         if not options.verbose:
@@ -221,4 +222,4 @@ class Tool(TestToolBase):
                     test_case.error
                 ])
 
-        return 0
+        return ReturnCode.OK

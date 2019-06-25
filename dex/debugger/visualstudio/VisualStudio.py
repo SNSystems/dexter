@@ -30,6 +30,7 @@ import sys
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
 from dex.utils.Exceptions import LoadDebuggerException
+from dex.utils.ReturnCode import ReturnCode
 
 
 def _load_com_module():
@@ -131,8 +132,9 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
     def step(self):
         self._fn_step()
 
-    def go(self):
+    def go(self) -> ReturnCode:
         self._fn_go()
+        return ReturnCode.OK
 
     def get_step_info(self):
         thread = self._debugger.CurrentThread

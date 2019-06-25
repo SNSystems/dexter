@@ -31,6 +31,7 @@ import sys
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
 from dex.utils.Exceptions import DebuggerException, LoadDebuggerException
+from dex.utils.ReturnCode import ReturnCode
 
 
 class LLDB(DebuggerBase):
@@ -134,8 +135,9 @@ class LLDB(DebuggerBase):
     def step(self):
         self._thread.StepInto()
 
-    def go(self):
+    def go(self) -> ReturnCode:
         self._process.Continue()
+        return ReturnCode.OK
 
     def get_step_info(self):
         frames = []

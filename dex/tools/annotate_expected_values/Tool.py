@@ -28,6 +28,7 @@ import pickle
 from dex.dextIR.StepIR import StepKind
 from dex.tools import ToolBase
 from dex.utils.Exceptions import Error
+from dex.utils.ReturnCode import ReturnCode
 
 
 class ExpectedWatchValue(object):
@@ -134,7 +135,7 @@ class Tool(ToolBase):
                     raise Error('"{}" <d>is not a valid file</>'.format(sf))
                 raise Error('<d>could not find file</> "{}"'.format(sf))
 
-    def go(self):  # noqa
+    def go(self) -> ReturnCode:  # noqa
         options = self.context.options
 
         exp_values = set()
@@ -210,4 +211,4 @@ class Tool(ToolBase):
                     fp.write("\n// DexExpectStepKind('{}', {})".format(
                         step_kind.name, step_kind.count))
 
-        return 0
+        return ReturnCode.OK

@@ -28,6 +28,7 @@ from dex.debugger.Debuggers import Debuggers
 from dex.tools import ToolBase
 from dex.utils import Timer
 from dex.utils.Exceptions import DebuggerException, Error
+from dex.utils.ReturnCode import ReturnCode
 
 
 class Tool(ToolBase):
@@ -46,10 +47,10 @@ class Tool(ToolBase):
     def handle_options(self, defaults):
         handle_debugger_tool_options1(self.context, defaults)
 
-    def go(self):
+    def go(self) -> ReturnCode:
         with Timer('list debuggers'):
             try:
                 Debuggers(self.context).list()
             except DebuggerException as e:
                 raise Error(e)
-        return 0
+        return ReturnCode.OK

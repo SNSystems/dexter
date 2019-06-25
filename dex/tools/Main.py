@@ -38,6 +38,7 @@ from dex.utils.Linting import linting_ok
 from dex.utils.UnitTests import unit_tests_ok
 from dex.utils.Version import version
 from dex.utils import WorkingDirectory
+from dex.utils.ReturnCode import ReturnCode
 
 
 def _output_bug_report_message(context):
@@ -159,7 +160,7 @@ def tool_main(context, tool, args):
 
         if options.version:
             context.o.green('{}\n'.format(context.version))
-            return 0
+            return ReturnCode.OK
 
         if (options.unittest != 'off' and not unit_tests_ok(context)):
             raise Error('<d>unit test failures</>')
@@ -169,7 +170,7 @@ def tool_main(context, tool, args):
 
         if options.colortest:
             context.o.colortest()
-            return 0
+            return ReturnCode.OK
 
         try:
             tool.handle_base_options(defaults)
@@ -178,8 +179,9 @@ def tool_main(context, tool, args):
 
         dir_ = context.options.working_directory
         with WorkingDirectory(context, dir=dir_) as context.working_directory:
-            tool.go()
-        return 0
+            return_code = tool.go()
+
+        return return_code
 
 
 class Context(object):
@@ -191,7 +193,7 @@ class Context(object):
         self.version: str = None
         self.root_directory: str = None
 
-def main():
+def main() -> ReturnCode:
 
     context = Context()
 
@@ -213,7 +215,7 @@ def main():
                     raise
             except AttributeError:
                 pass
-            return 1
+            return ReturnCode._ERROR
         except (KeyboardInterrupt, SystemExit):
             raise
         except:  # noqa

@@ -26,6 +26,7 @@ import imp
 import textwrap
 
 from dex.tools import ToolBase, get_tool_names, get_tools_directory, tool_main
+from dex.utils.ReturnCode import ReturnCode
 
 
 class Tool(ToolBase):
@@ -64,7 +65,7 @@ class Tool(ToolBase):
             s += '<g>{}</>\n{}\n\n'.format(tool_name, tool_doc)
         return s
 
-    def go(self):
+    def go(self) -> ReturnCode:
         if self.context.options.tool is None:
             self.context.o.auto(self._default_text)
             return 0

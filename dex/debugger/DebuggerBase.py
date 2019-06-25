@@ -32,6 +32,7 @@ from dex.command import get_command_object
 from dex.dextIR import DebuggerIR
 from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import NotYetLoadedDebuggerException
+from dex.utils.ReturnCode import ReturnCode
 
 
 class DebuggerBase(object, metaclass=abc.ABCMeta):
@@ -205,7 +206,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def go(self):
+    def go(self) -> ReturnCode:
         pass
 
     @abc.abstractmethod

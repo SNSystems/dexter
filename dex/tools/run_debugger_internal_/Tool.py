@@ -31,6 +31,7 @@ from dex.debugger import Debuggers
 from dex.tools import ToolBase
 from dex.utils import Timer
 from dex.utils.Exceptions import DebuggerException, Error
+from dex.utils.ReturnCode import ReturnCode
 
 
 class Tool(ToolBase):
@@ -62,7 +63,7 @@ class Tool(ToolBase):
 
         Timer.display = self.context.options.time_report
 
-    def go(self):
+    def go(self) -> ReturnCode:
         options = self.context.options
 
         with Timer('loading debugger'):
@@ -87,3 +88,4 @@ class Tool(ToolBase):
 
         with open(self.context.options.dextIR_path, 'wb') as fp:
             pickle.dump(self.dextIR, fp)
+        return ReturnCode.OK

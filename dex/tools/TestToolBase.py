@@ -34,6 +34,7 @@ from dex.heuristic.Heuristic import add_heuristic_tool_arguments
 from dex.tools.ToolBase import ToolBase
 from dex.utils import get_root_directory
 from dex.utils.Exceptions import Error, ToolArgumentError
+from dex.utils.ReturnCode import ReturnCode
 
 
 class TestToolBase(ToolBase):
@@ -93,7 +94,7 @@ class TestToolBase(ToolBase):
                     '<d>could not create directory</> <r>"{}"</> <y>({})</>'.
                     format(options.results_directory, e.strerror))
 
-    def go(self):  # noqa
+    def go(self) -> ReturnCode:  # noqa
         options = self.context.options
 
         subdirs = sorted([
@@ -116,7 +117,7 @@ class TestToolBase(ToolBase):
 
             self._run_test(subdir)
 
-        self._handle_results()
+        return self._handle_results()
 
     @staticmethod
     def _is_current_directory(test_directory):
@@ -138,5 +139,5 @@ class TestToolBase(ToolBase):
         pass
 
     @abc.abstractmethod
-    def _handle_results(self):
+    def _handle_results(self) -> ReturnCode:
         pass

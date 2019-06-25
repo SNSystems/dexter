@@ -29,6 +29,7 @@ import tempfile
 from dex import __version__
 from dex.utils import ExtArgParse
 from dex.utils import PrettyOutput
+from dex.utils.ReturnCode import ReturnCode
 
 
 class ToolBase(object, metaclass=abc.ABCMeta):
@@ -152,5 +153,5 @@ class ToolBase(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def go(self):
+    def go(self) -> ReturnCode:
         pass
