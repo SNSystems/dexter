@@ -35,6 +35,7 @@ from dex.tools import TestToolBase
 from dex.utils.Exceptions import DebuggerException, Error
 from dex.utils.Exceptions import BuildScriptException, HeuristicException
 from dex.utils.PrettyOutputBase import Stream
+from dex.utils.ReturnCode import ReturnCode
 
 
 class BisectPass(object):
@@ -240,15 +241,15 @@ class Tool(TestToolBase):
         self._write_pass_summary(pass_summary_path,
                                  current_bisect_pass_summary)
 
-    def _handle_results(self):
+    def _handle_results(self) -> ReturnCode:
         options = self.context.options
         pass_summary_path = os.path.join(options.results_directory,
                                          'overall-pass-summary.csv')
 
         self._write_pass_summary(pass_summary_path,
                                  self._all_bisect_pass_summary)
+        return ReturnCode.OK
 
-        return 1
 
     def _clang_opt_bisect_build(self, opt_bisect_limits):
         options = self.context.options

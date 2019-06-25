@@ -26,6 +26,7 @@ It just provides a welcome message and simple usage instructions.
 
 from dex.tools import ToolBase, get_tool_names
 from dex.utils.Exceptions import Error
+from dex.utils.ReturnCode import ReturnCode
 
 
 # This is a special "tool" that is run when no subtool has been specified on
@@ -58,5 +59,7 @@ class Tool(ToolBase):
             raise Error('<d>no subtool specified</>\n\n{}\n'.format(
                 self.parser.format_help()))
 
-    def go(self):
-        return 1
+    def go(self) -> ReturnCode:
+        # This fn is never called because not specifying a subtool raises an
+        # exception.
+        return ReturnCode._ERROR

@@ -29,6 +29,8 @@ from dex.heuristic import Heuristic
 from dex.heuristic.Heuristic import add_heuristic_tool_arguments
 from dex.tools import ToolBase
 from dex.utils.Exceptions import Error, HeuristicException
+from dex.utils.ReturnCode import ReturnCode
+
 
 class Tool(ToolBase):
     """Given a dextIR file, display the information in a human-readable form.
@@ -56,7 +58,7 @@ class Tool(ToolBase):
             raise Error('<d>could not find dextIR file</> <r>"{}"</>'.format(
                 options.input_path))
 
-    def go(self):
+    def go(self) -> ReturnCode:
         options = self.context.options
 
         with open(options.input_path, 'rb') as fp:
@@ -70,4 +72,4 @@ class Tool(ToolBase):
         self.context.o.auto('{}\n\n{}\n\n{}\n\n'.format(
             heuristic.summary_string, steps, heuristic.verbose_output))
 
-        return 0
+        return ReturnCode.OK
