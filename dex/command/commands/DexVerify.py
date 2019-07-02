@@ -20,18 +20,32 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Base class for all DExTer commands, where a command is a specific Python
-function that can be embedded into a comment in the source code under test
-which will then be executed by DExTer during debugging.
+"""[TODO] Add words
 """
+import pprint
 
-import abc
+from dex.command.CommandBase import CommandBase
+from dex.command.commands.LTD.internal.Proposition import Boolean
+from dex.dextIR import DextIR, DextStepIter
 
-class CommandBase(object, metaclass=abc.ABCMeta):
-    def __init__(self):
-        self.path = None
-        self.lineno = None
 
-    @abc.abstractmethod
-    def eval(self):
-        pass
+class DexVerify(CommandBase):
+    def __init__(self, *args):
+        if len(args) != 1:
+            raise TypeError('Expected exactly one arg')
+
+        self.model = args[0]
+        if isinstance(self.model, bool):
+            self.model = Boolean(self.model)
+
+    def eval(self, program: DextIR) -> bool:
+        # [TODO] return (bool, list) where list is a set of nested lists of
+        # string which describte the verification trace
+        trace_iter = DextStepIter(program)
+        return self.model.eval(trace_iter)
+
+    def __str__(self):
+        return "DexVerify({})".format(self.model)
+
+    def __repr__(self):
+        return self.__str__()

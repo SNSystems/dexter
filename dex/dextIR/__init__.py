@@ -25,6 +25,7 @@
 
 from dex.dextIR.BuilderIR import BuilderIR
 from dex.dextIR.DextIR import DextIR
+from dex.dextIR.DextIR import DextStepIter
 from dex.dextIR.DebuggerIR import DebuggerIR
 from dex.dextIR.FrameIR import FrameIR
 from dex.dextIR.LocIR import LocIR

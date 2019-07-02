@@ -20,18 +20,41 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Base class for all DExTer commands, where a command is a specific Python
-function that can be embedded into a comment in the source code under test
-which will then be executed by DExTer during debugging.
-"""
 
 import abc
+from dex.dextIR import DextStepIter
+from dex.command.commands.LTD.internal.Proposition import (
+    Proposition, Boolean, unwrap_LTD_arg
+)
 
-class CommandBase(object, metaclass=abc.ABCMeta):
-    def __init__(self):
-        self.path = None
-        self.lineno = None
+class UnaryOperator(Proposition):
+    def __init__(self, *args):
+        if len(args) != 1:
+            raise TypeError('Expected exactly one arg')
+        self.operand = unwrap_LTD_arg(args[0])
 
-    @abc.abstractmethod
-    def eval(self):
+    def eval(self, trace_iter: DextStepIter) -> bool:
         pass
+
+    def __str__(self):
+        return "{}({})".format(self.__class__.__name__, self.operand)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class BinaryOperator(Proposition):
+    def __init__(self, *args):
+        if len(args) != 2:
+            raise TypeError('Expected exactly two args')
+        self.lhs = unwrap_LTD_arg(args[0])
+        self.rhs = unwrap_LTD_arg(args[1])
+
+    def eval(self, step: DextStepIter) -> bool:
+        pass
+
+    def __str__(self):
+        return "{}({}, {})".format(self.__class__.__name__, self.lhs, self.rhs)
+
+    def __repr__(self):
+        return self.__str__()

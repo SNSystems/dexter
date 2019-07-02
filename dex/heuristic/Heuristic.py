@@ -134,11 +134,26 @@ class Heuristic(object):
             self.penalty_missing_step, self.penalty_misordered_steps
         ])
 
+        # Verify program with LTD
+        models = steps.commands.get('DexVerify', None)
+        dex_verify_max_penalty = len(models)
+        pen_dict = defaultdict(list)
+        if models is not None:
+            for model in models:
+                command = get_command_object(model)
+                result = command.eval(steps)
+                p = 0.0 if result else 1.0
+                pen_dict[str(command)] = [PenaltyInstance(result, p)]
+
+            self.penalties['DexVerify'] = PenaltyCommand(
+                pen_dict, dex_verify_max_penalty)
+
+
         # Get DexExpectWatchValue results.
         try:
             for watch in steps.commands["DexExpectWatchValue"]:
                 command = get_command_object(watch)
-                command(steps)
+                command.eval(steps)
                 maximum_possible_penalty = min(3, len(
                     command.values)) * worst_penalty
                 name, p = self._calculate_expect_watch_penalties(
@@ -159,7 +174,7 @@ class Heuristic(object):
         try:
             for step_kind in steps.commands['DexExpectStepKind']:
                 command = get_command_object(step_kind)
-                command()
+                command.eval()
                 # Cap the penalty at 2 * expected count or else 1
                 maximum_possible_penalty = max(command.count * 2, 1)
                 penalty = abs(command.count - step_kind_counts[command.name])
@@ -174,7 +189,7 @@ class Heuristic(object):
             pass
 
         if 'DexUnreachable' in steps.commands:
-            cmds = steps.commands['DexUnreachable'].command_list
+            cmds = steps.commands['DexUnreachable']
             unreach_count = 0
 
             # Find steps with unreachable in them
@@ -201,7 +216,7 @@ class Heuristic(object):
             self.penalties['unreachable lines'] = total
 
         if 'DexExpectStepOrder' in steps.commands:
-            cmds = steps.commands['DexExpectStepOrder'].command_list
+            cmds = steps.commands['DexExpectStepOrder']
             cmds = [(c, get_command_object(c)) for c in cmds]
 
             # Form a list of which line/cmd we _should_ have seen

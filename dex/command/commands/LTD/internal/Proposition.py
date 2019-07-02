@@ -20,18 +20,40 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Base class for all DExTer commands, where a command is a specific Python
-function that can be embedded into a comment in the source code under test
-which will then be executed by DExTer during debugging.
-"""
 
 import abc
 
-class CommandBase(object, metaclass=abc.ABCMeta):
-    def __init__(self):
-        self.path = None
-        self.lineno = None
+from dex.dextIR import DextStepIter
 
+
+class Proposition:
     @abc.abstractmethod
-    def eval(self):
+    def eval(self, trace_iter: DextStepIter) -> bool:
         pass
+
+
+class Boolean(Proposition):
+    def __init__(self, *args):
+        if len(args) != 1:
+            raise TypeError('Expected exactly one arg')
+        if not isinstance(args[0], bool):
+            raise TypeError('Boolean.__init__() requires bool arg')
+
+        self.value = args[0]
+
+    def eval(self, trace_iter: DextStepIter) -> bool:
+        return self.value
+
+    def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+def unwrap_LTD_arg(arg) -> Proposition:
+    if isinstance(arg, bool):
+        arg = Boolean(arg)
+    elif not isinstance(arg, Proposition):
+        raise TypeError('Arg is not a proposition: {}'.format(self.operand))
+    return arg

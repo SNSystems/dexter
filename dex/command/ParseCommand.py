@@ -32,7 +32,9 @@ import os
 
 from dex.command.CommandBase import CommandBase
 from dex.utils.Exceptions import CommandParseError
-
+from dex.command.commands.LTD import (
+    And, Or, Not, Until, Expect, Eventually, Henceforth, Weak, Release
+)
 
 def _get_valid_commands():
     """Search the commands subdirectory for any classes which are subclasses of
@@ -60,9 +62,25 @@ def _get_valid_commands():
                 for c in inspect.getmembers(module, inspect.isclass)
                 if c[1] != CommandBase and issubclass(c[1], CommandBase)
             })
+
+        # [TODO] This will need to be cleaned up a bit -- with this And() is a
+        # valid standalone command.
+        commands.update(get_LTD_commands())
         _get_valid_commands.cached = commands
         return commands
 
+def get_LTD_commands():
+    return {
+        'Or': Or,
+        'And': And,
+        'Not': Not,
+        'Weak': Weak,
+        'Until': Until,
+        'Expect': Expect,
+        'Release': Release,
+        'Eventually': Eventually,
+        'Henceforth': Henceforth,
+    }
 
 def get_command_object(commandIR):
     """Externally visible version of _safe_eval.  Only returns the Command

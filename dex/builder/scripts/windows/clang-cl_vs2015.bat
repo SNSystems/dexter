@@ -1,7 +1,9 @@
 @echo OFF
 setlocal EnableDelayedExpansion
 
-call "%VS140COMNTOOLS%..\..\VC\bin\amd64\vcvars64.bat"
+rem call "%VS140COMNTOOLS%..\..\VC\bin\amd64\vcvars64.bat"
+
+call "C:\Program Files\ (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 @echo OFF
 setlocal EnableDelayedExpansion

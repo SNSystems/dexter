@@ -4,3 +4,4 @@ __pycache__/
 .vscode/
 results/
 .*.swp
+.env/
