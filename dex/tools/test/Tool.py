@@ -101,6 +101,15 @@ class Tool(TestToolBase):
     def name(self):
         return 'DExTer test'
 
+    def add_tool_arguments(self, parser, defaults):
+        parser.add_argument('--fail-lt',
+                            type=float,
+                            default=0.0, # By default TEST always succeeds.
+                            help='exit with status FAIL(2) if the test result'
+                                ' is less than this value.',
+                            metavar='<float>')
+        super(Tool, self).add_tool_arguments(parser, defaults)
+
     def _build_test_case(self):
         """Invoke the specified builder script to build the test case
            with the specified cflags and ldflags.
@@ -206,6 +215,7 @@ class Tool(TestToolBase):
         return
 
     def _handle_results(self) -> ReturnCode:
+        return_code = ReturnCode.OK
         options = self.context.options
 
         if not options.verbose:
@@ -217,9 +227,12 @@ class Tool(TestToolBase):
             writer.writerow(['Test Case', 'Score', 'Error'])
 
             for test_case in self._test_cases:
+                if test_case.score < options.fail_lt:
+                    return_code = ReturnCode.FAIL
+
                 writer.writerow([
                     test_case.name, '{:.4f}'.format(test_case.score),
                     test_case.error
                 ])
 
-        return ReturnCode.OK
+        return return_code
