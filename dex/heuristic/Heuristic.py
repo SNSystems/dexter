@@ -120,6 +120,13 @@ def add_heuristic_tool_arguments(parser):
         default=4,  # XXX XXX XXX selected by random
         help='set the penalty for the program skipping over a step.',
         metavar='<int>')
+    parser.add_argument(
+        '--penalty-incorrect-program-state',
+        type=int,
+        default=4,  # XXX XXX XXX selected by random
+        help='set the penalty for the program never entering an expected state'
+        ' or entering an unexpected state.',
+        metavar='<int>')
 
 
 class Heuristic(object):
@@ -144,6 +151,18 @@ class Heuristic(object):
                 name, p = self._calculate_expect_watch_penalties(
                     command, maximum_possible_penalty)
                 self.penalties[name] = PenaltyCommand(p,
+                                                      maximum_possible_penalty)
+        except KeyError:
+            pass
+
+        try:
+            for expect_state in steps.commands["DexExpectProgramState"]:
+                command = get_command_object(expect_state)
+                success = command(steps)
+                penalty = 0 if success else self.penalty_incorrect_program_state
+                maximum_possible_penalty = self.penalty_incorrect_program_state
+                name = command.program_state_text
+                self.penalties[name] = PenaltyCommand(penalty,
                                                       maximum_possible_penalty)
         except KeyError:
             pass
@@ -480,3 +499,7 @@ class Heuristic(object):
     @property
     def penalty_misordered_steps(self):
         return self.context.options.penalty_misordered_steps
+
+    @property
+    def penalty_incorrect_program_state(self):
+        return self.context.options.penalty_incorrect_program_state

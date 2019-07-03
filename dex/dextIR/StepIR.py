@@ -29,6 +29,7 @@ from typing import List
 from enum import Enum
 from dex.dextIR.FrameIR import FrameIR
 from dex.dextIR.LocIR import LocIR
+from dex.dextIR.ProgramState import ProgramState
 
 
 class StopReason(Enum):
@@ -56,10 +57,12 @@ class StepIR:
                  stop_reason: StopReason,
                  frames: List[FrameIR],
                  step_kind: StepKind = None,
-                 watches: OrderedDict = None):
+                 watches: OrderedDict = None,
+                 program_state: ProgramState = None):
         self.step_index = step_index
         self.step_kind = step_kind
         self.stop_reason = stop_reason
+        self.program_state = program_state
 
         if frames is None:
             frames = []
