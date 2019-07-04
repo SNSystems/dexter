@@ -20,27 +20,30 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Serialization of information related to the result of an expression
-evaluation.
+"""@@ words
 """
+import pprint
+
+from dex.command.CommandBase import CommandBase
+from dex.command.commands.LTD.internal.Proposition import Boolean
+from dex.dextIR import DextIR, DextStepIter
 
 
-class ValueIR:
-    def __init__(self,
-                 expression: str,
-                 value: str,
-                 type_name: str,
-                 could_evaluate: bool,
-                 error_string: str = None,
-                 is_optimized_away: bool = False,
-                 is_irretrievable: bool = False):
-        self.expression = expression
-        self.value = value
-        self.type_name = type_name
-        self.could_evaluate = could_evaluate
-        self.error_string = error_string
-        self.is_optimized_away = is_optimized_away
-        self.is_irretrievable = is_irretrievable
+class DexVerify(CommandBase):
+    def __init__(self, *args):
+        if len(args) != 1:
+            raise TypeError('Expected exactly one arg')
+
+        self.model = args[0]
+        if isinstance(self.model, bool):
+            self.model = Boolean(self.model)
+
+    def eval(self, program: DextIR) -> bool:
+        trace_iter = DextStepIter(program)
+        return self.model.eval(trace_iter)
+
+    def __str__(self):
+        return "DexVerify({})".format(self.model)
 
     def __repr__(self):
-        return "Watch {} is {}".format(self.expression, self.value)
+        return self.__str__()

@@ -20,27 +20,31 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Serialization of information related to the result of an expression
-evaluation.
-"""
 
+from dex.dextIR import DextStepIter, StepIR
+from dex.command.commands.LTD.internal.Proposition import Proposition
+from dex.command.commands.LTD.internal.OperatorTypes import (
+    BinaryOperator, UnaryOperator
+)
 
-class ValueIR:
-    def __init__(self,
-                 expression: str,
-                 value: str,
-                 type_name: str,
-                 could_evaluate: bool,
-                 error_string: str = None,
-                 is_optimized_away: bool = False,
-                 is_irretrievable: bool = False):
-        self.expression = expression
-        self.value = value
-        self.type_name = type_name
-        self.could_evaluate = could_evaluate
-        self.error_string = error_string
-        self.is_optimized_away = is_optimized_away
-        self.is_irretrievable = is_irretrievable
+## @@ this is just here to test out LTD :)
+class Expect(Proposition):
+    def __init__(self, *args):
+        if len(args) != 2:
+            raise TypeError('expected exactly two args')
+
+        self.var = args[0]
+        self.value = args[1]
+
+    def eval(self, trace_iter: DextStepIter):
+        for expr, watch in trace_iter.dereference().watches.items():
+            if self.var == expr:
+                print("Expect({} == {}) and got {} == {}".format(self.var, self.value, expr, watch.value))
+                return self.value == watch.value
+        return False
+
+    def __str__(self):
+        return "Expect({} = {})".format(self.var, self.value)
 
     def __repr__(self):
-        return "Watch {} is {}".format(self.expression, self.value)
+        return self.__str__()

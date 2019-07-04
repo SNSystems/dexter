@@ -141,6 +141,16 @@ class Heuristic(object):
             self.penalty_missing_step, self.penalty_misordered_steps
         ])
 
+        # Verify program with LTD
+        models = steps.commands.get('DexVerify', None)
+        if models is not None:
+            for model in models:
+                command = get_command_object(model)
+                if command.eval(steps):
+                    print("model holds")
+                else:
+                    print("model does not hold")
+
         # Get DexExpectWatchValue results.
         try:
             for watch in steps.commands["DexExpectWatchValue"]:

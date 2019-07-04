@@ -42,16 +42,15 @@ Operator precedence:
 3. Binary boolean
 ---
 
+[This](http://www.lsv.fr/~gastin/ltl2ba/index.php) website is a fantastic
+resource -- view your LTL as a Büchi automaton.
+
 ## LTD (Linear Temporal Dexter commands)
 We expose the LTL operators as functions. This makes the formulae easy to parse
 because the functions will map directly to python like the existing DexCommands.
 
-Associativity is still important for reasons outliend later. Temporal operators
-are right associative and boolean connectives are left associative. e.g.
-```
-p U true U q == p U (true U q) == p U ( F q )
-```
-This reads "q must hold at some point, and p must hold at some point prior".
+Temporal operators are right associative and boolean connectives are left
+associative.
 
 ### LTD functors
 ```
@@ -77,19 +76,63 @@ Proposition
       list: Proposition
 
   // Binary temporal operators
-  BinaryTemporal(Proposition)
-    Until(BinaryTemporal)
-      list: Proposition
+  Until(BinaryTemporal)
+    lhs: Proposition
+    rhs: Proposition
 ```
-The binary operators all take a list argument. This is syntactic sugar for a
-chained sequence of operators. Operator associativity is important because is
-applies when resolving a chain like this.
-```
-Until(x, y, z) == Until(x, Until(y, z))
-```
-Which Reads "Z must hold at some point, until then y must hold, and until then x
-must hold."
+The binary boolean operators all take a list argument. This is syntactic sugar
+for a chained sequence of operators. Temporal binary operators cannot accept
+a list because it doesn't make sense for our use case (remember that binary
+temporal operators are right associative):
 
+Imagine that we want to verify your program produces one of these trace:
+```
+1. p -- program has property p
+2. q -- etc
+3. r
+
+1. p q
+2. r
+
+1. p q r
+```
+We want to verify that "p holds, then q holds, then after q holds, r holds" so
+you write `Until(p, q, r)` which is the same as `p U (q U r)` in infix notation.
+
+```
+1. p | true U (q U r) -- q U r must hold when q does not
+2. q | false U (q U r) -- q U r must hold from here on
+     | false U (true U r) -- r must hold when q does not
+3. r | false U (false U r) -- r must hold from here on
+	 | false U (false U true) -- woohoo
+```
+So, what's the problem? Well, imagine that after running your program it
+produces this trace:
+```
+1. p
+2. z
+3. r
+```
+Then, working through the verification:
+```
+1. p | true U (q U r) -- q U r must hold when q does not
+2. z | false U (q U r) -- q U r must hold from here on
+     | false U (false U r) -- r must hold from here on
+3. r | false U (false U true) -- woohoo - wait a minute
+```
+`Until(p, q, r)` is untuitive: it is stating that you may, but not are not
+obliged, to see `q` between `p` and `r`.
+
+The correct model to use here is:
+```
+p /\ (p U (q /\ (q U r))) == And(p, Until(p, And(q, Until(q, r))))
+```
+
+[notes] come up with an abstraction for this pattern.
+
+Order(p, q) == And(p, Until(p, q))
+
+[todo] everything from here onwards needs to be reworked
 ### Examples
 Dexter/FoldBranchToCommonDest/test.cpp
 ```
