@@ -174,7 +174,7 @@ class Heuristic(object):
             pass
 
         if 'DexUnreachable' in steps.commands:
-            cmds = steps.commands['DexUnreachable'].command_list
+            cmds = steps.commands['DexUnreachable']
             unreach_count = 0
 
             # Find steps with unreachable in them
@@ -201,7 +201,7 @@ class Heuristic(object):
             self.penalties['unreachable lines'] = total
 
         if 'DexExpectStepOrder' in steps.commands:
-            cmds = steps.commands['DexExpectStepOrder'].command_list
+            cmds = steps.commands['DexExpectStepOrder']
             cmds = [(c, get_command_object(c)) for c in cmds]
 
             # Form a list of which line/cmd we _should_ have seen
