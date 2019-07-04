@@ -9,7 +9,7 @@ class DexExpectStepOrder(CommandBase):
         self.sequence = [int(x) for x in args]
         super(DexExpectStepOrder, self).__init__()
 
-    def __call__(self, debugger):
+    def eval(self, debugger):
         step_info = debugger.get_step_info()
         loc = step_info.current_location
         return {'DexExpectStepOrder': ValueIR(expression=str(loc.lineno),

@@ -154,7 +154,7 @@ class DexExpectWatchValue(CommandBase):
         except KeyError:
             pass
 
-    def __call__(self, step_collection):
+    def eval(self, step_collection):
         for step in step_collection.steps:
             loc = step.current_location
 

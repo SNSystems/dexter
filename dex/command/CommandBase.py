@@ -33,5 +33,5 @@ class CommandBase(object, metaclass=abc.ABCMeta):
         self.lineno = None
 
     @abc.abstractmethod
-    def __call__(self):
+    def eval(self):
         pass

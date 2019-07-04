@@ -119,7 +119,8 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
             for watch in towatch:
                 if (watch.loc.path == loc.path
                         and watch.loc.lineno == loc.lineno):
-                    step_info.watches.update(get_command_object(watch)(self))
+                    result = get_command_object(watch).eval(self)
+                    step_info.watches.update(result)
                     break
         except KeyError:
             pass

@@ -138,7 +138,7 @@ class Heuristic(object):
         try:
             for watch in steps.commands["DexExpectWatchValue"]:
                 command = get_command_object(watch)
-                command(steps)
+                command.eval(steps)
                 maximum_possible_penalty = min(3, len(
                     command.values)) * worst_penalty
                 name, p = self._calculate_expect_watch_penalties(
@@ -159,7 +159,7 @@ class Heuristic(object):
         try:
             for step_kind in steps.commands['DexExpectStepKind']:
                 command = get_command_object(step_kind)
-                command()
+                command.eval()
                 # Cap the penalty at 2 * expected count or else 1
                 maximum_possible_penalty = max(command.count * 2, 1)
                 penalty = abs(command.count - step_kind_counts[command.name])

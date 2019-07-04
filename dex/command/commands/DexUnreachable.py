@@ -6,7 +6,7 @@ class DexUnreachable(CommandBase):
     super(DexUnreachable, self).__init__()
     pass
 
-  def __call__(self, debugger):
+  def eval(self, debugger):
     # If we're ever called, at all, then we're evaluating a line that has
     # been marked as unreachable. Which means a failure.
     vir = ValueIR(expression="Unreachable",
