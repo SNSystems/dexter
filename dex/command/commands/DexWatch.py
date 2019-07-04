@@ -39,5 +39,5 @@ class DexWatch(CommandBase):
         self._args = args
         super(DexWatch, self).__init__()
 
-    def __call__(self, debugger):
+    def eval(self, debugger):
         return {arg: debugger.evaluate_expression(arg) for arg in self._args}
