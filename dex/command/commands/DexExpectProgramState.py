@@ -34,7 +34,7 @@ def frame_from_dict(source: dict) -> StackFrame:
 def state_from_dict(source: dict) -> ProgramState:
     if 'frames' in source:
         assert isinstance(source['frames'], list)
-        source['frames'] = map(frame_from_dict, source['frames'])
+        source['frames'] = list(map(frame_from_dict, source['frames']))
     return ProgramState(**source)
 
 class DexExpectProgramState(CommandBase):

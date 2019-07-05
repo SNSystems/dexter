@@ -26,9 +26,11 @@ import abc
 import imp
 import os
 import sys
+from itertools import chain
 
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
+from dex.dextIR import StackFrame, SourceLocation, ProgramState
 from dex.utils.Exceptions import LoadDebuggerException
 from dex.utils.ReturnCode import ReturnCode
 
@@ -141,6 +143,7 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
         stackframes = thread.StackFrames
 
         frames = []
+        state_frames = []
 
         for sf in stackframes:
             frame = FrameIR(
@@ -154,16 +157,27 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
 
             frames.append(frame)
 
+            state_frame = StackFrame(function=frame.function,
+                                     is_inlined=frame.is_inlined,
+                                     local_vars={})
+            for expr in chain(sf.Arguments, sf.Locals):
+                state_frame.local_vars[expr.Name] = expr.Value
+            state_frames.append(state_frame)
+
         loc = LocIR(**self._location)
         if frames:
             frames[0].loc = loc
+            state_frames[0].location = SourceLocation(**self._location)
 
         reason = StopReason.BREAKPOINT
         if loc.path is None:  # pylint: disable=no-member
             reason = StopReason.STEP
 
+        program_state = ProgramState(frames=state_frames)
+
         return StepIR(
-            step_index=self.step_index, frames=frames, stop_reason=reason)
+            step_index=self.step_index, frames=frames, stop_reason=reason,
+            program_state=program_state)
 
     @property
     def is_running(self):

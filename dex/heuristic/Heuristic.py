@@ -156,14 +156,28 @@ class Heuristic(object):
             pass
 
         try:
-            for expect_state in steps.commands["DexExpectProgramState"]:
-                command = get_command_object(expect_state)
-                success = command(steps)
-                penalty = 0 if success else self.penalty_incorrect_program_state
+            penalties = defaultdict(list)
+            maximum_possible_penalty_all = 0
+            for command in steps.commands["DexExpectProgramState"]:
+                expect_state = get_command_object(command)
+                success = expect_state(steps)
+                p = 0 if success else self.penalty_incorrect_program_state
+
+                meta = 'expected {}: {}'.format(
+                    '{} times'.format(expect_state.times)
+                        if expect_state.times >= 0 else 'at least once',
+                    expect_state.program_state_text)
+
+                if success:
+                    meta = '<g>{}</>'.format(meta)
+
                 maximum_possible_penalty = self.penalty_incorrect_program_state
-                name = command.program_state_text
-                self.penalties[name] = PenaltyCommand(penalty,
-                                                      maximum_possible_penalty)
+                maximum_possible_penalty_all += maximum_possible_penalty
+                name = expect_state.program_state_text
+                penalties[meta] = [PenaltyInstance('{} times'.format(
+                    len(expect_state.encounters)), p)]
+            self.penalties['expected program states'] = PenaltyCommand(
+                penalties, maximum_possible_penalty_all)
         except KeyError:
             pass
 
@@ -181,11 +195,11 @@ class Heuristic(object):
                 command.eval()
                 # Cap the penalty at 2 * expected count or else 1
                 maximum_possible_penalty = max(command.count * 2, 1)
-                penalty = abs(command.count - step_kind_counts[command.name])
-                actual_penalty = min(penalty, maximum_possible_penalty)
+                p = abs(command.count - step_kind_counts[command.name])
+                actual_penalty = min(p, maximum_possible_penalty)
                 key = (command.name
                        if actual_penalty else '<g>{}</>'.format(command.name))
-                penalties[key] = [PenaltyInstance(penalty, actual_penalty)]
+                penalties[key] = [PenaltyInstance(p, actual_penalty)]
                 maximum_possible_penalty_all += maximum_possible_penalty
             self.penalties['step kind differences'] = PenaltyCommand(
                 penalties, maximum_possible_penalty_all)

@@ -89,16 +89,23 @@ class StackFrame:
         self.location = location
         self.local_vars = local_vars
 
+    def __str__(self):
+        return '{}{}: {} | {}'.format(
+            self.function,
+            ' (inlined)' if self.is_inlined else '',
+            self.location,
+            self.local_vars)
+
     def match(self, other) -> bool:
-        if self.location and not self.location.match(other.source_loc):
+        if self.location and not self.location.match(other.location):
             return False
 
         if self.local_vars:
-            for key, val in enumerate(self.local_vars):
+            for name in iter(self.local_vars):
                 try:
-                    if other.local_variables[key] != val:
+                    if other.local_vars[name] != self.local_vars[name]:
                         return False
-                except IndexError:
+                except KeyError:
                     return False
 
         return True
@@ -107,13 +114,13 @@ class ProgramState:
     def __init__(self,
                  frames: List[StackFrame] = None,
                  global_vars: OrderedDict = None):
-        if frames is None:
-            frames = []
         self.frames = frames
-
-        if global_vars is None:
-            global_vars = {}
         self.global_vars = global_vars
+
+    def __str__(self):
+        return '\n'.join(map(
+            lambda enum: 'Frame {}: {}'.format(enum[0], enum[1]),
+            enumerate(self.frames)))
 
     @property
     def num_frames(self):
@@ -135,7 +142,7 @@ class ProgramState:
     @property
     def current_location(self):
         try:
-            return self.current_frame.source_loc
+            return self.current_frame.location
         except AttributeError:
             return SourceLocation(path=None, lineno=None, column=None)
 
@@ -145,13 +152,13 @@ class ProgramState:
                 try:
                     if not frame.match(other.frames[idx]):
                         return False
-                except IndexError:
+                except (IndexError, KeyError):
                     return False
 
         if self.global_vars:
-            for key, val in enumerate(self.global_vars):
+            for name in iter(self.global_vars):
                 try:
-                    if other.global_variables[key] != val:
+                    if other.global_variables[name] != self.global_vars[name]:
                         return False
                 except IndexError:
                     return False
