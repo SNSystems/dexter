@@ -30,6 +30,7 @@ import sys
 
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
+from dex.dextIR import StackFrame, SourceLocation, ProgramState
 from dex.utils.Exceptions import DebuggerException, LoadDebuggerException
 from dex.utils.ReturnCode import ReturnCode
 
@@ -141,6 +142,7 @@ class LLDB(DebuggerBase):
 
     def get_step_info(self):
         frames = []
+        state_frames = []
 
         for i in range(0, self._thread.GetNumFrames()):
             sb_frame = self._thread.GetFrameAtIndex(i)
@@ -155,10 +157,12 @@ class LLDB(DebuggerBase):
 
             function = self._sanitize_function_name(sb_frame.GetFunctionName())
 
-            loc = LocIR(
-                path=path,
-                lineno=sb_line.GetLine(),
-                column=sb_line.GetColumn())
+            loc_dict = {
+                'path': path,
+                'lineno': sb_line.GetLine(),
+                'column': sb_line.GetColumn()
+            }
+            loc = LocIR(**loc_dict)
 
             frame = FrameIR(
                 function=function, is_inlined=sb_frame.IsInlined(), loc=loc)
@@ -170,13 +174,23 @@ class LLDB(DebuggerBase):
 
             frames.append(frame)
 
+            state_frame = StackFrame(function=frame.function,
+                                     is_inlined=frame.is_inlined,
+                                     location=SourceLocation(**loc_dict),
+                                     local_vars={})
+            for expr in sb_frame.GetVariables(True, True, True, True):
+                state_frame.local_vars[expr.name] = expr.value
+            state_frames.append(state_frame)
+
         if len(frames) == 1 and frames[0].function is None:
             frames = []
+            state_frames = []
 
         reason = self._translate_stop_reason(self._thread.GetStopReason())
 
         return StepIR(
-            step_index=self.step_index, frames=frames, stop_reason=reason)
+            step_index=self.step_index, frames=frames, stop_reason=reason,
+            program_state=ProgramState(state_frames))
 
     @property
     def is_running(self):

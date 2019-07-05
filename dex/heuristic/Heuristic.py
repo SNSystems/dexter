@@ -120,6 +120,13 @@ def add_heuristic_tool_arguments(parser):
         default=4,  # XXX XXX XXX selected by random
         help='set the penalty for the program skipping over a step.',
         metavar='<int>')
+    parser.add_argument(
+        '--penalty-incorrect-program-state',
+        type=int,
+        default=4,  # XXX XXX XXX selected by random
+        help='set the penalty for the program never entering an expected state'
+        ' or entering an unexpected state.',
+        metavar='<int>')
 
 
 class Heuristic(object):
@@ -148,6 +155,32 @@ class Heuristic(object):
         except KeyError:
             pass
 
+        try:
+            penalties = defaultdict(list)
+            maximum_possible_penalty_all = 0
+            for command in steps.commands["DexExpectProgramState"]:
+                expect_state = get_command_object(command)
+                success = expect_state.eval(steps)
+                p = 0 if success else self.penalty_incorrect_program_state
+
+                meta = 'expected {}: {}'.format(
+                    '{} times'.format(expect_state.times)
+                        if expect_state.times >= 0 else 'at least once',
+                    expect_state.program_state_text)
+
+                if success:
+                    meta = '<g>{}</>'.format(meta)
+
+                maximum_possible_penalty = self.penalty_incorrect_program_state
+                maximum_possible_penalty_all += maximum_possible_penalty
+                name = expect_state.program_state_text
+                penalties[meta] = [PenaltyInstance('{} times'.format(
+                    len(expect_state.encounters)), p)]
+            self.penalties['expected program states'] = PenaltyCommand(
+                penalties, maximum_possible_penalty_all)
+        except KeyError:
+            pass
+
         # Get the total number of each step kind.
         step_kind_counts = defaultdict(int)
         for step in getattr(steps, 'steps'):
@@ -162,11 +195,11 @@ class Heuristic(object):
                 command.eval()
                 # Cap the penalty at 2 * expected count or else 1
                 maximum_possible_penalty = max(command.count * 2, 1)
-                penalty = abs(command.count - step_kind_counts[command.name])
-                actual_penalty = min(penalty, maximum_possible_penalty)
+                p = abs(command.count - step_kind_counts[command.name])
+                actual_penalty = min(p, maximum_possible_penalty)
                 key = (command.name
                        if actual_penalty else '<g>{}</>'.format(command.name))
-                penalties[key] = [PenaltyInstance(penalty, actual_penalty)]
+                penalties[key] = [PenaltyInstance(p, actual_penalty)]
                 maximum_possible_penalty_all += maximum_possible_penalty
             self.penalties['step kind differences'] = PenaltyCommand(
                 penalties, maximum_possible_penalty_all)
@@ -480,3 +513,7 @@ class Heuristic(object):
     @property
     def penalty_misordered_steps(self):
         return self.context.options.penalty_misordered_steps
+
+    @property
+    def penalty_incorrect_program_state(self):
+        return self.context.options.penalty_incorrect_program_state
