@@ -20,7 +20,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Command for specifying an expected set of values for a particular watch."""
+"""Command for specifying a partial or complete state for the program to enter
+during execution.
+"""
 
 from dex.command.CommandBase import CommandBase
 from dex.dextIR import ProgramState, SourceLocation, StackFrame, DextIR
