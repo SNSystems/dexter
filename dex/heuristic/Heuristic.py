@@ -160,7 +160,7 @@ class Heuristic(object):
             maximum_possible_penalty_all = 0
             for command in steps.commands["DexExpectProgramState"]:
                 expect_state = get_command_object(command)
-                success = expect_state(steps)
+                success = expect_state.eval(steps)
                 p = 0 if success else self.penalty_incorrect_program_state
 
                 meta = 'expected {}: {}'.format(

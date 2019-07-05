@@ -40,29 +40,10 @@ class SourceLocation:
     def __str__(self):
         return '{}({}:{})'.format(self.path, self.lineno, self.column)
 
-    def __eq__(self, rhs):
-        return (self.path == rhs.path and self.lineno == rhs.lineno
-                and self.column == rhs.column)
-
-    def __lt__(self, rhs):
-        if self.path != rhs.path:
-            return False
-
-        if self.lineno == rhs.lineno:
-            return self.column < rhs.column
-
-        return self.lineno < rhs.lineno
-
-    def __gt__(self, rhs):
-        if self.path != rhs.path:
-            return False
-
-        if self.lineno == rhs.lineno:
-            return self.column > rhs.column
-
-        return self.lineno > rhs.lineno
-
     def match(self, other) -> bool:
+        if not other or not isinstance(other, SourceLocation):
+            return False
+
         if self.path and (self.path != other.path):
             return False
 
@@ -97,6 +78,9 @@ class StackFrame:
             self.local_vars)
 
     def match(self, other) -> bool:
+        if not other or not isinstance(other, StackFrame):
+            return False
+
         if self.location and not self.location.match(other.location):
             return False
 
@@ -122,31 +106,10 @@ class ProgramState:
             lambda enum: 'Frame {}: {}'.format(enum[0], enum[1]),
             enumerate(self.frames)))
 
-    @property
-    def num_frames(self):
-        return len(self.frames)
-
-    @property
-    def current_frame(self):
-        if not self.frames:
-            return None
-        return self.frames[0]
-
-    @property
-    def current_function(self):
-        try:
-            return self.current_frame.function
-        except AttributeError:
-            return None
-
-    @property
-    def current_location(self):
-        try:
-            return self.current_frame.location
-        except AttributeError:
-            return SourceLocation(path=None, lineno=None, column=None)
-
     def match(self, other) -> bool:
+        if not other or not isinstance(other, ProgramState):
+            return False
+
         if self.frames:
             for idx, frame in enumerate(self.frames):
                 try:

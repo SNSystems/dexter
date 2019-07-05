@@ -58,7 +58,7 @@ class DexExpectProgramState(CommandBase):
 
         super(DexExpectProgramState, self).__init__()
 
-    def __call__(self, step_collection: DextIR) -> bool:
+    def eval(self, step_collection: DextIR) -> bool:
         for step in step_collection.steps:
             if self.expected_program_state.match(step.program_state):
                 self.encounters.append(step.step_index)
