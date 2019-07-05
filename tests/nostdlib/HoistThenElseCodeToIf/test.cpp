@@ -28,7 +28,7 @@ int main()
 // something.
 
 // DexExpectWatchValue("x", 3, from_line=8, to_line=9)
-// DexExpectProgramState({'frames': [{'location': {'lineno': 9}, 'local_vars': {'y': '2'}}]})
+// DexExpectWatchValue("y", 2, on_line=9)
 
 // Test run:
 // python dexter.py test --builder clang --debugger lldb --cflags="-O0 -g" -v
