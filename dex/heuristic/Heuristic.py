@@ -214,7 +214,6 @@ class Heuristic(object):
             ureachs = [
                 s for s in steps.steps if 'DexUnreachable' in s.watches.keys()
             ]
-            assert len(ureachs) <= len(cmds)
 
             # There's no need to match up cmds with the actual watches
             upen = self.penalty_unreachable
