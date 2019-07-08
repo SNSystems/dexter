@@ -147,12 +147,20 @@ class Tool(TestToolBase):
         steps.builder = builderIR
         return steps
 
+    def _get_results_basename(self, test_name):
+        def splitall(x):
+            while len(x) > 0:
+              x, y = os.path.split(x)
+              yield y
+        all_components = reversed([x for x in splitall(test_name)])
+        return '_'.join(all_components)
+
     def _get_results_path(self, test_name):
         """Returns the path to the test results directory for the test denoted
            by test_name.
         """
-        return os.path.join(self.context.options.results_directory, '_'.join(
-            os.path.split(test_name)))
+        return os.path.join(self.context.options.results_directory,
+                            self._get_results_basename(test_name))
 
     def _get_results_text_path(self, test_name):
         """Returns path results .txt file for test denoted by test_name.
@@ -174,7 +182,8 @@ class Tool(TestToolBase):
         with open(output_text_path, 'w') as fp:
             self.context.o.auto(str(steps), stream=Stream(fp))
 
-        output_dextIR_path = '{}.dextIR'.format(test_name)
+        dextir_basename = self._get_results_basename(test_name)
+        output_dextIR_path = '{}.dextIR'.format(dextir_basename)
         with open(output_dextIR_path, 'wb') as fp:
             pickle.dump(steps, fp)
 
