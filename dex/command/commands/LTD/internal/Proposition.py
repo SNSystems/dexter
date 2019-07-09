@@ -45,3 +45,11 @@ class Boolean(Proposition):
 
     def __str__(self):
         return str(self.value)
+
+
+def unwrap_LTD_arg(arg) -> Proposition:
+    if isinstance(arg, bool):
+        arg = Boolean(arg)
+    elif not isinstance(arg, Proposition):
+        raise TypeError('Arg is not a proposition: {}'.format(self.operand))
+    return arg

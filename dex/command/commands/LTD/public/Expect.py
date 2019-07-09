@@ -27,7 +27,7 @@ from dex.command.commands.LTD.internal.OperatorTypes import (
     BinaryOperator, UnaryOperator
 )
 
-## @@ this is just here to test out LTD :)
+## For the demo we only allow the user to verify expressions.
 class Expect(Proposition):
     def __init__(self, *args):
         if len(args) != 2:
