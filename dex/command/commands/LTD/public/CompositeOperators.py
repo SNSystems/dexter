@@ -32,16 +32,16 @@ from dex.command.commands.LTD.public.BasicOperators import (
 class Eventually(UnaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
-        self.operand = Until(True, self.operand)
+        self.proposition = Until(True, self.operand)
 
     def eval(self, trace_iter: DextStepIter):
         print("v--- {} ---v".format(self))
-        result = self.operand.eval(trace_iter)
+        result = self.proposition.eval(trace_iter)
         print("^--- Eventually {} ---^".format(result))
         return result
 
     def __str__(self):
-        return "{} is {}".format(self.__class__.__name__, self.operand.__str__())
+        return "{} is {}".format(self.__class__.__name__, self.proposition.__str__())
 
     def __repr__(self):
         return self.__str__()
@@ -51,16 +51,16 @@ class Eventually(UnaryOperator):
 class Release(BinaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
-        self.operand = Weak(self.rhs, And(self.rhs, self.lhs))
+        self.proposition = Weak(self.rhs, And(self.rhs, self.lhs))
 
     def eval(self, trace_iter: DextStepIter):
         print("v--- {} ---v".format(self))
-        result = self.operand.eval(trace_iter)
+        result = self.proposition.eval(trace_iter)
         print("^--- Release {} ---^".format(result))
         return result
 
     def __str__(self):
-        return "{} is {}".format(self.__class__.__name__, self.operand.__str__())
+        return "{} is {}".format(self.__class__.__name__, self.proposition.__str__())
 
     def __repr__(self):
         return self.__str__()
@@ -69,16 +69,16 @@ class Release(BinaryOperator):
 class Henceforth(UnaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
-        self.operand = Release(False, self.operand)
+        self.proposition = Release(False, self.operand)
 
     def eval(self, trace_iter: DextStepIter):
         print("v--- {} ---v".format(self))
-        result = self.operand.eval(trace_iter)
+        result = self.proposition.eval(trace_iter)
         print("^--- {} ---^".format(result))
         return result
 
     def __str__(self):
-        return "{} is {}".format(self.__class__.__name__, self.operand.__str__())
+        return "{} is {}".format(self.__class__.__name__, self.proposition.__str__())
 
     def __repr__(self):
         return self.__str__()
