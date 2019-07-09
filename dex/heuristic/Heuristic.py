@@ -143,13 +143,18 @@ class Heuristic(object):
 
         # Verify program with LTD
         models = steps.commands.get('DexVerify', None)
+        dex_verify_max_penalty = len(models)
+        pen_dict = defaultdict(list)
         if models is not None:
             for model in models:
                 command = get_command_object(model)
-                if command.eval(steps):
-                    print("model holds")
-                else:
-                    print("model does not hold")
+                result = command.eval(steps)
+                p = 0.0 if result else 1.0
+                pen_dict[str(command)] = [PenaltyInstance(result, p)]
+
+            self.penalties['DexVerify'] = PenaltyCommand(
+                pen_dict, dex_verify_max_penalty)
+
 
         # Get DexExpectWatchValue results.
         try:
