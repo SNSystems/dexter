@@ -26,25 +26,6 @@ If you want to check that eventually a local variable `a` is `5` you'd write:
 DexVerify(Eventually(Expect('a', '5')))
 ```
 
-You can try this yourself (3, 4):
-```
-somewhere/dexter/examples/intro_0
-$ cat test.cpp
-int main()
-{
-    for (int a = 0; a < 10; ++i)
-        ;
-    return 0;
-}
-
-somewhere/dexter/examples/intro_0
-$ cd ../../
-
-somewhere/dexter
-$ python dexter.py test --builder clang --debugger lldb --cflags "-O0 -g" -- examples/intro_0
-intro_0: 1.000
-```
-
 `Eventually` is a temporal operator. **Temporal** operators work over **time**.
 This one is easy to work with. simply, `Eventually(p)` means that p must become
 true at some point during program execution.
@@ -77,12 +58,13 @@ If you want to say that `b == 1` at some point in the future *after*
 DexVerify(Eventually(And(Expect('a', 5), Eventually(Expect('b', 1)))))
 ```
 
+For more examples have a look in dexter/examples/LTD. Please be aware that the
+prefix "xfail_" indicates that running that test should result in a failure.
 
 ## 2. Motivation
 
-We needed a better way to represent the changes in program state.
-[TODO] Write more about why we chose LTL and talk about regex
-e.g. explain what you can do here that you can't with other dexcommands
+[TODO] Write this section
+
 
 ## 3. Thoery
 The DexVerify command formulae are based on Linear Temporal Logic (LTL).
@@ -95,7 +77,7 @@ p ::= a  |  p /\ p  |  !p  |  Xp |  p U p
 Where:
 * `a` is an atomic proposition
 * `p` represents a valid LTL formula
-* `X` denotes the ”next” operator (5)
+* `X` denotes the ”next” operator (3)
 * `U` denotes the ”until” operator
 * `!` denotes negation
 * `/\` denotes logical "and"
@@ -142,7 +124,7 @@ Not strictly "atomic propositions" in terms of LTL theory.
 ```
 Expect(p, q)
 ```
-Expression `p` must evaluate to value 'q'.
+Debugger C++ expression `p` must evaluate to value `q`.
 
 ### Boolean functions
 
@@ -158,102 +140,47 @@ Expression `p` must evaluate to value 'q'.
 ```
 Until(p, q)
 ```
-`q` must eventually hold and until then `p` must hold.
-LTL definition: `U`, Until
+`q` must eventually hold and until then `p` must hold.<br/>
+LTL definition: `U` &#8801; Until &#8801; for `0 <= i` where `q` holds `p` holds
+for `0 <= k < i`.
 
 #### Weak
 ```
 Weak(p, q)
 ```
-`p` must hold so long as `q` does not.
-LTL definition: `W`, Weak, Weak until
+`p` must hold so long as `q` does not.<br/>
+LTL definition: `W` &#8801; Weak &#8801; Weak until &#8801; for `0 <= i` where `q` holds `p` holds for `0 <= k < i`, or, if `q` never holds, `0 <= k`.
 
 #### Eventually
 ```
 Eventually(p)
 ```
-`p` must eventually hold.
-LTL definition: `True U p`, `F`, Finally, Eventually, Future.
+`p` must eventually hold.<br/>
+LTL definition: `F` &#8801; Finally &#8801; Eventually &#8801; Future &#8801;
+`True U p`
 
 #### Release
 ```
 Release(p, q)
 ```
 `p` must eventually hold and up to and including that time `q` must hold.
-NOTE: Operand order and keyword *including*.
-LTL definition:
+NOTE: Operand order and keyword *including*.<br/>
+LTL definition: `R` &#8801; Release &#8801; `q U (q /\ p)`
 
 #### Henceforth
 ```
 Henceforth(p)
 ```
-`p` must hold from now onwards.
-LTL definition:
+`p` must hold from now onwards.<br/>
+LTL definition: `G` &#8801; Globally &#8801; `False R p`
+
 ---
-
-
-### LTD functors
-
-The binary boolean operators all take a list argument. This is syntactic sugar
-for a chained sequence of operators. Temporal binary operators cannot accept
-a list because it doesn't make sense for our use case (remember that binary
-temporal operators are right associative):
-
-Imagine that we want to verify your program produces one of these trace:
-```
-1. p -- program has property p
-2. q -- etc
-3. r
-
-1. p q
-2. r
-
-1. p q r
-```
-We want to verify that "p holds, then q holds, then after q holds, r holds" so
-you write `Until(p, q, r)` which is the same as `p U (q U r)` in infix notation.
-
-```
-1. p | true U (q U r) -- q U r must hold when q does not
-2. q | false U (q U r) -- q U r must hold from here on
-     | false U (true U r) -- r must hold when q does not
-3. r | false U (false U r) -- r must hold from here on
-	 | false U (false U true) -- woohoo
-```
-So, what's the problem? Well, imagine that after running your program it
-produces this trace:
-```
-1. p
-2. z
-3. r
-```
-Then, working through the verification:
-```
-1. p | true U (q U r) -- q U r must hold when q does not
-2. z | false U (q U r) -- q U r must hold from here on
-     | false U (false U r) -- r must hold from here on
-3. r | false U (false U true) -- woohoo - wait a minute
-```
-`Until(p, q, r)` is untuitive: it is stating that you may, but not are not
-obliged, to see `q` between `p` and `r`.
-
-The correct model to use here is:
-```
-p /\ (p U (q /\ (q U r))) == And(p, Until(p, And(q, Until(q, r))))
-```
-
-[TODO] come up with an abstraction for this pattern.
-
-Order(p, q) == And(p, Until(p, q))
-
-[TODO] everything from here onwards needs to be reworked
 ### Examples
-[TODO] Redo examples
+[TODO] Add examples after coming up with some syntactic sugar for the common
+patterns.
 
 
 ### [TODO] / notes
 1. The Expect syntax will not look anything like this.
 2. Makes sense for the first step to be stepping into main -- discuss with team.
-3. Create this examples directory
-4. maybe just reference the example and don't show it all here
-5. note - may remove Next operator from dexter
+3. Next is not currently and may never be implemented -- no use case yet.
