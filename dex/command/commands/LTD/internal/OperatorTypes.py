@@ -33,7 +33,6 @@ class UnaryOperator(Proposition):
     def __init__(self, *args):
         if len(args) != 1:
             raise TypeError('Expected exactly one arg')
-
         self.operand = unwrap_LTD_arg(args[0])
 
     def eval(self, trace_iter: DextStepIter) -> bool:
@@ -47,10 +46,8 @@ class BinaryOperator(Proposition):
     def __init__(self, *args):
         if len(args) != 2:
             raise TypeError('Expected exactly two args')
-
         self.lhs = unwrap_LTD_arg(args[0])
         self.rhs = unwrap_LTD_arg(args[1])
-
 
     def eval(self, step: DextStepIter) -> bool:
         pass

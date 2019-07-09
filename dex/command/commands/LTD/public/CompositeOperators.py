@@ -29,6 +29,7 @@ from dex.command.commands.LTD.public.BasicOperators import (
     And, Or, Not, Until, Weak
 )
 
+
 class Eventually(UnaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
@@ -41,11 +42,11 @@ class Eventually(UnaryOperator):
         return result
 
     def __str__(self):
-        return "{} is {}".format(self.__class__.__name__, self.proposition.__str__())
+        return "{} is {}".format(
+            self.__class__.__name__, self.proposition.__str__())
 
     def __repr__(self):
         return self.__str__()
-
 
 
 class Release(BinaryOperator):
@@ -60,7 +61,8 @@ class Release(BinaryOperator):
         return result
 
     def __str__(self):
-        return "{} is {}".format(self.__class__.__name__, self.proposition.__str__())
+        return "{} is {}".format(
+            self.__class__.__name__, self.proposition.__str__())
 
     def __repr__(self):
         return self.__str__()
@@ -78,7 +80,8 @@ class Henceforth(UnaryOperator):
         return result
 
     def __str__(self):
-        return "{} is {}".format(self.__class__.__name__, self.proposition.__str__())
+        return "{} is {}".format(
+            self.__class__.__name__, self.proposition.__str__())
 
     def __repr__(self):
         return self.__str__()

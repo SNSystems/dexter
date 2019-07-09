@@ -39,12 +39,12 @@ class Expect(Proposition):
     def eval(self, trace_iter: DextStepIter):
         for expr, watch in trace_iter.dereference().watches.items():
             if self.var == expr:
-                print("Expect({} == {}) and got {} == {}".format(self.var, self.value, expr, watch.value))
+                print("{} and got {} == {}".format(self, expr, watch.value))
                 return self.value == watch.value
         return False
 
     def __str__(self):
-        return "Expect({} = {})".format(self.var, self.value)
+        return "Expect({} == {})".format(self.var, self.value)
 
     def __repr__(self):
         return self.__str__()

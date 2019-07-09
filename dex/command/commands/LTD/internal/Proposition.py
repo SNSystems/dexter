@@ -22,7 +22,9 @@
 # THE SOFTWARE.
 
 import abc
+
 from dex.dextIR import DextStepIter
+
 
 class Proposition:
     @abc.abstractmethod
@@ -32,7 +34,6 @@ class Proposition:
 
 class Boolean(Proposition):
     def __init__(self, *args):
-        super().__init__()
         if len(args) != 1:
             raise TypeError('Expected exactly one arg')
         if not isinstance(args[0], bool):
