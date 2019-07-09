@@ -143,9 +143,9 @@ class Heuristic(object):
 
         # Verify program with LTD
         models = steps.commands.get('DexVerify', None)
-        dex_verify_max_penalty = len(models)
-        pen_dict = defaultdict(list)
         if models is not None:
+            dex_verify_max_penalty = len(models)
+            pen_dict = defaultdict(list)
             for model in models:
                 command = get_command_object(model)
                 result = command.eval(steps)

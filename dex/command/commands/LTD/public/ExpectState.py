@@ -20,30 +20,28 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+"""LTD proposition based on DexExpectProgramState.
+"""
 
 from dex.dextIR import DextStepIter
 from dex.command.commands.LTD.internal.Proposition import Proposition
-from dex.command.commands.LTD.internal.OperatorTypes import (
-    BinaryOperator, UnaryOperator
-)
+from dex.command.commands.DexExpectProgramState import state_from_dict
 
-## For the demo we only allow the user to verify expressions.
-class Expect(Proposition):
+
+class ExpectState(Proposition):
     def __init__(self, *args):
-        if len(args) != 2:
-            raise TypeError('expected exactly two args')
+        if len(args) != 1:
+            raise TypeError('expected exactly one unnamed arg')
 
-        self.var = args[0]
-        self.value = args[1]
+        self.program_state_text = str(args[0])
+        self.expected_program_state = state_from_dict(args[0])
 
-    def eval(self, trace_iter: DextStepIter):
-        for expr, watch in trace_iter.dereference().watches.items():
-            if self.var == expr:
-                return self.value == watch.value
-        return False
+    def eval(self, trace_iter: DextStepIter) -> bool:
+        step = trace_iter.dereference()
+        return self.expected_program_state.match(step.program_state)
 
     def __str__(self):
-        return "Expect({} == {})".format(self.var, self.value)
+        return "ExpectState({})".format(self.program_state_text)
 
     def __repr__(self):
         return self.__str__()

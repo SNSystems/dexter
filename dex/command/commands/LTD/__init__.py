@@ -10,6 +10,7 @@ from dex.command.commands.LTD.public.BasicOperators import (
 
 ## Atomic propositions
 from dex.command.commands.LTD.public.Expect import Expect
+from dex.command.commands.LTD.public.ExpectState import ExpectState
 
 # Composit operators
 ## Temporal operatos
