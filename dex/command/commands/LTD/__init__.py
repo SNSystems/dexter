@@ -1,16 +1,18 @@
-
 # Basic operators
-## Boolean connectives
-from dex.command.commands.LTD.public.BasicOperators import Not
-from dex.command.commands.LTD.public.BasicOperators import And
-from dex.command.commands.LTD.public.BasicOperators import Or
+from dex.command.commands.LTD.public.BasicOperators import (
+    Not, And, Or,
+)
+
 ## Temporal operators
-from dex.command.commands.LTD.public.BasicOperators import Until
-from dex.command.commands.LTD.public.BasicOperators import Weak
+from dex.command.commands.LTD.public.BasicOperators import (
+    Until, Weak
+)
+
 ## Atomic propositions
 from dex.command.commands.LTD.public.Expect import Expect
 
 # Composit operators
 ## Temporal operatos
-from dex.command.commands.LTD.public.CompositeOperators import Eventually
-from dex.command.commands.LTD.public.CompositeOperators import Henceforth
+from dex.command.commands.LTD.public.CompositeOperators import (
+    Eventually, Henceforth, Release,
+)

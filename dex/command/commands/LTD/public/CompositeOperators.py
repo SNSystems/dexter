@@ -36,10 +36,7 @@ class Eventually(UnaryOperator):
         self.proposition = Until(True, self.operand)
 
     def eval(self, trace_iter: DextStepIter):
-        print("v--- {} ---v".format(self))
-        result = self.proposition.eval(trace_iter)
-        print("^--- Eventually {} ---^".format(result))
-        return result
+        return self.proposition.eval(trace_iter)
 
     def __str__(self):
         return "{} is {}".format(
@@ -55,10 +52,7 @@ class Release(BinaryOperator):
         self.proposition = Weak(self.rhs, And(self.rhs, self.lhs))
 
     def eval(self, trace_iter: DextStepIter):
-        print("v--- {} ---v".format(self))
-        result = self.proposition.eval(trace_iter)
-        print("^--- Release {} ---^".format(result))
-        return result
+        return  self.proposition.eval(trace_iter)
 
     def __str__(self):
         return "{} is {}".format(
@@ -74,10 +68,7 @@ class Henceforth(UnaryOperator):
         self.proposition = Release(False, self.operand)
 
     def eval(self, trace_iter: DextStepIter):
-        print("v--- {} ---v".format(self))
-        result = self.proposition.eval(trace_iter)
-        print("^--- {} ---^".format(result))
-        return result
+        return self.proposition.eval(trace_iter)
 
     def __str__(self):
         return "{} is {}".format(

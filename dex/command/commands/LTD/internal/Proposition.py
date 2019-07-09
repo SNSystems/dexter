@@ -47,6 +47,9 @@ class Boolean(Proposition):
     def __str__(self):
         return str(self.value)
 
+    def __repr__(self):
+        return self.__str__()
+
 
 def unwrap_LTD_arg(arg) -> Proposition:
     if isinstance(arg, bool):

@@ -81,7 +81,7 @@ DexVerify(Eventually(And(Expect('a', 5), Eventually(Expect('b', 1)))))
 ## 2. Motivation
 
 We needed a better way to represent the changes in program state.
-@@TODO Write more about why we chose LTL and talk about regex
+[TODO] Write more about why we chose LTL and talk about regex
 e.g. explain what you can do here that you can't with other dexcommands
 
 ## 3. Thoery
@@ -242,16 +242,16 @@ The correct model to use here is:
 p /\ (p U (q /\ (q U r))) == And(p, Until(p, And(q, Until(q, r))))
 ```
 
-[notes] come up with an abstraction for this pattern.
+[TODO] come up with an abstraction for this pattern.
 
 Order(p, q) == And(p, Until(p, q))
 
-[todo] everything from here onwards needs to be reworked
+[TODO] everything from here onwards needs to be reworked
 ### Examples
-[todo] Redo examples
+[TODO] Redo examples
 
 
-### @@ TODO/notes
+### [TODO] / notes
 1. The Expect syntax will not look anything like this.
 2. Makes sense for the first step to be stepping into main -- discuss with team.
 3. Create this examples directory

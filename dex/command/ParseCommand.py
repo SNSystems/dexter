@@ -33,7 +33,7 @@ import os
 from dex.command.CommandBase import CommandBase
 from dex.utils.Exceptions import CommandParseError
 from dex.command.commands.LTD import (
-    And, Or, Not, Until, Expect, Eventually, Henceforth, Weak
+    And, Or, Not, Until, Expect, Eventually, Henceforth, Weak, Release
 )
 
 def _get_valid_commands():
@@ -63,6 +63,8 @@ def _get_valid_commands():
                 if c[1] != CommandBase and issubclass(c[1], CommandBase)
             })
 
+        # [TODO] This will need to be cleaned up a bit -- with this And() is a
+        # valid standalone command.
         commands.update(get_LTD_commands())
         _get_valid_commands.cached = commands
         return commands
@@ -75,6 +77,7 @@ def get_LTD_commands():
         'Weak': Weak,
         'Until': Until,
         'Expect': Expect,
+        'Release': Release,
         'Eventually': Eventually,
         'Henceforth': Henceforth,
     }

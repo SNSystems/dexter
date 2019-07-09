@@ -22,7 +22,6 @@
 # THE SOFTWARE.
 """Root for dextIR serialization types."""
 
-import pprint
 from collections import OrderedDict
 from typing import List
 
@@ -118,9 +117,7 @@ class DextStepIter:
     def dereference(self) -> StepIR:
         """Dereference the iterator.
         """
-        step = self.dextIR.steps[self.current]
-        pprint.pprint("step[{}].watches: {}".format(self.current, step.watches))
-        return step
+        return self.dextIR.steps[self.current]
 
     def at_end(self) -> bool:
         return self.current >= len(self.dextIR.steps)

@@ -39,7 +39,6 @@ class Expect(Proposition):
     def eval(self, trace_iter: DextStepIter):
         for expr, watch in trace_iter.dereference().watches.items():
             if self.var == expr:
-                print("{} and got {} == {}".format(self, expr, watch.value))
                 return self.value == watch.value
         return False
 

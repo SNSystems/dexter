@@ -28,8 +28,6 @@ from dex.command.commands.LTD.internal.Proposition import (
 )
 
 class UnaryOperator(Proposition):
-    ## @@ implement a nice __rep__
-    ## @@ implement a nice __str__ which prints a tree-like pattern.
     def __init__(self, *args):
         if len(args) != 1:
             raise TypeError('Expected exactly one arg')
@@ -40,6 +38,9 @@ class UnaryOperator(Proposition):
 
     def __str__(self):
         return "{}({})".format(self.__class__.__name__, self.operand)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class BinaryOperator(Proposition):
@@ -54,3 +55,6 @@ class BinaryOperator(Proposition):
 
     def __str__(self):
         return "{}({}, {})".format(self.__class__.__name__, self.lhs, self.rhs)
+
+    def __repr__(self):
+        return self.__str__()
