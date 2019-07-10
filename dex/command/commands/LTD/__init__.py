@@ -5,7 +5,7 @@ from dex.command.commands.LTD.public.BasicOperators import (
 
 ## Temporal operators
 from dex.command.commands.LTD.public.BasicOperators import (
-    Until, Weak
+    Until, Weak, Next
 )
 
 ## Atomic propositions
