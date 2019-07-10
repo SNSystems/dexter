@@ -33,8 +33,8 @@ true at some point during program execution.
 `Eventually(p)` is defined as `Until(True, p)` (see the
 [source](dex/command/commands/LTD/public/CompositeOperators.py)).
 It's easy to explain how this works if we take a look at `Until(p, q)`.
-`Until` and `Weak` (see the Quick reference) are used to define all other
-temporal operators. All operators are exposed as functions so the formulae
+`Until`, `Weak` and `Next`(see the Quick reference) are used to define all
+other temporal operators. All operators are exposed as functions so the formulae
 read in Polish, or 'prefix', notation.
 
 `Until(p, q)` means that `q` must hold in the future, and **until** then `p`
@@ -77,7 +77,7 @@ p ::= a  |  p /\ p  |  !p  |  Xp |  p U p
 Where:
 * `a` is an atomic proposition
 * `p` represents a valid LTL formula
-* `X` denotes the ”next” operator (3)
+* `X` denotes the ”next” operator
 * `U` denotes the ”until” operator
 * `!` denotes negation
 * `/\` denotes logical "and"
@@ -151,6 +151,13 @@ Weak(p, q)
 `p` must hold so long as `q` does not.<br/>
 LTL definition: `W` &#8801; Weak &#8801; Weak until &#8801; for `0 <= i` where `q` holds `p` holds for `0 <= k < i`, or, if `q` never holds, `0 <= k`.
 
+#### Next
+```
+Next(p)
+```
+`p` must hold at the next time step.<br/>
+LTL definition: `X` &#8801; Next &#8801; `p` holds at next step.
+
 #### Eventually
 ```
 Eventually(p)
@@ -183,4 +190,3 @@ patterns.
 ### [TODO] / notes
 1. The Expect syntax will not look anything like this.
 2. Makes sense for the first step to be stepping into main -- discuss with team.
-3. Next is not currently and may never be implemented -- no use case yet.
