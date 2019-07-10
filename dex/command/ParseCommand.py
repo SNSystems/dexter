@@ -66,27 +66,9 @@ def _get_valid_commands():
                 if c[1] != CommandBase and issubclass(c[1], CommandBase)
             })
 
-        # [TODO] This will need to be cleaned up a bit -- with this And() is a
-        # valid standalone command.
-        commands.update(get_LTD_commands())
         _get_valid_commands.cached = commands
         return commands
 
-def get_LTD_commands():
-    return {
-        'Or': Or,
-        'And': And,
-        'Not': Not,
-        'Next': Next,
-        'Weak': Weak,
-        'After': After,
-        'Until': Until,
-        'Expect': Expect,
-        'Release': Release,
-        'Eventually': Eventually,
-        'Henceforth': Henceforth,
-        'ExpectState': ExpectState,
-    }
 
 def _get_command_name(command_raw: str) -> str:
     """Return command name by splitting up DExTer command contained in

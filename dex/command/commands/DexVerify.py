@@ -27,6 +27,10 @@ import pprint
 from dex.command.CommandBase import CommandBase
 from dex.command.commands.LTD.internal.Proposition import Boolean
 from dex.dextIR import DextIR, DextStepIter
+from dex.command.commands.LTD import (
+    Or, And, Not, Next, Weak, After, Until, Expect, Release, Eventually,
+    Henceforth, ExpectState,
+)
 
 
 class DexVerify(CommandBase):
@@ -43,6 +47,22 @@ class DexVerify(CommandBase):
         # string which describte the verification trace
         trace_iter = DextStepIter(program)
         return self.model.eval(trace_iter)
+
+    def get_subcommands():
+        return {
+            'Or': Or,
+            'And': And,
+            'Not': Not,
+            'Next': Next,
+            'Weak': Weak,
+            'After': After,
+            'Until': Until,
+            'Expect': Expect,
+            'Release': Release,
+            'Eventually': Eventually,
+            'Henceforth': Henceforth,
+            'ExpectState': ExpectState,
+        }
 
     def __str__(self):
         return "DexVerify({})".format(self.model)
