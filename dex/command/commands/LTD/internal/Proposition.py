@@ -32,6 +32,14 @@ class Proposition:
         pass
 
 
+class Composite:
+    def eval(self, trace_iter: DextStepIter):
+        return  self.proposition.eval(trace_iter)
+
+    def set_proposition(self, p: Proposition):
+        self.proposition = p
+
+
 class Boolean(Proposition):
     def __init__(self, *args):
         if len(args) != 1:
