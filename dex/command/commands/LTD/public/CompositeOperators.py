@@ -27,7 +27,7 @@ from dex.command.commands.LTD.internal.OperatorTypes import (
     BinaryOperator, UnaryOperator
 )
 from dex.command.commands.LTD.public.BasicOperators import (
-    And, Or, Not, Until, Weak
+    And, Or, Not, Until, Weak, Next,
 )
 
 
@@ -47,3 +47,12 @@ class Henceforth(Composite, UnaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
         self.set_proposition(Release(False, self.operand))
+
+
+class After(Composite, BinaryOperator):
+    """After(p, q): p must hold. Any time after that q must hold. p and q may
+    not hold simultaneously.
+    """
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.set_proposition(And(self.rhs, Next(Eventually(self.lhs))))
