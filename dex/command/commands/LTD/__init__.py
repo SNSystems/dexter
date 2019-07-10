@@ -5,7 +5,7 @@ from dex.command.commands.LTD.public.BasicOperators import (
 
 ## Temporal operators
 from dex.command.commands.LTD.public.BasicOperators import (
-    Until, Weak, Next
+    Until, Weak, Next,
 )
 
 ## Atomic propositions
@@ -15,5 +15,5 @@ from dex.command.commands.LTD.public.ExpectState import ExpectState
 # Composit operators
 ## Temporal operatos
 from dex.command.commands.LTD.public.CompositeOperators import (
-    Eventually, Henceforth, Release,
+    Eventually, Henceforth, Release, After,
 )

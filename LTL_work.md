@@ -181,6 +181,14 @@ Henceforth(p)
 `p` must hold from now onwards.<br/>
 LTL definition: `G` &#8801; Globally &#8801; `False R p`
 
+#### After
+```
+After(p, q)
+```
+`p` holds at some point after `q`. Both must hold at some point but not
+simultaneously.<br/>
+LTL definition: `A` &#8801; After &#8801; `q /\ X(F(p))`
+
 ---
 ### Examples
 [TODO] Add examples after coming up with some syntactic sugar for the common
@@ -190,3 +198,6 @@ patterns.
 ### [TODO] / notes
 1. The Expect syntax will not look anything like this.
 2. Makes sense for the first step to be stepping into main -- discuss with team.
+3. It seems like all DexVerify() commands start wth Eventually. It might make
+sense to bake this in? E.g.
+DexVerify(p) == Eventually(And(Expect({frames: {main}}), p))
