@@ -36,6 +36,8 @@ from dex.command.commands.LTD import (
     And, Or, Not, Until, Expect, Eventually, Henceforth, Weak, Release,
     ExpectState, Next, After
 )
+from dex.dextIR import CommandIR
+
 
 def _get_valid_commands():
     """Search the commands subdirectory for any classes which are subclasses of
@@ -86,26 +88,41 @@ def get_LTD_commands():
         'ExpectState': ExpectState,
     }
 
-def get_command_object(commandIR):
-    """Externally visible version of _safe_eval.  Only returns the Command
-    object itself.
-    """
-    valid_commands = _get_valid_commands()
-    # pylint: disable=eval-used
-    command = eval(commandIR.raw_text, valid_commands)
-    # pylint: enable=eval-used
-    command.path = commandIR.loc.path
-    command.lineno = commandIR.loc.lineno
-    return command
-
-
-def _get_command_name(command_raw):
+def _get_command_name(command_raw: str) -> str:
     """Return command name by splitting up DExTer command contained in
        command_raw on the first opening paranthesis and further stripping
        any potential leading or trailing whitespace.
     """
-    command_name = command_raw.split('(', 1)[0].rstrip()
-    return command_name
+    return command_raw.split('(', 1)[0].rstrip()
+
+
+def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
+    """Return a dict which merges valid_commands and subcommands for
+    command_name.
+    """
+    subcommands = valid_commands[command_name].get_subcommands()
+    if subcommands:
+        return { **valid_commands, **subcommands }
+    return valid_commands
+
+
+def _eval_command(command_raw: str, valid_commands: dict) -> CommandBase:
+    command_name = _get_command_name(command_raw)
+    valid_commands = _merge_subcommands(command_name, valid_commands)
+    # pylint: disable=eval-used
+    command = eval(command_raw, valid_commands)
+    # pylint: enable=eval-used
+    return command
+
+
+def get_command_object(commandIR: CommandIR):
+    """Externally visible version of _safe_eval.  Only returns the Command
+    object itself.
+    """
+    command = _eval_command(commandIR.raw_text, _get_valid_commands())
+    command.path = commandIR.loc.path
+    command.lineno = commandIR.loc.lineno
+    return command
 
 
 def _find_all_commands_in_file(path, file_lines, valid_commands):
@@ -128,9 +145,7 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
 
         to_eval = line[column:].rstrip()
         try:
-            # pylint: disable=eval-used
-            command = eval(to_eval, valid_commands)
-            # pylint: enable=eval-used
+            command = _eval_command(to_eval, valid_commands)
             command_name = _get_command_name(to_eval)
             command.path = path
             command.lineno = lineno

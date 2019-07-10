@@ -35,3 +35,9 @@ class CommandBase(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def eval(self):
         pass
+
+    def get_subcommands() -> dict:
+        """Returns a dictionary of subcommands in the form {name: command} or
+        None if no subcommands are required.
+        """
+        return None
