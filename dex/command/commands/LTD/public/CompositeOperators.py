@@ -22,6 +22,7 @@
 # THE SOFTWARE.
 
 from dex.dextIR import DextStepIter, StepIR
+from dex.command.commands.LTD.internal.Proposition import Composite
 from dex.command.commands.LTD.internal.OperatorTypes import (
     BinaryOperator, UnaryOperator
 )
@@ -30,28 +31,19 @@ from dex.command.commands.LTD.public.BasicOperators import (
 )
 
 
-class Eventually(UnaryOperator):
+class Eventually(Composite, UnaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
-        self.proposition = Until(True, self.operand)
-
-    def eval(self, trace_iter: DextStepIter):
-        return self.proposition.eval(trace_iter)
+        self.set_proposition(Until(True, self.operand))
 
 
-class Release(BinaryOperator):
+class Release(Composite, BinaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
-        self.proposition = Weak(self.rhs, And(self.rhs, self.lhs))
-
-    def eval(self, trace_iter: DextStepIter):
-        return  self.proposition.eval(trace_iter)
+        self.set_proposition(Weak(self.rhs, And(self.rhs, self.lhs)))
 
 
-class Henceforth(UnaryOperator):
+class Henceforth(Composite, UnaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
-        self.proposition = Release(False, self.operand)
-
-    def eval(self, trace_iter: DextStepIter):
-        return self.proposition.eval(trace_iter)
+        self.set_proposition(Release(False, self.operand))
