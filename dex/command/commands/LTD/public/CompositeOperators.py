@@ -38,13 +38,6 @@ class Eventually(UnaryOperator):
     def eval(self, trace_iter: DextStepIter):
         return self.proposition.eval(trace_iter)
 
-    def __str__(self):
-        return "{} is {}".format(
-            self.__class__.__name__, self.proposition.__str__())
-
-    def __repr__(self):
-        return self.__str__()
-
 
 class Release(BinaryOperator):
     def __init__(self, *args):
@@ -54,13 +47,6 @@ class Release(BinaryOperator):
     def eval(self, trace_iter: DextStepIter):
         return  self.proposition.eval(trace_iter)
 
-    def __str__(self):
-        return "{} is {}".format(
-            self.__class__.__name__, self.proposition.__str__())
-
-    def __repr__(self):
-        return self.__str__()
-
 
 class Henceforth(UnaryOperator):
     def __init__(self, *args):
@@ -69,10 +55,3 @@ class Henceforth(UnaryOperator):
 
     def eval(self, trace_iter: DextStepIter):
         return self.proposition.eval(trace_iter)
-
-    def __str__(self):
-        return "{} is {}".format(
-            self.__class__.__name__, self.proposition.__str__())
-
-    def __repr__(self):
-        return self.__str__()

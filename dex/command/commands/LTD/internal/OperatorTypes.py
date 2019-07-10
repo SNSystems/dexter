@@ -30,7 +30,8 @@ from dex.command.commands.LTD.internal.Proposition import (
 class UnaryOperator(Proposition):
     def __init__(self, *args):
         if len(args) != 1:
-            raise TypeError('Expected exactly one arg')
+            raise TypeError('{} expected exactly one arg'.format(
+                self.__class__.__name__))
         self.operand = unwrap_LTD_arg(args[0])
 
     def eval(self, trace_iter: DextStepIter) -> bool:
@@ -46,7 +47,8 @@ class UnaryOperator(Proposition):
 class BinaryOperator(Proposition):
     def __init__(self, *args):
         if len(args) != 2:
-            raise TypeError('Expected exactly two args')
+            raise TypeError('{} expected exactly two args'.format(
+                self.__class__.__name__))
         self.lhs = unwrap_LTD_arg(args[0])
         self.rhs = unwrap_LTD_arg(args[1])
 
