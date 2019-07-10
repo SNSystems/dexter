@@ -91,3 +91,12 @@ class Until(BinaryOperator):
             trace_iter.increment()
         return False
 
+
+class Next(UnaryOperator):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def eval(self, trace_iter: DextStepIter):
+        trace_iter = copy(trace_iter)
+        trace_iter.increment()
+        return self.operand.eval(trace_iter)

@@ -33,7 +33,7 @@ import os
 from dex.command.CommandBase import CommandBase
 from dex.utils.Exceptions import CommandParseError
 from dex.command.commands.LTD import (
-    And, Or, Not, Until, Expect, Eventually, Henceforth, Weak, Release
+    And, Or, Not, Until, Expect, Eventually, Henceforth, Weak, Release, Next,
 )
 
 def _get_valid_commands():
@@ -74,6 +74,7 @@ def get_LTD_commands():
         'Or': Or,
         'And': And,
         'Not': Not,
+        'Next': Next,
         'Weak': Weak,
         'Until': Until,
         'Expect': Expect,
