@@ -50,7 +50,7 @@ class Henceforth(Composite, UnaryOperator):
 
 
 class After(Composite, BinaryOperator):
-    """After(p, q): p must hold. Any time after that q must hold. p and q may
+    """After(p, q): q must hold. Any time after that p must hold. p and q may
     not hold simultaneously.
     """
     def __init__(self, *args):

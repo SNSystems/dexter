@@ -37,6 +37,8 @@ class ExpectState(Proposition):
         self.expected_program_state = state_from_dict(args[0])
 
     def eval(self, trace_iter: DextStepIter) -> bool:
+        if trace_iter.at_end():
+            return False
         step = trace_iter.dereference()
         return self.expected_program_state.match(step.program_state)
 
