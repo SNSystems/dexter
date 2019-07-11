@@ -102,45 +102,95 @@ def get_command_object(commandIR: CommandIR):
     return command
 
 
+def _find_start_of_command(line, valid_commands) -> int:
+    """Scan line for a valid command, return the index of the first character
+    of the command and the command. Return -1 if no command is found.
+    """
+    for command in valid_commands:
+        start = line.rfind(command)
+        if start != -1:
+            return start
+    return -1
+
+
+def _find_end_of_command(line, start, paren_balance) -> (int, int):
+    """Return (end, paren_balance) where end is 1 + the index of the last char
+    in the command or, if the parentheses are not balanced, the end of the line.
+    paren_balance will be 0 when the parentheses are balanced.
+    """
+    for end in range(start, len(line)):
+        ch = line[end]
+        if ch == '(':
+            paren_balance += 1
+        elif ch == ')':
+            paren_balance -=1
+        if paren_balance == 0:
+            break
+    end += 1
+    return (end, paren_balance)
+
+
 def _find_all_commands_in_file(path, file_lines, valid_commands):
     commands = defaultdict(dict)
-
     err = CommandParseError()
     err.filename = path
-
+    paren_balance = 0
     for lineno, line in enumerate(file_lines):
-        lineno += 1  # Line numbering convention starts at 1.
+        start = 0 # Index from which we start parsing
+        lineno += 1  # Line numbers start at 1.
         err.lineno = lineno
         err.src = line.rstrip()
 
-        for command in valid_commands:
-            column = line.rfind(command)
-            if column != -1:
-                break
-        else:
+        # If parens are currently balanced we can look for a new command
+        if paren_balance == 0:
+            start = _find_start_of_command(line, valid_commands)
+            if start == -1:
+                continue
+
+            command_name = _get_command_name(line[start:])
+            command_path = path
+            command_lineno = lineno
+            command_column = start + 1 # Column numbers start at 1.
+            cmd_text_list = [command_name]
+            start += len(command_name) # Start searching for parens after cmd.
+
+        end, paren_balance = _find_end_of_command(line, start, paren_balance)
+        # Add this text blob to the command
+        cmd_text_list.append(line[start:end])
+
+        # If the parens are unbalanced start reading the next line in an attempt
+        # to find the end of the command.
+        if paren_balance != 0:
             continue
 
-        to_eval = line[column:].rstrip()
+        # Parens are balanced, we have a full command to evaluate.
         try:
-            command = _eval_command(to_eval, valid_commands)
-            command_name = _get_command_name(to_eval)
-            command.path = path
-            command.lineno = lineno
-            command.raw_text = to_eval
+            raw_text = "".join(cmd_text_list)
+            command = _eval_command(raw_text, valid_commands)
+            command.path = command_path
+            command.lineno = command_lineno
+            command.raw_text = raw_text
             assert (path, lineno) not in commands[command_name], (
                 command_name, commands[command_name])
             commands[command_name][path, lineno] = command
         except SyntaxError as e:
             err.info = str(e.msg)
-            err.caret = '{}<r>^</>'.format(' ' * (column + e.offset - 1))
+            err.caret = '{}<r>^</>'.format(
+                ' ' * (command_column + e.offset - 1))
             raise err
         except TypeError as e:
             err.info = str(e).replace('__init__() ', '')
-            err.caret = '{}<r>{}</>'.format(' ' * (column),
-                                            '^' * (len(err.src) - column))
+            err.caret = '{}<r>{}</>'.format(
+                ' ' * (command_column), '^' * (len(err.src) - command_column))
             raise err
 
+    if paren_balance != 0:
+        err.info = (
+            "Unbalanced parenthesis starting at line {} column {}".format(
+                command_lineno, command_column + len(command_name)))
+        raise err
     return dict(commands)
+
 
 
 def find_all_commands(source_files):
