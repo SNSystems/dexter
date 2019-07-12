@@ -27,15 +27,14 @@ DexVerify(Eventually(Expect('a', '5')))
 ```
 
 `Eventually` is a temporal operator. **Temporal** operators work over **time**.
-This one is easy to work with. simply, `Eventually(p)` means that p must become
-true at some point during program execution.
+Intuitively, `Eventually(p)` means that `p` must become true at some point
+during program execution.
 
-`Eventually(p)` is defined as `Until(True, p)` (see the
-[source](dex/command/commands/LTD/public/CompositeOperators.py)).
-It's easy to explain how this works if we take a look at `Until(p, q)`.
-`Until`, `Weak` and `Next`(see the Quick reference) are used to define all
-other temporal operators. All operators are exposed as functions so the formulae
-read in Polish, or 'prefix', notation.
+`Eventually(p)` is defined as `Until(True, p)`. It's easy to explain how this
+works if we take a look at `Until(p, q)`. `Until`, `Weak` and `Next`
+(see the Quick Reference section) are used to define all other temporal
+operators. All operators are exposed as functions so the formulae read in
+Polish, or 'prefix', notation.
 
 `Until(p, q)` means that `q` must hold in the future, and **until** then `p`
 must hold.
@@ -52,10 +51,10 @@ DexVerify(And(Eventually(Expect('a', '5')), Eventually(Expect('b', '1'))))
 ```
 
 This formula doesn't impose any ordering on the `Expect` propositions.
-If you want to say that `b == 1` at some point in the future *after*
+If you want to say that `b == 1` at some point in the future **after**
 `a == 5` you'd write:
 ```
-DexVerify(Eventually(And(Expect('a', 5), Eventually(Expect('b', 1)))))
+DexVerify(After(Expect('b', '1'), Expect('a', '5')))
 ```
 
 For more examples have a look in dexter/examples/LTD. Please be aware that the
@@ -66,9 +65,11 @@ prefix "xfail_" indicates that running that test should result in a failure.
 [TODO] Write this section
 
 
-## 3. Thoery
+## 3. Theory
 The DexVerify command formulae are based on Linear Temporal Logic (LTL).
-The standard definition of LTL is as follows (modified from [this](https://www.win.tue.nl/~jschmalt/teaching/2IX20/reader_software_specification_ch_9.pdf) source):
+The standard definition of LTL is as follows (modified from
+[this](https://www.win.tue.nl/~jschmalt/teaching/2IX20/reader_software_specification_ch_9.pdf)
+source):
 
 ```
 p ::= a  |  p /\ p  |  !p  |  Xp |  p U p
@@ -141,15 +142,16 @@ Debugger C++ expression `p` must evaluate to value `q`.
 Until(p, q)
 ```
 `q` must eventually hold and until then `p` must hold.<br/>
-LTL definition: `U` &#8801; Until &#8801; for `0 <= i` where `q` holds `p` holds
-for `0 <= k < i`.
+LTL definition: `U` &#8801; Until &#8801; `q` holds at some time `i >= 0` and
+`p` holds for all `0 <= k < i`.
 
 #### Weak
 ```
 Weak(p, q)
 ```
 `p` must hold so long as `q` does not.<br/>
-LTL definition: `W` &#8801; Weak &#8801; Weak until &#8801; for `0 <= i` where `q` holds `p` holds for `0 <= k < i`, or, if `q` never holds, `0 <= k`.
+LTL definition: `W` &#8801; Weak &#8801; Weak until &#8801; `q` holds at some
+time `i >= 0` or never holds `i = inf` and `p` holds for all `0 <= k < i`.
 
 #### Next
 ```
@@ -172,7 +174,7 @@ Release(p, q)
 ```
 `p` must eventually hold and up to and including that time `q` must hold.
 NOTE: Operand order and keyword *including*.<br/>
-LTL definition: `R` &#8801; Release &#8801; `q U (q /\ p)`
+LTL definition: `R` &#8801; Release &#8801; `q W (q /\ p)`
 
 #### Henceforth
 ```
