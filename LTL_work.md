@@ -191,6 +191,14 @@ After(p, q)
 simultaneously.<br/>
 LTL definition: `A` &#8801; After &#8801; `q /\ X(F(p))`
 
+#### Ordered
+```
+Ordered(p, q, r...)
+```
+The propositions may hold at any time so long as each proposition holds before
+the next (left to right) and they do all hold at some point.
+LTL definition: `O` &#8801; Ordered &#8801; `r... A (q A p)`
+
 ---
 ### Examples
 [TODO] Add examples after coming up with some syntactic sugar for the common

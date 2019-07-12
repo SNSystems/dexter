@@ -22,9 +22,9 @@
 # THE SOFTWARE.
 
 from dex.dextIR import DextStepIter, StepIR
-from dex.command.commands.LTD.internal.Proposition import Composite
+from dex.command.commands.LTD.internal.Proposition import Proposition, Composite
 from dex.command.commands.LTD.internal.OperatorTypes import (
-    BinaryOperator, UnaryOperator
+    BinaryOperator, UnaryOperator, BinaryOperatorTree
 )
 from dex.command.commands.LTD.public.BasicOperators import (
     And, Or, Not, Until, Weak, Next,
@@ -56,3 +56,8 @@ class After(Composite, BinaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
         self.set_proposition(And(self.rhs, Next(Eventually(self.lhs))))
+
+
+class Ordered(BinaryOperatorTree):
+    def proposition_template(p: Proposition, q: Proposition):
+        return After(q, p)

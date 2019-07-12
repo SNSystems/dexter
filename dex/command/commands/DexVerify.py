@@ -29,7 +29,7 @@ from dex.command.commands.LTD.internal.Proposition import Boolean
 from dex.dextIR import DextIR, DextStepIter
 from dex.command.commands.LTD import (
     Or, And, Not, Next, Weak, After, Until, Expect, Release, Eventually,
-    Henceforth, ExpectState,
+    Henceforth, ExpectState, Ordered
 )
 
 
@@ -58,6 +58,7 @@ class DexVerify(CommandBase):
             'After': After,
             'Until': Until,
             'Expect': Expect,
+            'Ordered': Ordered,
             'Release': Release,
             'Eventually': Eventually,
             'Henceforth': Henceforth,
