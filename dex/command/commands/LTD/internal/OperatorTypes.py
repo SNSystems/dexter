@@ -24,7 +24,7 @@
 import abc
 from dex.dextIR import DextStepIter
 from dex.command.commands.LTD.internal.Proposition import (
-    Proposition, Boolean, unwrap_LTD_arg
+    Composite, Proposition, Boolean, unwrap_LTD_arg
 )
 
 class UnaryOperator(Proposition):
@@ -51,6 +51,45 @@ class BinaryOperator(Proposition):
 
     def __str__(self):
         return "{}({}, {})".format(self.__class__.__name__, self.lhs, self.rhs)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class BinaryOperatorTree(Composite, Proposition):
+    """Build an expression tree starting with the rightmost operand.
+    For example Fn(a, b, c) will build:
+            op
+            /\
+            a  op
+                /\
+                b  c
+    define op by implementing proposition_template.
+    """
+    def __init__(self, *args):
+        if len(args) < 2:
+            raise TypeError('{} expected at least 2 args'.format(
+                self.__class__.__name__))
+
+        # Keep args for printing
+        self.args = args
+
+        # Build a tree of binary expressions starting with the deepest rhs leaf.
+        rhs = unwrap_LTD_arg(args[-1])
+        i = len(args) - 2
+        while i >= 0:
+            lhs = unwrap_LTD_arg(args[i])
+            rhs = self.__class__.proposition_template(lhs, rhs)
+            i -= 1
+
+        self.set_proposition(rhs)
+
+    @abc.abstractmethod
+    def proposition_template(p: Proposition, q: Proposition) -> Proposition:
+        pass
+
+    def __str__(self):
+        return "{}{}".format(self.__class__.__name__, self.args)
 
     def __repr__(self):
         return self.__str__()
