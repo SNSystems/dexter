@@ -133,7 +133,7 @@ class DextStepIter:
     def __copy__(self):
         return DextStepIter(self.dextIR, self.current)
 
-    # For the demo we just skip over steps with no watches
+    # [TODO] Remove when auto-DexWatch is implemented.
     def _skip_empty_watches(self):
         while (self.current < len(self.dextIR.steps)
             and len(self.dextIR.steps[self.current].watches) < 1):

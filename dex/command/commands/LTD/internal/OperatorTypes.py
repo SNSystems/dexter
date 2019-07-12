@@ -34,9 +34,6 @@ class UnaryOperator(Proposition):
                 self.__class__.__name__))
         self.operand = unwrap_LTD_arg(args[0])
 
-    def eval(self, trace_iter: DextStepIter) -> bool:
-        pass
-
     def __str__(self):
         return "{}({})".format(self.__class__.__name__, self.operand)
 
@@ -51,9 +48,6 @@ class BinaryOperator(Proposition):
                 self.__class__.__name__))
         self.lhs = unwrap_LTD_arg(args[0])
         self.rhs = unwrap_LTD_arg(args[1])
-
-    def eval(self, step: DextStepIter) -> bool:
-        pass
 
     def __str__(self):
         return "{}({}, {})".format(self.__class__.__name__, self.lhs, self.rhs)
