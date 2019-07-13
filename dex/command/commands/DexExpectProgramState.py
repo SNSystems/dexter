@@ -58,6 +58,10 @@ class DexExpectProgramState(CommandBase):
 
         super(DexExpectProgramState, self).__init__()
 
+    @staticmethod
+    def get_name():
+        return __class__.__name__
+
     def eval(self, step_collection: DextIR) -> bool:
         for step in step_collection.steps:
             if self.expected_program_state.match(step.program_state):

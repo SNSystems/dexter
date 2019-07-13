@@ -25,7 +25,22 @@
 import difflib
 
 from dex.command.CommandBase import CommandBase
-from dex.heuristic import StepValueInfo
+
+
+class StepValueInfo(object):
+    def __init__(self, step_index, value_info):
+        self.step_index = step_index
+        self.value_info = value_info
+
+    def __str__(self):
+        return '{}:{}'.format(self.step_index, self.value_info)
+
+    def __eq__(self, other):
+        return (self.value_info.expression == other.value_info.expression
+                and self.value_info.value == other.value_info.value)
+
+    def __hash__(self):
+        return hash(self.value_info.expression, self.value_info.value)
 
 
 def _check_watch_order(actual_watches, expected_values):
@@ -153,6 +168,10 @@ class DexExpectWatchValue(CommandBase):
             self._missing_values.remove(watch.value)
         except KeyError:
             pass
+
+    @staticmethod
+    def get_name():
+        return __class__.__name__
 
     def eval(self, step_collection):
         for step in step_collection.steps:

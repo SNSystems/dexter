@@ -26,42 +26,25 @@ Python code being embedded within DExTer commands.
 """
 
 from collections import defaultdict
-import imp
-import inspect
-import os
 
-from dex.command.CommandBase import CommandBase
 from dex.utils.Exceptions import CommandParseError
+from dex.command.commands.DexExpectProgramState import DexExpectProgramState
+from dex.command.commands.DexExpectStepKind import DexExpectStepKind
+from dex.command.commands.DexExpectStepOrder import DexExpectStepOrder
+from dex.command.commands.DexExpectWatchValue import DexExpectWatchValue
+from dex.command.commands.DexUnreachable import DexUnreachable
+from dex.command.commands.DexWatch import DexWatch
 
 
 def _get_valid_commands():
-    """Search the commands subdirectory for any classes which are subclasses of
-    CommandBase and return a dict in the form of {name: class}.
-    """
-    try:
-        return _get_valid_commands.cached
-    except AttributeError:
-        commands_directory = os.path.join(
-            os.path.dirname(__file__), 'commands')
-        potential_modules = [
-            os.path.splitext(f)[0] for f in os.listdir(commands_directory)
-        ]
-
-        commands = {}
-        for m in potential_modules:
-            try:
-                module_info = imp.find_module(m, [commands_directory])
-                module = imp.load_module(m, *module_info)
-            except ImportError:
-                continue
-
-            commands.update({
-                c[0]: c[1]
-                for c in inspect.getmembers(module, inspect.isclass)
-                if c[1] != CommandBase and issubclass(c[1], CommandBase)
-            })
-        _get_valid_commands.cached = commands
-        return commands
+    return {
+      DexExpectProgramState.get_name() : DexExpectProgramState,
+      DexExpectStepKind.get_name() : DexExpectStepKind,
+      DexExpectStepOrder.get_name() : DexExpectStepOrder,
+      DexExpectWatchValue.get_name() : DexExpectWatchValue,
+      DexUnreachable.get_name() : DexUnreachable,
+      DexWatch.get_name() : DexWatch
+    }
 
 
 def get_command_object(commandIR):
