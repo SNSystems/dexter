@@ -20,24 +20,32 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Base class for all DExTer commands, where a command is a specific Python
-function that can be embedded into a comment in the source code under test
-which will then be executed by DExTer during debugging.
-"""
 
-import abc
+from dex.dextIR import DextStepIter
+from dex.command.commands.LTD.internal.Proposition import Proposition
+from dex.command.commands.LTD.internal.OperatorTypes import (
+    BinaryOperator, UnaryOperator
+)
 
-class CommandBase(object, metaclass=abc.ABCMeta):
-    def __init__(self):
-        self.path = None
-        self.lineno = None
+## For the demo we only allow the user to verify expressions.
+class Expect(Proposition):
+    def __init__(self, *args):
+        if len(args) != 2:
+            raise TypeError('expected exactly two args')
 
-    @abc.abstractmethod
-    def eval(self):
-        pass
+        self.var = args[0]
+        self.value = args[1]
 
-    def get_subcommands() -> dict:
-        """Returns a dictionary of subcommands in the form {name: command} or
-        None if no subcommands are required.
-        """
-        return None
+    def eval(self, trace_iter: DextStepIter):
+        if trace_iter.at_end():
+            return False
+        for expr, watch in trace_iter.dereference().watches.items():
+            if self.var == expr:
+                return self.value == watch.value
+        return False
+
+    def __str__(self):
+        return "Expect({} == {})".format(self.var, self.value)
+
+    def __repr__(self):
+        return self.__str__()

@@ -20,24 +20,30 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Base class for all DExTer commands, where a command is a specific Python
-function that can be embedded into a comment in the source code under test
-which will then be executed by DExTer during debugging.
+"""LTD proposition based on DexExpectProgramState.
 """
 
-import abc
+from dex.dextIR import DextStepIter
+from dex.command.commands.LTD.internal.Proposition import Proposition
+from dex.command.commands.DexExpectProgramState import state_from_dict
 
-class CommandBase(object, metaclass=abc.ABCMeta):
-    def __init__(self):
-        self.path = None
-        self.lineno = None
 
-    @abc.abstractmethod
-    def eval(self):
-        pass
+class ExpectState(Proposition):
+    def __init__(self, *args):
+        if len(args) != 1:
+            raise TypeError('expected exactly one unnamed arg')
 
-    def get_subcommands() -> dict:
-        """Returns a dictionary of subcommands in the form {name: command} or
-        None if no subcommands are required.
-        """
-        return None
+        self.program_state_text = str(args[0])
+        self.expected_program_state = state_from_dict(args[0])
+
+    def eval(self, trace_iter: DextStepIter) -> bool:
+        if trace_iter.at_end():
+            return False
+        step = trace_iter.dereference()
+        return self.expected_program_state.match(step.program_state)
+
+    def __str__(self):
+        return "ExpectState({})".format(self.program_state_text)
+
+    def __repr__(self):
+        return self.__str__()
