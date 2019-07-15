@@ -143,7 +143,6 @@ class LLDB(DebuggerBase):
     def get_step_info(self):
         frames = []
         state_frames = []
-        print(self.watches)
 
         for i in range(0, self._thread.GetNumFrames()):
             sb_frame = self._thread.GetFrameAtIndex(i)
