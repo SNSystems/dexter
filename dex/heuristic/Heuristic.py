@@ -197,7 +197,7 @@ class Heuristic(object):
                 maximum_possible_penalty = max(command.count * 2, 1)
                 p = abs(command.count - step_kind_counts[command.name])
                 actual_penalty = min(p, maximum_possible_penalty)
-                key = (command.name
+                key = ('{}'.format(command.name)
                        if actual_penalty else '<g>{}</>'.format(command.name))
                 penalties[key] = [PenaltyInstance(p, actual_penalty)]
                 maximum_possible_penalty_all += maximum_possible_penalty
