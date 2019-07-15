@@ -26,6 +26,7 @@ which will then be executed by DExTer during debugging.
 """
 
 import abc
+from typing import List
 
 class CommandBase(object, metaclass=abc.ABCMeta):
     def __init__(self):
@@ -38,6 +39,9 @@ class CommandBase(object, metaclass=abc.ABCMeta):
         """This abstract method is usually implemented in subclasses as:
            return __class__.__name__
         """
+
+    def get_watches(self) -> List[str]:
+        return []
 
     @abc.abstractmethod
     def eval(self):

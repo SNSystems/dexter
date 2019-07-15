@@ -41,6 +41,9 @@ class SourceLocation:
         return '{}({}:{})'.format(self.path, self.lineno, self.column)
 
     def match(self, other) -> bool:
+        """Returns true iff all the properties that appear in `self` have the
+        same value in `other`, but not necessarily vice versa.
+        """
         if not other or not isinstance(other, SourceLocation):
             return False
 
@@ -75,9 +78,12 @@ class StackFrame:
             self.function,
             ' (inlined)' if self.is_inlined else '',
             self.location,
-            self.local_vars)
+            {k: str(self.local_vars[k]) for k in self.local_vars})
 
     def match(self, other) -> bool:
+        """Returns true iff all the properties that appear in `self` have the
+        same value in `other`, but not necessarily vice versa.
+        """
         if not other or not isinstance(other, StackFrame):
             return False
 
@@ -87,7 +93,7 @@ class StackFrame:
         if self.local_vars:
             for name in iter(self.local_vars):
                 try:
-                    if other.local_vars[name] != self.local_vars[name]:
+                    if other.local_vars[name].value != self.local_vars[name]:
                         return False
                 except KeyError:
                     return False
@@ -95,11 +101,8 @@ class StackFrame:
         return True
 
 class ProgramState:
-    def __init__(self,
-                 frames: List[StackFrame] = None,
-                 global_vars: OrderedDict = None):
+    def __init__(self, frames: List[StackFrame] = None):
         self.frames = frames
-        self.global_vars = global_vars
 
     def __str__(self):
         return '\n'.join(map(
@@ -107,6 +110,9 @@ class ProgramState:
             enumerate(self.frames)))
 
     def match(self, other) -> bool:
+        """Returns true iff all the properties that appear in `self` have the
+        same value in `other`, but not necessarily vice versa.
+        """
         if not other or not isinstance(other, ProgramState):
             return False
 
@@ -116,14 +122,6 @@ class ProgramState:
                     if not frame.match(other.frames[idx]):
                         return False
                 except (IndexError, KeyError):
-                    return False
-
-        if self.global_vars:
-            for name in iter(self.global_vars):
-                try:
-                    if other.global_variables[name] != self.global_vars[name]:
-                        return False
-                except IndexError:
                     return False
 
         return True

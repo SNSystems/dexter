@@ -24,6 +24,8 @@
 during execution.
 """
 
+from itertools import chain
+
 from dex.command.CommandBase import CommandBase
 from dex.dextIR import ProgramState, SourceLocation, StackFrame, DextIR
 
@@ -61,6 +63,11 @@ class DexExpectProgramState(CommandBase):
     @staticmethod
     def get_name():
         return __class__.__name__
+
+    def get_watches(self):
+        frame_expects = chain.from_iterable(iter(frame.local_vars)
+            for frame in self.expected_program_state.frames)
+        return set(frame_expects)
 
     def eval(self, step_collection: DextIR) -> bool:
         for step in step_collection.steps:

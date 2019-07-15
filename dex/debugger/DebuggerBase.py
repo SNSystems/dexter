@@ -42,6 +42,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         self._interface = None
         self.has_loaded = False
         self._loading_error = NotYetLoadedDebuggerException()
+        self.watches = set()
 
         try:
             self._interface = self._load_interface()
@@ -136,6 +137,10 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         self.steps.clear_steps()
         self.launch()
 
+        for command in chain.from_iterable(self.steps.commands.values()):
+            command_obj = get_command_object(command)
+            self.watches = self.watches.union(command_obj.get_watches())
+
         max_steps = self.context.options.max_steps
         for _ in range(max_steps):
             while self.is_running:
@@ -148,7 +153,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
             step_info = self.get_step_info()
 
             if step_info.current_frame:
-                self._update_step_watches(step_info)
+                # self._update_step_watches(step_info)
                 self.steps.new_step(self.context, step_info)
 
             if (step_info.current_frame

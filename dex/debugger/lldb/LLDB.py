@@ -143,6 +143,7 @@ class LLDB(DebuggerBase):
     def get_step_info(self):
         frames = []
         state_frames = []
+        print(self.watches)
 
         for i in range(0, self._thread.GetNumFrames()):
             sb_frame = self._thread.GetFrameAtIndex(i)
@@ -178,8 +179,8 @@ class LLDB(DebuggerBase):
                                      is_inlined=frame.is_inlined,
                                      location=SourceLocation(**loc_dict),
                                      local_vars={})
-            for expr in sb_frame.GetVariables(True, True, True, True):
-                state_frame.local_vars[expr.name] = expr.value
+            for expr in map(lambda watch, idx=i: self.evaluate_expression(watch, idx), self.watches):
+                state_frame.local_vars[expr.expression] = expr
             state_frames.append(state_frame)
 
         if len(frames) == 1 and frames[0].function is None:
@@ -205,8 +206,8 @@ class LLDB(DebuggerBase):
     def frames_below_main(self):
         return ['__scrt_common_main_seh', '__libc_start_main']
 
-    def evaluate_expression(self, expression):
-        result = self._thread.GetFrameAtIndex(0).EvaluateExpression(expression)
+    def evaluate_expression(self, expression, frame_idx=0):
+        result = self._thread.GetFrameAtIndex(frame_idx).EvaluateExpression(expression)
         error_string = str(result.error)
 
         value = result.value
