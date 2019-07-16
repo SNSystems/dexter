@@ -178,7 +178,9 @@ class LLDB(DebuggerBase):
                                      is_inlined=frame.is_inlined,
                                      location=SourceLocation(**loc_dict),
                                      watches={})
-            for expr in map(lambda watch, idx=i: self.evaluate_expression(watch, idx), self.watches):
+            for expr in map(
+                lambda watch, idx=i: self.evaluate_expression(watch, idx),
+                self.watches):
                 state_frame.watches[expr.expression] = expr
             state_frames.append(state_frame)
 

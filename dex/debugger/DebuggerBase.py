@@ -111,7 +111,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
 
     def _update_step_watches(self, step_info):
         loc = step_info.current_location
-        watch_cmds = ['DexWatch', 'DexUnreachable', 'DexExpectStepOrder']
+        watch_cmds = ['DexUnreachable', 'DexExpectStepOrder']
         towatch = chain.from_iterable(self.steps.commands[x]
                                       for x in watch_cmds
                                       if x in self.steps.commands)
@@ -153,7 +153,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
             step_info = self.get_step_info()
 
             if step_info.current_frame:
-                # self._update_step_watches(step_info)
+                self._update_step_watches(step_info)
                 self.steps.new_step(self.context, step_info)
 
             if (step_info.current_frame
