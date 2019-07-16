@@ -41,6 +41,3 @@ class ValueIR:
         self.error_string = error_string
         self.is_optimized_away = is_optimized_away
         self.is_irretrievable = is_irretrievable
-
-    def __str__(self):
-        return self.value
