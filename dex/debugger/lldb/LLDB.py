@@ -177,9 +177,9 @@ class LLDB(DebuggerBase):
             state_frame = StackFrame(function=frame.function,
                                      is_inlined=frame.is_inlined,
                                      location=SourceLocation(**loc_dict),
-                                     local_vars={})
+                                     watches={})
             for expr in map(lambda watch, idx=i: self.evaluate_expression(watch, idx), self.watches):
-                state_frame.local_vars[expr.expression] = expr
+                state_frame.watches[expr.expression] = expr
             state_frames.append(state_frame)
 
         if len(frames) == 1 and frames[0].function is None:

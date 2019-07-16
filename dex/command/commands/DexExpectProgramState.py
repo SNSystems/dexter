@@ -65,7 +65,7 @@ class DexExpectProgramState(CommandBase):
         return __class__.__name__
 
     def get_watches(self):
-        frame_expects = chain.from_iterable(iter(frame.local_vars)
+        frame_expects = chain.from_iterable(iter(frame.watches)
             for frame in self.expected_program_state.frames)
         return set(frame_expects)
 

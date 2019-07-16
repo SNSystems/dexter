@@ -169,7 +169,7 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
 
             state_frame = StackFrame(function=frame.function,
                                      is_inlined=frame.is_inlined,
-                                     local_vars={})
+                                     watches={})
 
             if idx == 0:
                 frame.loc = loc
@@ -177,7 +177,7 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
 
             self.set_current_stack_frame(idx)
             for watch in self.watches:
-                state_frame.local_vars[watch] = self.evaluate_expression(
+                state_frame.watches[watch] = self.evaluate_expression(
                     watch)
             self.set_current_stack_frame(0)
 

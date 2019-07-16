@@ -183,7 +183,7 @@ class DexExpectWatchValue(CommandBase):
 
             if (loc.path == self.path and loc.lineno in self.line_range):
                 try:
-                    watch = step.program_state.frames[0].local_vars[self.expression]
+                    watch = step.program_state.frames[0].watches[self.expression]
                 except KeyError:
                     pass
                 else:
