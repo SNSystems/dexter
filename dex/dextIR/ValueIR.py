@@ -20,12 +20,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Serialization of information related to the result of an expression
-evaluation.
-"""
 
 
 class ValueIR:
+    """Data class to store the result of an expression evaluation."""
+
     def __init__(self,
                  expression: str,
                  value: str,

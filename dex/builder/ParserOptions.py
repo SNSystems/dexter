@@ -29,6 +29,11 @@ from dex.utils import is_native_windows
 
 
 def _find_build_scripts():
+    """Finds build scripts in the 'scripts' subdirectory.
+
+    Returns:
+        { script_name (str): directory (str) }
+    """
     try:
         return _find_build_scripts.cached
     except AttributeError:

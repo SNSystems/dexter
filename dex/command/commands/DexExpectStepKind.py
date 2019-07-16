@@ -27,6 +27,14 @@ from dex.dextIR.StepIR import StepKind
 
 
 class DexExpectStepKind(CommandBase):
+    """Expect to see a particular step `kind` a number of `times` while stepping
+    through the program.
+
+    DexExpectStepKind(kind, times)
+
+    See Commands.md for more info.
+    """
+
     def __init__(self, *args):
         if len(args) != 2:
             raise TypeError('expected two args')
@@ -47,4 +55,7 @@ class DexExpectStepKind(CommandBase):
         return __class__.__name__
 
     def eval(self):
+        # DexExpectStepKind eval() implementation is mixed into
+        # Heuristic.__init__()
+        # [TODO] Fix this ^.
         pass

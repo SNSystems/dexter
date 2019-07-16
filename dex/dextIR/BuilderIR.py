@@ -20,13 +20,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Serialization of information related to the builder."""
-
-
-from typing import List
 
 
 class BuilderIR:
+    """Data class which represents the compiler related options passed to Dexter
+    """
+
     def __init__(self, name: str, cflags: str, ldflags: str):
         self.name = name
         self.cflags = cflags

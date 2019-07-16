@@ -51,6 +51,16 @@ class CommandBase(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def eval(self):
+        """Evaluate the command.
+
+        This will be called when constructing a Heuristic object to determine
+        the debug score.
+
+        Returns:
+            The logic for handling the result of CommandBase.eval() must be
+            defined in Heuristic.__init__() so a consitent return type between
+            commands is not enforced.
+        """
         pass
 
     def get_subcommands() -> dict:

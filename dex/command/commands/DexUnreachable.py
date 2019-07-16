@@ -25,7 +25,15 @@
 from dex.command.CommandBase import CommandBase
 from dex.dextIR import ValueIR
 
+
 class DexUnreachable(CommandBase):
+    """Expect the source line this is found on will never be stepped on to.
+
+    DexUnreachable()
+
+    See Commands.md for more info.
+    """
+
     def __init(self):
         super(DexUnreachable, self).__init__()
         pass

@@ -2,6 +2,14 @@ from dex.command.CommandBase import CommandBase
 from dex.dextIR import ValueIR
 
 class DexExpectStepOrder(CommandBase):
+    """Expect the line this command is found on to be stepped on before all
+    other DexExpectStepOrder commands with a greater `index` argument.
+
+    DexExpectStepOrder(index)
+
+    See Commands.md for more info.
+    """
+
     def __init__(self, *args):
         if not args:
             raise TypeError('Need at least one order number')

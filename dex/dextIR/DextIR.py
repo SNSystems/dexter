@@ -20,8 +20,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Root for dextIR serialization types."""
-
 from collections import OrderedDict
 from typing import List
 
@@ -41,7 +39,19 @@ def _step_kind_func(context, step):
 
 
 class DextIR:
-    # commands: OrderedDict[str, list[CommandIR]]
+    """A full Dexter test report.
+
+    This is composed of all the other *IR classes. They are used together to
+    record Dexter inputs and the resultant debugger steps, providing a single
+    high level access container.
+
+    The Heuristic class works with dexter commands and the generated DextIR to
+    determine the debugging score for a given test.
+
+    Args:
+        commands: { name (str), commands (list[CommandIR])
+    """
+
     def __init__(self,
                  dexter_version: str,
                  executable_path: str,

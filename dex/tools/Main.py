@@ -185,6 +185,9 @@ def tool_main(context, tool, args):
 
 
 class Context(object):
+    """Context encapsulates globally useful objects and data; passed to many
+    Dexter functions.
+    """
 
     def __init__(self):
         self.o: PrettyOutput = None
@@ -192,6 +195,7 @@ class Context(object):
         self.options: dict = None
         self.version: str = None
         self.root_directory: str = None
+
 
 def main() -> ReturnCode:
 

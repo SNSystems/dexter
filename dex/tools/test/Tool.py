@@ -157,7 +157,7 @@ class Tool(TestToolBase):
 
     def _get_results_path(self, test_name):
         """Returns the path to the test results directory for the test denoted
-           by test_name.
+        by test_name.
         """
         return os.path.join(self.context.options.results_directory,
                             self._get_results_basename(test_name))
@@ -176,7 +176,7 @@ class Tool(TestToolBase):
 
     def _record_steps(self, test_name, steps):
         """Write out the set of steps out to the test's .txt and .json
-           results file.
+        results file.
         """
         output_text_path = self._get_results_text_path(test_name)
         with open(output_text_path, 'w') as fp:
@@ -195,21 +195,21 @@ class Tool(TestToolBase):
 
     def _record_test_and_display(self, test_case):
         """Output test case to o stream and record test case internally for
-           handling later.
+        handling later.
         """
         self.context.o.auto(test_case)
         self._test_cases.append(test_case)
 
     def _record_failed_test(self, test_name, exception):
         """Instantiate a failed test case with failure exception and
-           store internally.
+        store internally.
         """
         test_case = TestCase(self.context, test_name, None, exception)
         self._record_test_and_display(test_case)
 
     def _record_successful_test(self, test_name, steps, heuristic):
         """Instantiate a successful test run, store test for handling later.
-           Display verbose output for test case if required.
+        Display verbose output for test case if required.
         """
         test_case = TestCase(self.context, test_name, heuristic, None)
         self._record_test_and_display(test_case)
@@ -219,7 +219,7 @@ class Tool(TestToolBase):
 
     def _run_test(self, test_dir):
         """Attempt to run test case found in test_dir. Store result internally
-           in self._test_cases.
+        in self._test_cases.
         """
         test_name = self._get_test_name(test_dir)
         try:

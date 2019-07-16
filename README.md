@@ -13,6 +13,12 @@ The following command evaluates your environment, listing the available and comp
     dexter.py list-debuggers
 
 ## Dependencies
+[TODO] Add a requirements.txt or an install.py and document it here.
+
+### Python 3.6
+
+DExTer requires at least python 3.6. This means that LLDB must also be built
+with at least 3.6 if you wish to use it.
 
 ### pywin32 python package
 
@@ -40,63 +46,71 @@ The following DExTer commands build the test.cpp from the tests/nostdlib/fibonac
 
 The sample test case (tests/nostdlib/fibonacci) looks like this:
 
-    #ifdef _MSC_VER
-    # define DEX_NOINLINE __declspec(noinline)
-    #else
-    # define DEX_NOINLINE __attribute__((__noinline__))
-    #endif
+    1.  #ifdef _MSC_VER
+    2.  # define DEX_NOINLINE __declspec(noinline)
+    3.  #else
+    4.  # define DEX_NOINLINE __attribute__((__noinline__))
+    5.  #endif
+    6.
+    7.  DEX_NOINLINE
+    8.  void Fibonacci(int terms, int& total)
+    9.  {
+    0.      int first = 0;
+    11.     int second = 1;
+    12.     for (int i = 0; i < terms; ++i)
+    13.     {
+    14.         int next = first + second; // DexLabel('start')
+    15.         total += first;
+    16.         first = second;
+    17.         second = next;             // DexLabel('end')
+    18.     }
+    19. }
+    20.
+    21. int main()
+    22. {
+    23.     int total = 0;
+    24.     Fibonacci(5, total);
+    25.     return total;
+    26. }
+    27.
+    28. /*
+    29. DexExpectWatchValue('i', '0', '1', '2', '3', '4',
+    30.                     from_line='start', to_line='end')
+    31. DexExpectWatchValue('first', '0', '1', '2', '3', '5',
+    32.                    from_line='start', to_line='end')
+    33. DexExpectWatchValue('second', '1', '2', '3', '5',
+    34                      rom_line='start', to_line='end')
+    35. DexExpectWatchValue('total', '0', '1', '2', '4', '7',
+    36.                     from_line='start', to_line='end')
+    37. DexExpectWatchValue('next', '1', '2', '3', '5', '8',
+    38.                     from_line='start', to_line='end')
+    39. DexExpectWatchValue('total', '7', on_line=25)
+    40. DexExpectStepKind('FUNC_EXTERNAL', 0)
+    41. */
 
-    DEX_NOINLINE
-    void Fibonacci(int terms, int& total)
-    {
-        int first = 0;
-        int second = 1;
+[DexLabel][1] is used to give a name to a line number.
 
-        for (int i = 0; i < terms; ++i)
-        {
-            int next = first + second; // DexWatch('i', 'first', 'second', 'total')
-            total += first;            // DexWatch('i', 'first', 'second', 'total', 'next')
-            first = second;            // DexWatch('i', 'first', 'second', 'total', 'next')
-            second = next;             // DexWatch('i', 'first', 'second', 'total', 'next')
-        }
-    }
+The [DexExpectWatchValue][2] command states that an expression, e.g. `i`, should
+have particular values, `'0', '1', '2', '3','4'`, sequentially over the program
+lifetime on particular lines. You can refer to a named line or simply the line
+number (See line 39).
 
-    int main()
-    {
-        int total = 0;
-        Fibonacci(5, total);
-        return total;         // DexWatch('total')
-    }
+At the end of the test is the following line:
 
-    // DexExpectWatchValue('i',      '0', '1', '2', '3', '4', from_line=15, to_line=18)
-    // DexExpectWatchValue('first',  '0', '1', '2', '3', '5', from_line=15, to_line=18)
-    // DexExpectWatchValue('second', '1', '2', '3', '5',      from_line=15, to_line=18)
-    // DexExpectWatchValue('total',  '0', '1', '2', '4', '7', from_line=15, to_line=18)
-    // DexExpectWatchValue('next',   '1', '2', '3', '5', '8', from_line=16, to_line=18)
-    // DexExpectWatchValue('total',  '7', on_line=26)
-    // DexExpectStepKind('FUNC_EXTERNAL', 0)
-
-DExTer uses the comments at the end of the lines inside the for loop to instruct the debugger to attempt to evaluate the each variable as watch expressions whenever it steps.
-
-For example, on line 15:
-
-    DexWatch('i', 'first', 'second', 'total')
-
-At the end of the test case there are comments that tell DExTer what values to expect. Using the example below, DExTer will expect 'i' initially to be 0, then 1, 2, 3 and 4. Note that if there is any deviation from this pattern, DExTer will register this as unexpected behavior.
-
-    // DexExpectWatchValue('i',      '0', '1', '2', '3', '4', from_line=15, to_line=18)
-
-Similarly, at the end of the test is the following line:
-
-    // DexExpectStepKind('FUNC_EXTERNAL', 0)
+    DexExpectStepKind('FUNC_EXTERNAL', 0)
 
 Each time the debugger steps, DExTer classifies the 'kind'. For example:
-* ```FORWARD``` - meaning the new source location is later in the same function
-* ```BACKWARD``` - meaning the new source location is earlier in the same function
-* ```FUNC``` - meaning the new location is in a different function
-* ```FUNC_EXTERNAL``` - meaning the new location is not within the test file.
+* `FORWARD` - meaning the new source location is later in the same function
+* `BACKWARD` - meaning the new source location is earlier in the same function
+* `FUNC` - meaning the new location is in a different function
+* `FUNC_EXTERNAL` - meaning the new location is not within the test file.
 
-The comment line given above indicates to DExTer that we do not expect the debugger to step outside of the test file.  Any differences to this would be registered as unexpected behavior.
+The [DexExpectStepKind][3] command indicates that we do not expect the debugger to
+step outside of the test file.
+
+[1]: Commands.md#DexLabel
+[2]: Commands.md#DexExpectWatchValue
+[3]: Commands.md#DexExpectStepKind
 
 ## Detailed DExTer reports
 
@@ -104,7 +118,7 @@ Running the command below launches the tests/nostdlib/fibonacci test case in DEx
 
     $ dexter.py test --builder clang-cl_vs2015 --debugger vs2017 --cflags="/Ox /Zi" --ldflags="/Zi" -v -- tests/nostdlib/fibonacci
 
-The detailed report is enabled by ```-v``` and shows a breakdown of the information from each check make in each debugger step. For example:
+The detailed report is enabled by `-v` and shows a breakdown of the information from each debugger step. For example:
 
     fibonacci = (0.2832)
 
@@ -244,15 +258,16 @@ shows a score of 0.2832 suggesting that unexpected behavior has been seen.  This
         step 20 (Variable is optimized away and not available.)
         step 23 (Variable is optimized away and not available.)
 
-shows that for ```first``` the expected values 0, 1, 2 and 3 were seen, 5 was not.  On some steps the variable was reported as being optimized away.
+shows that for `first` the expected values 0, 1, 2 and 3 were seen, 5 was not.  On some steps the variable was reported as being optimized away.
 
 ## Writing new test cases
 
-Each test requires a ```test.cfg``` file.  Currently the contents of this file are not read, but its presence is used to determine the root directory of a test. In the future, configuration variables for the test such as supported language modes may be stored in this file.  Once a test has been written with DexWatch comments added, the ```annotate-expected-values``` tool can be used in conjunction with a DextIR JSON file (likely from an unoptimized build) to automatically generate ```DexExpectWatchValue``` and ```DexExpectStepKind``` checks for the file based on the observed behavior.  It is expected that these generated checks will still need to be manually tweaked, but the tool should provide a useful starting point.
+Each test requires a `test.cfg` file.  Currently the contents of this file are not read, but its presence is used to determine the root directory of a test. In the future, configuration variables for the test such as supported language modes may be stored in this file.  Once a test has been written with DexWatch comments added, the `annotate-expected-values` tool can be used in conjunction with a DextIR file (generated by running `dexter.py test` on an unoptimized build) to automatically generate `DexExpectWatchValue` and `DexExpectStepKind` checks for the file based on the observed behavior.  The generated commands may need some adjustments but this should
+provide a good starting point.
 
 ## Additional tools
 
-For clang-based compilers, the ```clang-opt-bisect``` tool can be used to get a breakdown of which LLVM passes may be contributing to debugging experience issues.  For example:
+For clang-based compilers, the `clang-opt-bisect` tool can be used to get a breakdown of which LLVM passes may be contributing to debugging experience issues.  For example:
 
     $ dexter.py clang-opt-bisect tests/nostdlib/fibonacci --builder clang-cl --debugger vs2017 --cflags="/Ox /Zi" --ldflags="/Zi"
 
@@ -297,6 +312,7 @@ For clang-based compilers, the ```clang-opt-bisect``` tool can be used to get a 
 
 
 ## Contributing to DExTer
+[TODO] Add new testing policy info
 
 Before submitting any contributions please ensure that all unit tests and style/lint checks still pass. These can be run with the following command line flags:
 

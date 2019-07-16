@@ -22,8 +22,8 @@
 # THE SOFTWARE.
 """List debuggers tool."""
 
-from dex.debugger.Debuggers import add_debugger_tool_arguments1
-from dex.debugger.Debuggers import handle_debugger_tool_options1
+from dex.debugger.Debuggers import add_debugger_tool_base_arguments
+from dex.debugger.Debuggers import handle_debugger_tool_base_options
 from dex.debugger.Debuggers import Debuggers
 from dex.tools import ToolBase
 from dex.utils import Timer
@@ -42,10 +42,10 @@ class Tool(ToolBase):
 
     def add_tool_arguments(self, parser, defaults):
         parser.description = Tool.__doc__
-        add_debugger_tool_arguments1(parser, defaults)
+        add_debugger_tool_base_arguments(parser, defaults)
 
     def handle_options(self, defaults):
-        handle_debugger_tool_options1(self.context, defaults)
+        handle_debugger_tool_base_options(self.context, defaults)
 
     def go(self) -> ReturnCode:
         with Timer('list debuggers'):

@@ -28,6 +28,15 @@ from dex.command.CommandBase import CommandBase
 
 
 class DexWatch(CommandBase):
+    """Evaluate the `expressions` on the line this command is found on. Use in
+    combination with `annotate-expected-values` to generate
+    `DexExpectWatchValues` commands for this source file.
+
+    DexWatch(*expressions)
+
+    See Commands.md for more info.
+    """
+
     def __init__(self, *args):
         if not args:
             raise TypeError('expected some arguments')

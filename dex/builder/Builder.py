@@ -66,6 +66,13 @@ def _get_script_environment(source_files, compiler_options,
 def run_external_build_script(context, script_path, source_files,
                               compiler_options, linker_options,
                               executable_file):
+    """Build an executable using a builder script.
+
+    The executable is saved to `context.working_directory.path`.
+
+    Returns:
+        ( stdout (str), stderr (str), builder (BuilderIR) )
+    """
 
     builderIR = BuilderIR(
         name=context.options.builder,
