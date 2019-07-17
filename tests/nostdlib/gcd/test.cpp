@@ -17,5 +17,32 @@ int main()
 	return GCD(111, 259);
 }
 
-// DexExpectProgramState({'frames': [{'location': {'lineno': 11}, 'local_vars': {'lhs': '37', 'rhs': '0'}}, {'local_vars': {'lhs': '111', 'rhs': '37'}}, {'local_vars': {'lhs': '259', 'rhs': '111'}}, {'local_vars': {'lhs': '111', 'rhs': '259'}}]})
-
+/*
+DexExpectProgramState({
+	'frames': [
+		{
+			'location': {
+				'lineno': 11
+			},
+			'local_vars': {
+				'lhs': '37', 'rhs': '0'
+			}
+		},
+		{
+			'local_vars': {
+				'lhs': '111', 'rhs': '37'
+			}
+		},
+		{
+			'local_vars': {
+				'lhs': '259', 'rhs': '111'
+			}
+		},
+		{
+			'local_vars': {
+				'lhs': '111', 'rhs': '259'
+			}
+		}
+	]
+})
+*/
