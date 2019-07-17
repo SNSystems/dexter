@@ -42,5 +42,9 @@ class DexExpectStepKind(CommandBase):
 
         super(DexExpectStepKind, self).__init__()
 
+    @staticmethod
+    def get_name():
+        return __class__.__name__
+
     def eval(self):
         pass

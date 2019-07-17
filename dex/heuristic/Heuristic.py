@@ -29,29 +29,14 @@ Assign penalties based on different commands to decrease the score.
 from collections import defaultdict, namedtuple, Counter
 import difflib
 import os
-from itertools import repeat, chain, groupby
+from itertools import groupby
+from dex.command.commands.DexExpectWatchValue import StepValueInfo
+from dex.command.ParseCommand import get_command_object
 
-from dex.command import get_command_object
 
 PenaltyCommand = namedtuple('PenaltyCommand', ['pen_dict', 'max_penalty'])
 # 'meta' field used in different ways by different things
 PenaltyInstance = namedtuple('PenaltyInstance', ['meta', 'the_penalty'])
-
-
-class StepValueInfo(object):
-    def __init__(self, step_index, value_info):
-        self.step_index = step_index
-        self.value_info = value_info
-
-    def __str__(self):
-        return '{}:{}'.format(self.step_index, self.value_info)
-
-    def __eq__(self, other):
-        return (self.value_info.expression == other.value_info.expression
-                and self.value_info.value == other.value_info.value)
-
-    def __hash__(self):
-        return hash(self.value_info.expression, self.value_info.value)
 
 
 def add_heuristic_tool_arguments(parser):

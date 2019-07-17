@@ -9,6 +9,10 @@ class DexExpectStepOrder(CommandBase):
         self.sequence = [int(x) for x in args]
         super(DexExpectStepOrder, self).__init__()
 
+    @staticmethod
+    def get_name():
+        return __class__.__name__
+
     def eval(self, debugger):
         step_info = debugger.get_step_info()
         loc = step_info.current_location
