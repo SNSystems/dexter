@@ -232,5 +232,5 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def evaluate_expression(self, expression):
+    def evaluate_expression(self, expression, frame_idx=0):
         pass

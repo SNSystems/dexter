@@ -208,7 +208,8 @@ class LLDB(DebuggerBase):
         return ['__scrt_common_main_seh', '__libc_start_main']
 
     def evaluate_expression(self, expression, frame_idx=0):
-        result = self._thread.GetFrameAtIndex(frame_idx).EvaluateExpression(expression)
+        result = self._thread.GetFrameAtIndex(frame_idx
+            ).EvaluateExpression(expression)
         error_string = str(result.error)
 
         value = result.value

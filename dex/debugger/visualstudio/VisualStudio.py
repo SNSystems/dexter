@@ -175,11 +175,9 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
                 frame.loc = loc
                 state_frame.location = SourceLocation(**self._location)
 
-            self.set_current_stack_frame(idx)
             for watch in self.watches:
                 state_frame.watches[watch] = self.evaluate_expression(
-                    watch)
-            self.set_current_stack_frame(0)
+                    watch, idx)
 
 
             state_frames.append(state_frame)
@@ -210,8 +208,10 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
             '__tmainCRTStartup', 'mainCRTStartup'
         ]
 
-    def evaluate_expression(self, expression) -> ValueIR:
+    def evaluate_expression(self, expression, frame_idx=0) -> ValueIR:
+        self.set_current_stack_frame(frame_idx)
         result = self._debugger.GetExpression(expression)
+        self.set_current_stack_frame(0)
         value = result.Value
 
         is_optimized_away = any(s in value for s in [
