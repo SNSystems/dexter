@@ -29,7 +29,7 @@ import time
 import traceback
 
 from dex.command import get_command_object
-from dex.dextIR import DebuggerIR
+from dex.dextIR import DebuggerIR, ValueIR
 from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import NotYetLoadedDebuggerException
 from dex.utils.ReturnCode import ReturnCode
@@ -232,5 +232,5 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def evaluate_expression(self, expression, frame_idx=0):
+    def evaluate_expression(self, expression, frame_idx=0) -> ValueIR:
         pass
