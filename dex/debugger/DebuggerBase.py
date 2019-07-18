@@ -139,7 +139,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
 
         for command in chain.from_iterable(self.steps.commands.values()):
             command_obj = get_command_object(command)
-            self.watches = self.watches.union(command_obj.get_watches())
+            self.watches.update(command_obj.get_watches())
 
         max_steps = self.context.options.max_steps
         for _ in range(max_steps):

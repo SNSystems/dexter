@@ -154,7 +154,6 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
         frames = []
         state_frames = []
 
-        loc = LocIR(**self._location)
 
         for idx, sf in enumerate(stackframes):
             frame = FrameIR(
@@ -171,10 +170,6 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
                                      is_inlined=frame.is_inlined,
                                      watches={})
 
-            if idx == 0:
-                frame.loc = loc
-                state_frame.location = SourceLocation(**self._location)
-
             for watch in self.watches:
                 state_frame.watches[watch] = self.evaluate_expression(
                     watch, idx)
@@ -182,6 +177,10 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
 
             state_frames.append(state_frame)
             frames.append(frame)
+
+        loc = LocIR(**self._location)
+        frames[0].loc = loc
+        state_frames[0].location = SourceLocation(**self._location)
 
         reason = StopReason.BREAKPOINT
         if loc.path is None:  # pylint: disable=no-member
