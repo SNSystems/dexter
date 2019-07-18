@@ -31,7 +31,6 @@ import difflib
 import os
 from itertools import groupby
 from dex.command.commands.DexExpectWatchValue import StepValueInfo
-from dex.command.ParseCommand import get_command_object
 
 
 PenaltyCommand = namedtuple('PenaltyCommand', ['pen_dict', 'max_penalty'])
@@ -128,8 +127,7 @@ class Heuristic(object):
 
         # Get DexExpectWatchValue results.
         try:
-            for watch in steps.commands["DexExpectWatchValue"]:
-                command = get_command_object(watch)
+            for command in steps.commands['DexExpectWatchValue']:
                 command.eval(steps)
                 maximum_possible_penalty = min(3, len(
                     command.values)) * worst_penalty
@@ -143,8 +141,7 @@ class Heuristic(object):
         try:
             penalties = defaultdict(list)
             maximum_possible_penalty_all = 0
-            for command in steps.commands["DexExpectProgramState"]:
-                expect_state = get_command_object(command)
+            for expect_state in steps.commands['DexExpectProgramState']:
                 success = expect_state.eval(steps)
                 p = 0 if success else self.penalty_incorrect_program_state
 
@@ -175,8 +172,7 @@ class Heuristic(object):
         penalties = defaultdict(list)
         maximum_possible_penalty_all = 0
         try:
-            for step_kind in steps.commands['DexExpectStepKind']:
-                command = get_command_object(step_kind)
+            for command in steps.commands['DexExpectStepKind']:
                 command.eval()
                 # Cap the penalty at 2 * expected count or else 1
                 maximum_possible_penalty = max(command.count * 2, 1)
@@ -219,11 +215,10 @@ class Heuristic(object):
 
         if 'DexExpectStepOrder' in steps.commands:
             cmds = steps.commands['DexExpectStepOrder']
-            cmds = [(c, get_command_object(c)) for c in cmds]
 
             # Form a list of which line/cmd we _should_ have seen
-            cmd_num_lst = [(x, c.loc.lineno) for c, co in cmds
-                           for x in co.sequence]
+            cmd_num_lst = [(x, c.lineno) for c in cmds
+                                         for x in c.sequence]
             # Order them by the sequence number
             cmd_num_lst.sort(key=lambda t: t[0])
             # Strip out sequence key

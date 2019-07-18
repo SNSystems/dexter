@@ -27,7 +27,6 @@
 import sys
 
 from dex.tools import main
-from dex.utils.ReturnCode import ReturnCode
 
 if __name__ == '__main__':
     return_code = main()

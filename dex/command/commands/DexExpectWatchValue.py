@@ -141,6 +141,29 @@ class DexExpectWatchValue(CommandBase):
     def encountered_values(self):
         return sorted(list(set(self.values) - self._missing_values))
 
+
+    def resolve_label(self, label_line_pair):
+        # from_line and to_line could have the same label.
+        if self._to_line == label_line_pair[0]:
+            self._to_line = label_line_pair[1]
+        if self._from_line == label_line_pair[0]:
+             self._from_line = label_line_pair[1]
+
+    def has_labels(self):
+        return len(self.get_label_args()) > 0
+
+    def get_label_args(self):
+        label_list = []
+        try:
+            int(self._from_line)
+        except ValueError:
+            label_list.append(self._from_line)
+        try:
+            int(self._to_line)
+        except ValueError:
+            label_list.append(self._to_line)
+        return label_list
+
     def _handle_watch(self, step, watch):
         self.times_encountered += 1
 

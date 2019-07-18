@@ -28,13 +28,13 @@ Python code being embedded within DExTer commands.
 from collections import defaultdict
 
 from dex.utils.Exceptions import CommandParseError
-from dex.dextIR import CommandIR
 
 from dex.command.CommandBase import CommandBase
 from dex.command.commands.DexExpectProgramState import DexExpectProgramState
 from dex.command.commands.DexExpectStepKind import DexExpectStepKind
 from dex.command.commands.DexExpectStepOrder import DexExpectStepOrder
 from dex.command.commands.DexExpectWatchValue import DexExpectWatchValue
+from dex.command.commands.DexLabel import DexLabel
 from dex.command.commands.DexUnreachable import DexUnreachable
 from dex.command.commands.DexWatch import DexWatch
 
@@ -45,6 +45,7 @@ def _get_valid_commands():
       DexExpectStepKind.get_name() : DexExpectStepKind,
       DexExpectStepOrder.get_name() : DexExpectStepOrder,
       DexExpectWatchValue.get_name() : DexExpectWatchValue,
+      DexLabel.get_name() : DexLabel,
       DexUnreachable.get_name() : DexUnreachable,
       DexWatch.get_name() : DexWatch
     }
@@ -60,7 +61,7 @@ def _get_command_name(command_raw: str) -> str:
 
 def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
     """Return a dict which merges valid_commands and subcommands for
-    command_name.
+       command_name.
     """
     subcommands = valid_commands[command_name].get_subcommands()
     if subcommands:
@@ -77,14 +78,22 @@ def _eval_command(command_raw: str, valid_commands: dict) -> CommandBase:
     return command
 
 
-def get_command_object(commandIR: CommandIR):
-    """Externally visible version of _safe_eval.  Only returns the Command
-    object itself.
-    """
-    command = _eval_command(commandIR.raw_text, _get_valid_commands())
-    command.path = commandIR.loc.path
-    command.lineno = commandIR.loc.lineno
-    return command
+def resolve_labels(command: CommandBase, commands: dict):
+    """Attempt to resolve any labels in command"""
+    dex_labels = commands['DexLabel']
+    command_label_args = command.get_label_args()
+    for command_arg in command_label_args:
+        for dex_label in list(dex_labels.values()):
+            if dex_label.path == command.path and dex_label.eval() == command_arg:
+                command.resolve_label(dex_label.get_as_pair())
+    # labels for command should be resolved by this point.
+    if command.has_labels():
+        syntax_error = SyntaxError()
+        syntax_error.filename = command.path
+        syntax_error.lineno = command.lineno
+        syntax_error.offset = 0
+        syntax_error.text = command.__str__
+        raise syntax_error
 
 
 def _find_start_of_command(line, valid_commands) -> int:
@@ -133,7 +142,6 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
                 continue
 
             command_name = _get_command_name(line[start:])
-            command_path = path
             command_lineno = lineno
             command_column = start + 1 # Column numbers start at 1.
             cmd_text_list = [command_name]
@@ -152,9 +160,11 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
         try:
             raw_text = "".join(cmd_text_list)
             command = _eval_command(raw_text, valid_commands)
-            command.path = command_path
-            command.lineno = command_lineno
+            command_name = _get_command_name(raw_text)
+            command.path = path
+            command.lineno = lineno
             command.raw_text = raw_text
+            resolve_labels(command, commands)
             assert (path, lineno) not in commands[command_name], (
                 command_name, commands[command_name])
             commands[command_name][path, lineno] = command

@@ -28,7 +28,6 @@ import sys
 import time
 import traceback
 
-from dex.command import get_command_object
 from dex.dextIR import DebuggerIR
 from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import NotYetLoadedDebuggerException
@@ -117,9 +116,9 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         try:
             # Iterate over all watches of the types named in watch_cmds
             for watch in towatch:
-                if (watch.loc.path == loc.path
-                        and watch.loc.lineno == loc.lineno):
-                    result = get_command_object(watch).eval(self)
+                if (watch.path == loc.path
+                        and watch.lineno == loc.lineno):
+                    result = watch.eval(self)
                     step_info.watches.update(result)
                     break
         except KeyError:

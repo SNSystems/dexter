@@ -21,4 +21,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from dex.command.ParseCommand import find_all_commands, get_command_object
+from dex.command.ParseCommand import find_all_commands
