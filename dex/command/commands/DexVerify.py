@@ -22,7 +22,6 @@
 # THE SOFTWARE.
 """[TODO] Add words
 """
-import pprint
 
 from dex.command.CommandBase import CommandBase
 from dex.command.commands.LTD.internal.Proposition import Boolean

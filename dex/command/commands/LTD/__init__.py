@@ -12,8 +12,8 @@ from dex.command.commands.LTD.public.BasicOperators import (
 from dex.command.commands.LTD.public.Expect import Expect
 from dex.command.commands.LTD.public.ExpectState import ExpectState
 
-# Composit operators
-## Temporal operatos
+# Composite operators
+## Temporal operators
 from dex.command.commands.LTD.public.CompositeOperators import (
     Eventually, Henceforth, Release, After, Ordered
 )

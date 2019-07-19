@@ -99,4 +99,4 @@ class Next(UnaryOperator):
     def eval(self, trace_iter: DextStepIter):
         trace_iter = copy(trace_iter)
         trace_iter.increment()
-        return self.operand.eval(trace_iter)
+        return not trace_iter.at_end() and self.operand.eval(trace_iter)

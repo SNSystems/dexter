@@ -46,7 +46,7 @@ class Release(Composite, BinaryOperator):
 class Henceforth(Composite, UnaryOperator):
     def __init__(self, *args):
         super().__init__(*args)
-        self.set_proposition(Release(False, self.operand))
+        self.set_proposition(Weak(self.operand, False))
 
 
 class After(Composite, BinaryOperator):
