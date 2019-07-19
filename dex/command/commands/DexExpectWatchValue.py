@@ -154,12 +154,8 @@ class DexExpectWatchValue(CommandBase):
         return len(self.get_label_args()) > 0
 
     def get_label_args(self):
-        label_list = []
-        if isinstance(self._from_line, str):
-            label_list.append(self._from_line)
-        if isinstance(self._to_line, str):
-            label_list.append(self._to_line)
-        return label_list
+        return [label for label in (self._from_line, self._to_line)
+                      if isinstance(label, str)]
 
     def _handle_watch(self, step, watch):
         self.times_encountered += 1
