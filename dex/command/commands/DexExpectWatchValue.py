@@ -129,6 +129,10 @@ class DexExpectWatchValue(CommandBase):
 
         super(DexExpectWatchValue, self).__init__()
 
+
+    def get_watches(self):
+        return [self.expression]
+
     @property
     def line_range(self):
         return list(range(self._from_line, self._to_line + 1))
@@ -195,7 +199,7 @@ class DexExpectWatchValue(CommandBase):
 
             if (loc.path == self.path and loc.lineno in self.line_range):
                 try:
-                    watch = step.watches[self.expression]
+                    watch = step.program_state.frames[0].watches[self.expression]
                 except KeyError:
                     pass
                 else:

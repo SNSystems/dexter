@@ -41,6 +41,9 @@ class SourceLocation:
         return '{}({}:{})'.format(self.path, self.lineno, self.column)
 
     def match(self, other) -> bool:
+        """Returns true iff all the properties that appear in `self` have the
+        same value in `other`, but not necessarily vice versa.
+        """
         if not other or not isinstance(other, SourceLocation):
             return False
 
@@ -61,33 +64,36 @@ class StackFrame:
                  function: str = None,
                  is_inlined: bool = None,
                  location: SourceLocation = None,
-                 local_vars: OrderedDict = None):
-        if local_vars is None:
-            local_vars = {}
+                 watches: OrderedDict = None):
+        if watches is None:
+            watches = {}
 
         self.function = function
         self.is_inlined = is_inlined
         self.location = location
-        self.local_vars = local_vars
+        self.watches = watches
 
     def __str__(self):
         return '{}{}: {} | {}'.format(
             self.function,
             ' (inlined)' if self.is_inlined else '',
             self.location,
-            self.local_vars)
+            {k: str(self.watches[k]) for k in self.watches})
 
     def match(self, other) -> bool:
+        """Returns true iff all the properties that appear in `self` have the
+        same value in `other`, but not necessarily vice versa.
+        """
         if not other or not isinstance(other, StackFrame):
             return False
 
         if self.location and not self.location.match(other.location):
             return False
 
-        if self.local_vars:
-            for name in iter(self.local_vars):
+        if self.watches:
+            for name in iter(self.watches):
                 try:
-                    if other.local_vars[name] != self.local_vars[name]:
+                    if other.watches[name].value != self.watches[name]:
                         return False
                 except KeyError:
                     return False
@@ -95,11 +101,8 @@ class StackFrame:
         return True
 
 class ProgramState:
-    def __init__(self,
-                 frames: List[StackFrame] = None,
-                 global_vars: OrderedDict = None):
+    def __init__(self, frames: List[StackFrame] = None):
         self.frames = frames
-        self.global_vars = global_vars
 
     def __str__(self):
         return '\n'.join(map(
@@ -107,6 +110,9 @@ class ProgramState:
             enumerate(self.frames)))
 
     def match(self, other) -> bool:
+        """Returns true iff all the properties that appear in `self` have the
+        same value in `other`, but not necessarily vice versa.
+        """
         if not other or not isinstance(other, ProgramState):
             return False
 
@@ -116,14 +122,6 @@ class ProgramState:
                     if not frame.match(other.frames[idx]):
                         return False
                 except (IndexError, KeyError):
-                    return False
-
-        if self.global_vars:
-            for name in iter(self.global_vars):
-                try:
-                    if other.global_variables[name] != self.global_vars[name]:
-                        return False
-                except IndexError:
                     return False
 
         return True

@@ -24,22 +24,22 @@ DexExpectProgramState({
 			'location': {
 				'lineno': 11
 			},
-			'local_vars': {
+			'watches': {
 				'lhs': '37', 'rhs': '0'
 			}
 		},
 		{
-			'local_vars': {
+			'watches': {
 				'lhs': '111', 'rhs': '37'
 			}
 		},
 		{
-			'local_vars': {
+			'watches': {
 				'lhs': '259', 'rhs': '111'
 			}
 		},
 		{
-			'local_vars': {
+			'watches': {
 				'lhs': '111', 'rhs': '259'
 			}
 		}
