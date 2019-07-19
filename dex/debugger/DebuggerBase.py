@@ -137,8 +137,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         self.steps.clear_steps()
         self.launch()
 
-        for command in chain.from_iterable(self.steps.commands.values()):
-            command_obj = get_command_object(command)
+        for command_obj in chain.from_iterable(self.steps.commands.values()):
             self.watches.update(command_obj.get_watches())
 
         max_steps = self.context.options.max_steps

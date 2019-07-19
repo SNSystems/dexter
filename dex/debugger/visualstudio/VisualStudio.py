@@ -179,8 +179,9 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
             frames.append(frame)
 
         loc = LocIR(**self._location)
-        frames[0].loc = loc
-        state_frames[0].location = SourceLocation(**self._location)
+        if frames:
+            frames[0].loc = loc
+            state_frames[0].location = SourceLocation(**self._location)
 
         reason = StopReason.BREAKPOINT
         if loc.path is None:  # pylint: disable=no-member
