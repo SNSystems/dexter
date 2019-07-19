@@ -20,8 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""LTD proposition based on DexExpectProgramState.
-"""
+"""LTD proposition based on DexExpectProgramState."""
 
 from dex.dextIR import DextStepIter
 from dex.command.commands.LTD.internal.Proposition import Proposition

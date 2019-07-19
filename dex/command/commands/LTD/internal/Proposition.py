@@ -20,6 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+"""Base classes and utilities required for LTD propositions."""
 
 import abc
 
@@ -27,12 +28,36 @@ from dex.dextIR import DextStepIter
 
 
 class Proposition:
+    """Base class for all LTD propositions."""
+
     @abc.abstractmethod
     def eval(self, trace_iter: DextStepIter) -> bool:
+        """Verify that this proposition holds.
+
+        `trace_iter` must be copied if it is going to be modified
+        (e.g. incremented). It is okay to increment and blindly pass on because:
+
+        You MUST check `not trace_iter.at_end()` before using
+        `trace_iter.dereference()` to get the current debugger step.
+
+        Args:
+            trace_iter: Debugger steps to verify.
+
+        Returns:
+            True if the proposition holds.
+        """
         pass
 
 
 class Composite:
+    """Interface for composite LTD operators.
+
+    Operators using this interface need not define an `eval()`. You must call
+    `set_proposition` once to bind the composite proposition.
+
+    set_proposition adds the attribute `proposition` to this object.
+    """
+
     def eval(self, trace_iter: DextStepIter):
         return  self.proposition.eval(trace_iter)
 
@@ -41,6 +66,12 @@ class Composite:
 
 
 class Boolean(Proposition):
+    """A wrapper around `bool` type for LTD expressions.
+
+    Arg list:
+        param1 (bool): The value to wrap.
+    """
+
     def __init__(self, *args):
         if len(args) != 1:
             raise TypeError('Expected exactly one arg')
@@ -59,7 +90,17 @@ class Boolean(Proposition):
         return self.__str__()
 
 
-def unwrap_LTD_arg(arg) -> Proposition:
+def load_proposition_arg(arg) -> Proposition:
+    """Validate a `Proposition` argument.
+
+    Promotes `arg` from `bool` type to `Boolean` which is a valid proposition.
+
+    Raises:
+        TypeError: arg is not a `bool` or `Proposition`.
+
+    Returns:
+        The proposition.
+    """
     if isinstance(arg, bool):
         arg = Boolean(arg)
     elif not isinstance(arg, Proposition):
