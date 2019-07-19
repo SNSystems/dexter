@@ -29,7 +29,7 @@ import time
 import traceback
 
 from dex.command import get_command_object
-from dex.dextIR import DebuggerIR
+from dex.dextIR import DebuggerIR, ValueIR
 from dex.utils.Exceptions import DebuggerException
 from dex.utils.Exceptions import NotYetLoadedDebuggerException
 from dex.utils.ReturnCode import ReturnCode
@@ -42,6 +42,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         self._interface = None
         self.has_loaded = False
         self._loading_error = NotYetLoadedDebuggerException()
+        self.watches = set()
 
         try:
             self._interface = self._load_interface()
@@ -110,7 +111,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
 
     def _update_step_watches(self, step_info):
         loc = step_info.current_location
-        watch_cmds = ['DexWatch', 'DexUnreachable', 'DexExpectStepOrder']
+        watch_cmds = ['DexUnreachable', 'DexExpectStepOrder']
         towatch = chain.from_iterable(self.steps.commands[x]
                                       for x in watch_cmds
                                       if x in self.steps.commands)
@@ -135,6 +136,10 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
     def start(self):
         self.steps.clear_steps()
         self.launch()
+
+        for command in chain.from_iterable(self.steps.commands.values()):
+            command_obj = get_command_object(command)
+            self.watches.update(command_obj.get_watches())
 
         max_steps = self.context.options.max_steps
         for _ in range(max_steps):
@@ -227,5 +232,5 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def evaluate_expression(self, expression):
+    def evaluate_expression(self, expression, frame_idx=0) -> ValueIR:
         pass

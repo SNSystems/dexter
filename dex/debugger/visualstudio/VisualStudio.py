@@ -26,12 +26,11 @@ import abc
 import imp
 import os
 import sys
-from itertools import chain
 
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
 from dex.dextIR import StackFrame, SourceLocation, ProgramState
-from dex.utils.Exceptions import LoadDebuggerException
+from dex.utils.Exceptions import Error, LoadDebuggerException
 from dex.utils.ReturnCode import ReturnCode
 
 
@@ -138,6 +137,16 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
         self._fn_go()
         return ReturnCode.OK
 
+    def set_current_stack_frame(self, idx: int = 0):
+        thread = self._debugger.CurrentThread
+        stack_frames = thread.StackFrames
+        try:
+            stack_frame = stack_frames[idx]
+            self._debugger.CurrentStackFrame = stack_frame.raw
+        except IndexError:
+            raise Error('attempted to access stack frame {} out of {}'
+                .format(idx, len(stack_frames)))
+
     def get_step_info(self):
         thread = self._debugger.CurrentThread
         stackframes = thread.StackFrames
@@ -145,7 +154,8 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
         frames = []
         state_frames = []
 
-        for sf in stackframes:
+
+        for idx, sf in enumerate(stackframes):
             frame = FrameIR(
                 function=self._sanitize_function_name(sf.FunctionName),
                 is_inlined=sf.FunctionName.startswith('[Inline Frame]'),
@@ -155,19 +165,22 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
             if any(name in fname for name in self.frames_below_main):
                 break
 
-            frames.append(frame)
 
             state_frame = StackFrame(function=frame.function,
                                      is_inlined=frame.is_inlined,
-                                     local_vars={})
-            for expr in chain(sf.Arguments, sf.Locals):
-                state_frame.local_vars[expr.Name] = expr.Value
+                                     watches={})
+
+            for watch in self.watches:
+                state_frame.watches[watch] = self.evaluate_expression(
+                    watch, idx)
+
+
             state_frames.append(state_frame)
+            frames.append(frame)
 
         loc = LocIR(**self._location)
-        if frames:
-            frames[0].loc = loc
-            state_frames[0].location = SourceLocation(**self._location)
+        frames[0].loc = loc
+        state_frames[0].location = SourceLocation(**self._location)
 
         reason = StopReason.BREAKPOINT
         if loc.path is None:  # pylint: disable=no-member
@@ -194,8 +207,10 @@ class VisualStudio(DebuggerBase, metaclass=abc.ABCMeta):  # pylint: disable=abst
             '__tmainCRTStartup', 'mainCRTStartup'
         ]
 
-    def evaluate_expression(self, expression):
+    def evaluate_expression(self, expression, frame_idx=0) -> ValueIR:
+        self.set_current_stack_frame(frame_idx)
         result = self._debugger.GetExpression(expression)
+        self.set_current_stack_frame(0)
         value = result.Value
 
         is_optimized_away = any(s in value for s in [
