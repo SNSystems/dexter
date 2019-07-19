@@ -76,7 +76,7 @@ def run_external_build_script(context, script_path, source_files,
                                                         compiler_options)
 
     script_environ = _get_script_environment(source_files, compiler_options,
-                                            linker_options, executable_file)
+                                             linker_options, executable_file)
     env = dict(os.environ)
     env.update(script_environ)
     try:
@@ -108,20 +108,19 @@ class TestBuilder(unittest.TestCase):
         env = _get_script_environment(source_files, compiler_options,
                                       linker_options, executable_file)
 
-        assert(env['SOURCE_FILES'] == 'a.a b.b')
-        assert(env['OBJECT_FILES'] == 'a.a.o b.b.o')
+        assert env['SOURCE_FILES'] == 'a.a b.b'
+        assert env['OBJECT_FILES'] == 'a.a.o b.b.o'
 
-        assert(env['SOURCE_INDEXES'] == '01 02')
-        assert(env['LINKER_OPTIONS'] == '-optionX valueX')
+        assert env['SOURCE_INDEXES'] == '01 02'
+        assert env['LINKER_OPTIONS'] == '-optionX valueX'
 
-        assert(env['SOURCE_FILE_01'] == 'a.a')
-        assert(env['SOURCE_FILE_02'] == 'b.b')
+        assert env['SOURCE_FILE_01'] == 'a.a'
+        assert env['SOURCE_FILE_02'] == 'b.b'
 
-        assert(env['OBJECT_FILE_01'] == 'a.a.o')
-        assert(env['OBJECT_FILE_02'] == 'b.b.o')
+        assert env['OBJECT_FILE_01'] == 'a.a.o'
+        assert env['OBJECT_FILE_02'] == 'b.b.o'
 
-        assert(env['EXECUTABLE_FILE'] == 'exe.exe')
+        assert env['EXECUTABLE_FILE'] == 'exe.exe'
 
-        assert(env['COMPILER_OPTIONS_01'] == '-option1 value1')
-        assert(env['COMPILER_OPTIONS_02'] == '-option2 value2')
-  
+        assert env['COMPILER_OPTIONS_01'] == '-option1 value1'
+        assert env['COMPILER_OPTIONS_02'] == '-option2 value2'
