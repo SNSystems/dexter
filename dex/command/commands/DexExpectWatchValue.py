@@ -144,23 +144,20 @@ class DexExpectWatchValue(CommandBase):
 
     def resolve_label(self, label_line_pair):
         # from_line and to_line could have the same label.
-        if self._to_line == label_line_pair[0]:
-            self._to_line = label_line_pair[1]
-        if self._from_line == label_line_pair[0]:
-             self._from_line = label_line_pair[1]
+        label, lineno = label_line_pair
+        if self._to_line == label:
+            self._to_line = lineno
+        if self._from_line == label:
+            self._from_line = lineno
 
     def has_labels(self):
         return len(self.get_label_args()) > 0
 
     def get_label_args(self):
         label_list = []
-        try:
-            int(self._from_line)
-        except ValueError:
+        if isinstance(self._from_line, str):
             label_list.append(self._from_line)
-        try:
-            int(self._to_line)
-        except ValueError:
+        if isinstance(self._to_line, str):
             label_list.append(self._to_line)
         return label_list
 

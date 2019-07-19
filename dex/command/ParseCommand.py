@@ -84,7 +84,8 @@ def resolve_labels(command: CommandBase, commands: dict):
     command_label_args = command.get_label_args()
     for command_arg in command_label_args:
         for dex_label in list(dex_labels.values()):
-            if dex_label.path == command.path and dex_label.eval() == command_arg:
+            if (dex_label.path == command.path and
+                dex_label.eval() == command_arg):
                 command.resolve_label(dex_label.get_as_pair())
     # labels for command should be resolved by this point.
     if command.has_labels():
@@ -92,7 +93,9 @@ def resolve_labels(command: CommandBase, commands: dict):
         syntax_error.filename = command.path
         syntax_error.lineno = command.lineno
         syntax_error.offset = 0
-        syntax_error.text = command.__str__
+        syntax_error.msg = 'Unresolved labels'
+        for label in command.get_label_args():
+            syntax_error.msg += ' \'' + label + '\''
         raise syntax_error
 
 
