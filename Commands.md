@@ -30,17 +30,20 @@
                       ]}
 
     Keyword args:
-        times (int): Minumum number of ime this state pattern is expected to be
-            seen. Defaults to 1. Can be 0.
+        times (int): Minimum number of times this state pattern is expected to
+             be seen. Defaults to 1. Can be 0.
 
 ### Description
-Expect to see a given program `state` a certain numer of `times`.
+Expect to see a given program `state` a certain number of `times`.
 
-When matching expected against reported states:
-* Omitted fields in `StackFrame` and `SourceLocation` dictionaries are ignored.
-* The state match fails if the results of each `expr` in `watches`
-does not match the given `value`.
+For every debugger step the reported state is compared with the expected state.
+To consider the states a match:
 
+* The `SourceLocation` must match in both states. Omitted fields in the
+`SourceLocation` dictionary are ignored; they always match.
+* Each `expr` in `watches` in the expected state must evaluate to the given
+`value`.
+* The function name and inline status are not considered.
 
 ### Heuristic
 [TODO]
