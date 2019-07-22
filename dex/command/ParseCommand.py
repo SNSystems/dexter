@@ -53,15 +53,15 @@ def _get_valid_commands():
 
 def _get_command_name(command_raw: str) -> str:
     """Return command name by splitting up DExTer command contained in
-       command_raw on the first opening paranthesis and further stripping
-       any potential leading or trailing whitespace.
+    command_raw on the first opening paranthesis and further stripping
+    any potential leading or trailing whitespace.
     """
     return command_raw.split('(', 1)[0].rstrip()
 
 
 def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
     """Return a dict which merges valid_commands and subcommands for
-       command_name.
+    command_name.
     """
     subcommands = valid_commands[command_name].get_subcommands()
     if subcommands:
