@@ -70,14 +70,14 @@ through the program.
 
 ---
 ## DexExpectStepOrder
-    DexExpectStepOrder(index)
+    DexExpectStepOrder(*order)
 
-    Args:
-      index (int): Position in sequence of DexExpectStepOrder commands
+    Arg list:
+      order (int): One or more indices.
 
 ### Description
-Expect the line this command is found on to be stepped on before all other
-DexExpectStepOrder commands with a greater `index` argument.
+Expect the line every `DexExpectStepOrder` is found on to be stepped on in
+`order`. Each instance must have a set of unique ascending indicies.
 
 ### Heuristic
 [TODO]
@@ -85,8 +85,8 @@ DexExpectStepOrder commands with a greater `index` argument.
 
 ---
 ## DexExpectWatchValue
-    DexExpectWatchValue(expr, *values[,**from_line=1][,**to_line=Max]
-                        [,**on_line])
+    DexExpectWatchValue(expr, *values [,**from_line=1][,**to_line=Max]
+                        [,**on_line][,**require_in_order=True])
 
     Args:
         expr (str): C++ expression to evaluate.
@@ -100,6 +100,7 @@ DexExpectStepOrder commands with a greater `index` argument.
             source.
         on_line (int): Only evaluate the expression on this line. If provided,
             this overrides from_line and to_line.
+        require_in_order (bool): If False the values can appear in any order.
 
 ### Description
 Expect the C++ expression `expr` to evaluate to the list of `values`

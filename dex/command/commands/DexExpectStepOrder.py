@@ -2,10 +2,10 @@ from dex.command.CommandBase import CommandBase
 from dex.dextIR import ValueIR
 
 class DexExpectStepOrder(CommandBase):
-    """Expect the line this command is found on to be stepped on before all
-    other DexExpectStepOrder commands with a greater `index` argument.
+    """Expect the line every `DexExpectStepOrder` is found on to be stepped on
+    in `order`. Each instance must have a set of unique ascending indicies.
 
-    DexExpectStepOrder(index)
+    DexExpectStepOrder(*order)
 
     See Commands.md for more info.
     """
