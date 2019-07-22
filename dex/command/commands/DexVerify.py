@@ -20,9 +20,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""[TODO] Add words
-"""
-
 from dex.command.CommandBase import CommandBase
 from dex.command.commands.LTD.internal.Proposition import Boolean
 from dex.dextIR import DextIR, DextStepIter
@@ -33,6 +30,13 @@ from dex.command.commands.LTD import (
 
 
 class DexVerify(CommandBase):
+    """Define an LTD model which expresses expected debugging behaviour.
+
+    DexVerify(proposition)
+
+    See Commands.md for more info.
+    """
+
     def __init__(self, *args):
         if len(args) != 1:
             raise TypeError('Expected exactly one arg')
@@ -48,6 +52,7 @@ class DexVerify(CommandBase):
         return self.model.eval(trace_iter)
 
     def get_subcommands():
+        # LTD operators which are exposed to test writers through DexVerify.
         return {
             'Or': Or,
             'And': And,

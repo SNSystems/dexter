@@ -111,16 +111,14 @@ class BinaryOperatorTree(Composite, Proposition):
 
         # Build a tree of binary expressions starting with the deepest rhs leaf.
         rhs = load_proposition_arg(args[-1])
-        i = len(args) - 2
-        while i >= 0:
+        for i in reversed(range(len(args)-1)):
             lhs = load_proposition_arg(args[i])
-            rhs = self.__class__.proposition_template(lhs, rhs)
-            i -= 1
+            rhs = self.proposition_template(lhs, rhs)
 
         self.set_proposition(rhs)
 
-    @abc.abstractmethod
-    def proposition_template(p: Proposition, q: Proposition) -> Proposition:
+    @abc.abstractclassmethod
+    def proposition_template(self, p: Proposition, q: Proposition) -> Proposition:
         pass
 
     def __str__(self):

@@ -61,5 +61,5 @@ class After(Composite, BinaryOperator):
 
 
 class Ordered(BinaryOperatorTree):
-    def proposition_template(p: Proposition, q: Proposition):
+    def proposition_template(self, p: Proposition, q: Proposition):
         return After(q, p)
