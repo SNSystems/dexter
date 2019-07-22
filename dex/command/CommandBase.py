@@ -33,6 +33,12 @@ class CommandBase(object, metaclass=abc.ABCMeta):
         self.path = None
         self.lineno = None
 
+    def get_label_args(self):
+        return list()
+
+    def has_labels(self):
+        return False
+
     @staticmethod
     @abc.abstractstaticmethod
     def get_name():

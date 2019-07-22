@@ -1,7 +1,7 @@
 # DExTer : Debugging Experience Tester
 # ~~~~~~   ~         ~~         ~   ~~
 #
-# Copyright (c) 2018 by SN Systems Ltd., Sony Interactive Entertainment Inc.
+# Copyright (c) 2019 by SN Systems Ltd., Sony Interactive Entertainment Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,28 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Serialization of a DExTer command embedded within one of the files under
-test.
+"""Command used to give a line in a test a named psuedonym. Every DexLabel has
+   a line number and Label string component.
 """
 
-from dex.dextIR.LocIR import LocIR
+from dex.command.CommandBase import CommandBase
 
 
-class CommandIR:
-    def __init__(self, raw_text: str, loc: LocIR):
-        self.raw_text = raw_text
-        self.loc = loc
+class DexLabel(CommandBase):
+    def __init__(self, label):
+
+        if not isinstance(label, str):
+            raise TypeError('invalid argument type')
+
+        self._label = label
+        super(DexLabel, self).__init__()
+
+    def get_as_pair(self):
+        return (self._label, self.lineno)
+
+    @staticmethod
+    def get_name():
+        return __class__.__name__
+
+    def eval(self):
+        return self._label

@@ -30,5 +30,4 @@ from dex.dextIR.FrameIR import FrameIR
 from dex.dextIR.LocIR import LocIR
 from dex.dextIR.StepIR import StepIR, StepKind, StopReason
 from dex.dextIR.ValueIR import ValueIR
-from dex.dextIR.CommandIR import CommandIR
 from dex.dextIR.ProgramState import ProgramState, SourceLocation, StackFrame
