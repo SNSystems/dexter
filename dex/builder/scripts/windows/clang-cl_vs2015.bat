@@ -6,12 +6,12 @@ call "%VS140COMNTOOLS%..\..\VC\bin\amd64\vcvars64.bat"
 @echo OFF
 setlocal EnableDelayedExpansion
 
-for %%I in ({SOURCE_INDEXES}) do (
+for %%I in (%SOURCE_INDEXES%) do (
   clang-cl.exe /c !COMPILER_OPTIONS_%%I! !SOURCE_FILE_%%I! /Fo!OBJECT_FILE_%%I!
   if errorlevel 1 goto :FAIL
 )
 
-clang-cl.exe {LINKER_OPTIONS} {OBJECT_FILES} /Fe{EXECUTABLE_FILE}
+clang-cl.exe %LINKER_OPTIONS% %OBJECT_FILES% /Fe%EXECUTABLE_FILE%
 if errorlevel 1 goto :FAIL
 goto :END
 

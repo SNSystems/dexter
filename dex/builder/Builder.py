@@ -37,8 +37,8 @@ def _quotify(text):
     return '"{}"'.format(text)
 
 
-def _expand_text_replacements(text, source_files, compiler_options,
-                              linker_options, executable_file):
+def _get_script_environment(source_files, compiler_options,
+                            linker_options, executable_file):
 
     source_files = [_quotify(f) for f in source_files]
     object_files = [
@@ -46,27 +46,21 @@ def _expand_text_replacements(text, source_files, compiler_options,
     ]
     source_indexes = ['{:02d}'.format(i + 1) for i in range(len(source_files))]
 
-    replacements = {}
-    replacements['SOURCE_INDEXES'] = ' '.join(source_indexes)
-    replacements['SOURCE_FILES'] = ' '.join(source_files)
-    replacements['OBJECT_FILES'] = ' '.join(object_files)
-    replacements['LINKER_OPTIONS'] = linker_options
+    env_variables = {}
+    env_variables['SOURCE_INDEXES'] = ' '.join(source_indexes)
+    env_variables['SOURCE_FILES'] = ' '.join(source_files)
+    env_variables['OBJECT_FILES'] = ' '.join(object_files)
+    env_variables['LINKER_OPTIONS'] = linker_options
 
     for i, _ in enumerate(source_files):
         index = source_indexes[i]
-        replacements['SOURCE_FILE_{}'.format(index)] = source_files[i]
-        replacements['OBJECT_FILE_{}'.format(index)] = object_files[i]
-        replacements['COMPILER_OPTIONS_{}'.format(index)] = compiler_options[i]
+        env_variables['SOURCE_FILE_{}'.format(index)] = source_files[i]
+        env_variables['OBJECT_FILE_{}'.format(index)] = object_files[i]
+        env_variables['COMPILER_OPTIONS_{}'.format(index)] = compiler_options[i]
 
-    replacements['EXECUTABLE_FILE'] = executable_file
+    env_variables['EXECUTABLE_FILE'] = executable_file
 
-    try:
-        return replacements, text.format(**replacements)
-    except KeyError as e:
-        raise BuildScriptException('could not expand variable {}.\n'
-                                   'Available expansions are: {}'.format(
-                                       e, ', '.join(
-                                           sorted(replacements.keys()))))
+    return env_variables
 
 
 def run_external_build_script(context, script_path, source_files,
@@ -78,33 +72,17 @@ def run_external_build_script(context, script_path, source_files,
         cflags=compiler_options,
         ldflags=linker_options,
     )
-    tmp_script_path = os.path.join(context.working_directory.path,
-                                   os.path.basename(script_path))
-
     assert len(source_files) == len(compiler_options), (source_files,
                                                         compiler_options)
 
-    with open(script_path, 'r') as fp:
-        text = fp.read()
-
-    try:
-        replacements, text = _expand_text_replacements(
-            text, source_files, compiler_options, linker_options,
-            executable_file)
-    except BuildScriptException as e:
-        raise BuildScriptException('{}: {}'.format(script_path, e))
-
-    with open(tmp_script_path, 'w') as fp:
-        fp.write(text)
-
-    os.chmod(tmp_script_path, os.stat(script_path).st_mode)
-
+    script_environ = _get_script_environment(source_files, compiler_options,
+                                             linker_options, executable_file)
     env = dict(os.environ)
-    env.update(replacements)
+    env.update(script_environ)
     try:
         with Timer('running build script'):
             process = subprocess.Popen(
-                [tmp_script_path],
+                [script_path],
                 cwd=context.working_directory.path,
                 env=env,
                 stdout=subprocess.PIPE,
@@ -122,95 +100,27 @@ def run_external_build_script(context, script_path, source_files,
 
 
 class TestBuilder(unittest.TestCase):
-    def test_expand_text_replacements(self):
-        text = ''
-        source_files = ['a.a']
-        compiler_options = ['-option1 value1']
-        linker_options = '-optionX valueX'
-        executable_file = 'exe.exe'
-
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-
-        self.assertEqual(result, '')
-
-        text = '{SOURCE_FILES}'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'a.a')
-
-        text = '{SOURCE_FILE_01}'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'a.a')
-
-        text = '{SOURCE_FILE_02}'
-        with self.assertRaises(BuildScriptException):
-            _expand_text_replacements(text, source_files, compiler_options,
-                                      linker_options, executable_file)
-
-        text = '{COMPILER_OPTIONS_01}'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, '-option1 value1')
-
-        text = '{COMPILER_OPTIONS_02}'
-        with self.assertRaises(BuildScriptException):
-            _expand_text_replacements(text, source_files, compiler_options,
-                                      linker_options, executable_file)
-
-        text = '{EXECUTABLE_FILE}'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'exe.exe')
-
-        text = '{FOO}'
-        with self.assertRaises(BuildScriptException):
-            _expand_text_replacements(text, source_files, compiler_options,
-                                      linker_options, executable_file)
-
-        text = (
-            'xx {SOURCE_FILE_01} yy {COMPILER_OPTIONS_01} zz {EXECUTABLE_FILE}'
-        )
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'xx a.a yy -option1 value1 zz exe.exe')
-
+    def test_get_script_environment(self):
         source_files = ['a.a', 'b.b']
         compiler_options = ['-option1 value1', '-option2 value2']
+        linker_options = '-optionX valueX'
+        executable_file = 'exe.exe'
+        env = _get_script_environment(source_files, compiler_options,
+                                      linker_options, executable_file)
 
-        text = 'xx {SOURCE_FILES} yy'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'xx a.a b.b yy')
+        assert env['SOURCE_FILES'] == 'a.a b.b'
+        assert env['OBJECT_FILES'] == 'a.a.o b.b.o'
 
-        text = 'xx {SOURCE_FILE_01} yy {COMPILER_OPTIONS_01} zz'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'xx a.a yy -option1 value1 zz')
+        assert env['SOURCE_INDEXES'] == '01 02'
+        assert env['LINKER_OPTIONS'] == '-optionX valueX'
 
-        text = 'xx {SOURCE_FILE_01} yy {COMPILER_OPTIONS_02} zz'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'xx a.a yy -option2 value2 zz')
+        assert env['SOURCE_FILE_01'] == 'a.a'
+        assert env['SOURCE_FILE_02'] == 'b.b'
 
-        text = 'xx {SOURCE_FILE_02} yy {COMPILER_OPTIONS_01} zz'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'xx b.b yy -option1 value1 zz')
+        assert env['OBJECT_FILE_01'] == 'a.a.o'
+        assert env['OBJECT_FILE_02'] == 'b.b.o'
 
-        text = 'xx {SOURCE_FILE_02} yy {COMPILER_OPTIONS_02} zz'
-        result = _expand_text_replacements(text, source_files,
-                                           compiler_options, linker_options,
-                                           executable_file)[1]
-        self.assertEqual(result, 'xx b.b yy -option2 value2 zz')
+        assert env['EXECUTABLE_FILE'] == 'exe.exe'
+
+        assert env['COMPILER_OPTIONS_01'] == '-option1 value1'
+        assert env['COMPILER_OPTIONS_02'] == '-option2 value2'
