@@ -77,9 +77,9 @@ The sample test case (tests/nostdlib/fibonacci) looks like this:
     29. DexExpectWatchValue('i', '0', '1', '2', '3', '4',
     30.                     from_line='start', to_line='end')
     31. DexExpectWatchValue('first', '0', '1', '2', '3', '5',
-    32.                    from_line='start', to_line='end')
+    32.                     from_line='start', to_line='end')
     33. DexExpectWatchValue('second', '1', '2', '3', '5',
-    34                      rom_line='start', to_line='end')
+    34                      from_line='start', to_line='end')
     35. DexExpectWatchValue('total', '0', '1', '2', '4', '7',
     36.                     from_line='start', to_line='end')
     37. DexExpectWatchValue('next', '1', '2', '3', '5', '8',
