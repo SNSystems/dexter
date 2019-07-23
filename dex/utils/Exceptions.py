@@ -70,11 +70,6 @@ class CommandParseError(Dexception):
         self.caret = None
 
 
-class SrInitError(Dexception):
-    """If a serialized object cannot be initialized correctly."""
-    pass
-
-
 class ToolArgumentError(Dexception):
     """If a tool argument is invalid."""
     pass
