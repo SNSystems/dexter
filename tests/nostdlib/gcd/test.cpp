@@ -8,7 +8,7 @@ DEX_NOINLINE
 int GCD(int lhs, int rhs)
 {
 	if (rhs == 0)
-		return lhs;
+		return lhs; // DexLabel('check')
 	return GCD(rhs, lhs % rhs);
 }
 
@@ -22,7 +22,7 @@ DexExpectProgramState({
 	'frames': [
 		{
 			'location': {
-				'lineno': 11
+				'lineno': 'check'
 			},
 			'watches': {
 				'lhs': '37', 'rhs': '0'
