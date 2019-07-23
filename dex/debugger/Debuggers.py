@@ -217,7 +217,6 @@ class Debuggers(object):
             return cls._potential_debuggers
         except AttributeError:
             cls._potential_debuggers = _get_potential_debuggers()
-            import pdb; pdb.set_trace()
             return cls._potential_debuggers
 
     def __init__(self, context):
