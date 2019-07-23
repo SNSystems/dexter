@@ -93,6 +93,7 @@ class DEBUG_SYMBOL_ENTRY(Structure):
     ]
 PDEBUG_SYMBOL_ENTRY = POINTER(DEBUG_SYMBOL_ENTRY)
 
+# UUID for DebugSymbols5 interface.
 DebugSymbols5IID = IID(0xc65fa83e, 0x1e69, 0x475e, IID_Data4_Type(0x8e, 0x0e, 0xb5, 0xd7, 0x9e, 0x9c, 0xc1, 0x7e))
 
 class IDebugSymbols5(Structure):
@@ -273,6 +274,7 @@ class Symbols(object):
     self.ptr = symbols
     self.symbols = symbols.contents
     self.vt = self.symbols.lpVtbl.contents
+    # Keep some handy ulongs for passing into C methods.
     self.ulong = c_ulong()
     self.ulong64 = c_ulonglong()
 
@@ -360,7 +362,7 @@ class Symbols(object):
   def GetSymbolPath(self):
     # Query for length of buffer to allocate
     res = self.vt.GetSymbolPath(self.symbols, None, 0, byref(self.ulong))
-    aborter(res, "GetSymbolPath", legit=[1])
+    aborter(res, "GetSymbolPath", legit=[S_FALSE])
 
     # Fetch 'length' length symbol path string
     length = self.ulong.value
@@ -373,7 +375,7 @@ class Symbols(object):
   def GetSourcePath(self):
     # Query for length of buffer to allocate
     res = self.vt.GetSourcePath(self.symbols, None, 0, byref(self.ulong))
-    aborter(res, "GetSourcePath", legit=[1])
+    aborter(res, "GetSourcePath", legit=[S_FALSE])
 
     # Fetch a string of len 'length'
     length = self.ulong.value
@@ -412,7 +414,7 @@ class Symbols(object):
     res = self.vt.GetLineByOffset(self.symbols, offs, None, None, 0, byref(self.ulong), None)
     if res == E_FAIL:
       return None # Sometimes we just can't get line numbers, of course
-    aborter(res, "GetLineByOffset", legit=[1])
+    aborter(res, "GetLineByOffset", legit=[S_FALSE])
 
     # Allocate filename buffer and query for line number too
     filenamelen = self.ulong.value
@@ -426,7 +428,7 @@ class Symbols(object):
   def GetModuleNameString(self, whichname, base):
     # Initial query for name string length
     res = self.vt.GetModuleNameString(self.symbols, whichname, DEBUG_ANY_ID, base, None, 0, byref(self.ulong))
-    aborter(res, "GetModuleNameString", legit=[1])
+    aborter(res, "GetModuleNameString", legit=[S_FALSE])
 
     module_name_len = self.ulong.value
     module_name = (c_char * module_name_len)()

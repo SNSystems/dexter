@@ -31,6 +31,7 @@ from dex.utils.ReturnCode import ReturnCode
 
 from . import setup
 from . import probe_process
+from . import breakpoint
 
 class DbgEng(DebuggerBase):
     def __init__(self, context, *args):
@@ -74,7 +75,7 @@ class DbgEng(DebuggerBase):
 
     def clear_breakpoints(self):
         for x in self.breakpoints:
-            x.RemoveFlags(0x4)
+            x.RemoveFlags(breakpoint.BreakpointFlags.DEBUG_BREAKPOINT_ENABLED)
             self.client.Control.RemoveBreakpoint(x)
 
     def add_breakpoint(self, file_, line):
@@ -122,11 +123,9 @@ class DbgEng(DebuggerBase):
         return self.finished
 
     def evaluate_expression(self, expression):
-        #print("lolexpression {}".format(expression))
         res = self.client.Control.Evaluate(expression)
         if res is not None:
           result, typename = self.client.Control.Evaluate(expression)
-          #print("res {} {}".format(result, typename))
           could_eval = True
         else:
           result, typename = (None, None)
@@ -140,5 +139,3 @@ class DbgEng(DebuggerBase):
             could_evaluate=could_eval,
             is_optimized_away=False,
             is_irretrievable=False)
- 
- 

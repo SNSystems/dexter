@@ -3,6 +3,7 @@ from functools import partial
 
 from .utils import *
 
+# UUID For SystemObjects4 interface.
 DebugSystemObjects4IID = IID(0x489468e6, 0x7d0f, 0x4af5, IID_Data4_Type(0x87, 0xab, 0x25, 0x20, 0x74, 0x54, 0xd5, 0x53))
 
 class IDebugSystemObjects4(Structure):
@@ -74,6 +75,7 @@ class SysObjects(object):
     self.ptr = sysobjects
     self.sysobjects = sysobjects.contents
     self.vt = self.sysobjects.lpVtbl.contents
+    # Keep a handy ulong for passing into C methods.
     self.ulong = c_ulong()
 
   def GetNumberSystems(self):
@@ -185,7 +187,7 @@ class SysObjects(object):
     threads = []
     for x in self.GetThreadIdsByIndex():
       sysid, threadid = x
-      procs.append(threadid)
+      threads.append(threadid)
 
     print("Current processes: {}".format(procs))
-    print("Current threads: {}".format(procs))
+    print("Current threads: {}".format(threads))

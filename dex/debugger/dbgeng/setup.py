@@ -87,6 +87,7 @@ def process_creator(binfile):
   startupinfoa.hStdError = None
   processinformation = PROCESS_INFORMATION()
 
+  # 0x4 below specifies CREATE_SUSPENDED.
   ret = Kernel32.CreateProcessA(binfile.encode("ascii"), None, None, None, False, 0x4, None, None, byref(startupinfoa), byref(processinformation))
   if ret == 0:
     raise Exception('CreateProcess running {}'.format(binfile))

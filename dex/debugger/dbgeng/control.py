@@ -54,7 +54,7 @@ class DebugValueType(IntEnum):
   DEBUG_VALUE_VECTOR128    = 11
   DEBUG_VALUE_TYPES        = 12
 
-
+# UUID for DebugControl7 interface.
 DebugControl7IID = IID(0xb86fb3b1, 0x80d4, 0x475b, IID_Data4_Type(0xae, 0xa3, 0xcf, 0x06, 0x53, 0x9c, 0xf6, 0x3a))
 
 class IDebugControl7(Structure):
@@ -281,6 +281,7 @@ class Control(object):
     self.ptr = control
     self.control = control.contents
     self.vt = self.control.lpVtbl.contents
+    # Keep a handy ulong for passing into C methods.
     self.ulong = c_ulong()
 
   def GetExecutionStatus(self, doprint=False):
@@ -299,7 +300,7 @@ class Control(object):
   def WaitForEvent(self, timeout=100):
     # No flags are taken by WaitForEvent, hence 0
     ret = self.vt.WaitForEvent(self.control, 0, timeout)
-    aborter(ret, "WaitforEvent", legit=[1])
+    aborter(ret, "WaitforEvent", legit=[S_FALSE])
     return ret
 
   def AddBreakpoint2(self, offset=None, enabled=None):

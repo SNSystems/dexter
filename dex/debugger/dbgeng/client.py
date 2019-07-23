@@ -16,6 +16,7 @@ class DebugAttach(IntFlag):
   DEBUG_ATTACH_INVASIVE_RESUME_PROCESS =   0x10
   DEBUG_ATTACH_NONINVASIVE_ALLOW_PARTIAL = 0x20
 
+# UUID for DebugClient7 interface.
 DebugClient7IID = IID(0x13586be3, 0x542e, 0x481e, IID_Data4_Type(0xb1, 0xf2, 0x84, 0x97, 0xba, 0x74, 0xf9, 0xa9 ))
 
 class IDebugClient7(Structure):
