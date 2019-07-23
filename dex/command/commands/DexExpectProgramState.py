@@ -83,7 +83,7 @@ class DexExpectProgramState(CommandBase):
         return [frame.location.lineno
                     for frame in self.expected_program_state.frames
                         if frame.location and
-                            isinstance(frame.location.lineno, str)]
+                        isinstance(frame.location.lineno, str)]
 
     def resolve_label(self, label_line__pair):
         label, line = label_line__pair
