@@ -84,7 +84,7 @@ def get_tool_names():
     """
     return [
         'annotate-expected-values', 'clang-opt-bisect', 'help',
-        'list-debuggers', 'no-tool', 'run-debugger-internal-', 'test', 'view'
+        'list-debuggers', 'no-tool-', 'run-debugger-internal-', 'test', 'view'
     ]
 
 
