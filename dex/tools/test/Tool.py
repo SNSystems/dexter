@@ -168,11 +168,11 @@ class Tool(TestToolBase):
         test_results_path = self._get_results_path(test_name)
         return '{}.txt'.format(test_results_path)
 
-    def _get_results_json_path(self, test_name):
-        """Returns path to results .json file for test denoted by test_name.
+    def _get_results_pickle_path(self, test_name):
+        """Returns path results .dextIR file for test denoted by test_name.
         """
         test_results_path = self._get_results_path(test_name)
-        return '{}.json'.format(test_results_path)
+        return '{}.dextIR'.format(test_results_path)
 
     def _record_steps(self, test_name, steps):
         """Write out the set of steps out to the test's .txt and .json
@@ -182,10 +182,9 @@ class Tool(TestToolBase):
         with open(output_text_path, 'w') as fp:
             self.context.o.auto(str(steps), stream=Stream(fp))
 
-        dextir_basename = self._get_results_basename(test_name)
-        output_dextIR_path = '{}.dextIR'.format(dextir_basename)
+        output_dextIR_path = self._get_results_pickle_path(test_name)
         with open(output_dextIR_path, 'wb') as fp:
-            pickle.dump(steps, fp)
+            pickle.dump(steps, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
     def _record_score(self, test_name, heuristic):
         """Write out the test's heuristic score to the results .txt file.
