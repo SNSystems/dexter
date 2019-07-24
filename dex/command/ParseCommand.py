@@ -100,15 +100,19 @@ def resolve_labels(command: CommandBase, commands: dict):
         raise syntax_error
 
 
-def _find_start_of_command(line, valid_commands) -> int:
-    """Scan line for a valid command, return the index of the first character
-    of the command and the command. Return -1 if no command is found.
+def _find_start_of_command(line, valid_commands) -> (str, int):
+    """Scan line for a valid command.
+
+    Returns:
+        ( command_name (str), start (int) )
+        command_name: None if no command is found.
+        start: Index of first charachter of command_name in line.
     """
     for command in valid_commands:
         start = line.rfind(command)
         if start != -1:
-            return start
-    return -1
+            return (command, start)
+    return (None, -1)
 
 
 def _find_end_of_command(line, start, paren_balance) -> (int, int):
@@ -141,11 +145,10 @@ def _find_all_commands_in_file(context, path, file_lines, valid_commands):
 
         # If parens are currently balanced we can look for a new command
         if paren_balance == 0:
-            start = _find_start_of_command(line, valid_commands)
-            if start == -1:
+            command_name, start = _find_start_of_command(line, valid_commands)
+            if command_name is None:
                 continue
 
-            command_name = _get_command_name(line[start:])
             first_paren = start + len(command_name)
             if line[first_paren] != '(':
                 warn(context,
@@ -157,7 +160,7 @@ def _find_all_commands_in_file(context, path, file_lines, valid_commands):
             command_lineno = lineno
             command_column = start + 1 # Column numbers start at 1.
             cmd_text_list = [command_name]
-            start = first_paren
+            start = first_paren # Start balancing at opening parenthesis.
 
         end, paren_balance = _find_end_of_command(line, start, paren_balance)
         # Add this text blob to the command
@@ -172,7 +175,6 @@ def _find_all_commands_in_file(context, path, file_lines, valid_commands):
         try:
             raw_text = "".join(cmd_text_list)
             command = _eval_command(raw_text, valid_commands)
-            command_name = _get_command_name(raw_text)
             command.path = path
             command.lineno = lineno
             command.raw_text = raw_text
