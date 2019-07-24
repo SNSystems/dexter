@@ -76,8 +76,12 @@ def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
     return valid_commands
 
 
-# [TODO] Update docstring after PR #32 lands
 def _eval_command(command_raw: str, valid_commands: dict) -> CommandBase:
+    """Build a command object from raw text.
+
+    Returns:
+        A dexter command object.
+    """
     command_name = _get_command_name(command_raw)
     valid_commands = _merge_subcommands(command_name, valid_commands)
     # pylint: disable=eval-used
