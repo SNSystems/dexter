@@ -144,7 +144,7 @@ def handle_debugger_tool_options(context, defaults):  # noqa
 
 
 def _get_command_infos(context):
-    commands = find_all_commands(context.options.source_files)
+    commands = find_all_commands(context, context.options.source_files)
     command_infos = OrderedDict()
     for command_type in commands:
         for command in commands[command_type].values():

@@ -27,6 +27,7 @@ Python code being embedded within DExTer commands.
 
 from collections import defaultdict
 
+from dex.utils import warn
 from dex.utils.Exceptions import CommandParseError
 
 from dex.command.CommandBase import CommandBase
@@ -127,7 +128,7 @@ def _find_end_of_command(line, start, paren_balance) -> (int, int):
     return (end, paren_balance)
 
 
-def _find_all_commands_in_file(path, file_lines, valid_commands):
+def _find_all_commands_in_file(context, path, file_lines, valid_commands):
     commands = defaultdict(dict)
     err = CommandParseError()
     err.filename = path
@@ -145,10 +146,18 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
                 continue
 
             command_name = _get_command_name(line[start:])
+            first_paren = start + len(command_name)
+            if line[first_paren] != '(':
+                warn(context,
+                    "{}({}:{}): Ignoring {}. Expected to see '(' immediately "
+                    "after command.".format(
+                        path, lineno, first_paren, command_name))
+                continue
+
             command_lineno = lineno
             command_column = start + 1 # Column numbers start at 1.
             cmd_text_list = [command_name]
-            start += len(command_name) # Start searching for parens after cmd.
+            start = first_paren
 
         end, paren_balance = _find_end_of_command(line, start, paren_balance)
         # Add this text blob to the command
@@ -191,13 +200,13 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
 
 
 
-def find_all_commands(source_files):
+def find_all_commands(context, source_files):
     commands = defaultdict(dict)
     valid_commands = _get_valid_commands()
     for source_file in source_files:
         with open(source_file) as fp:
             lines = fp.readlines()
-        file_commands = _find_all_commands_in_file(source_file, lines,
+        file_commands = _find_all_commands_in_file(context, source_file, lines,
                                                    valid_commands)
         for command_name in file_commands:
             commands[command_name].update(file_commands[command_name])
