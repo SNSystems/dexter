@@ -24,7 +24,6 @@
 
 import os
 
-from dex.utils.Enum import create_named_enum
 from dex.utils.Environment import is_native_windows, has_pywin32
 from dex.utils.PrettyOutputBase import PreserveAutoColors
 from dex.utils.RootDirectory import get_root_directory
