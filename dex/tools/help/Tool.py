@@ -68,7 +68,7 @@ class Tool(ToolBase):
     def go(self) -> ReturnCode:
         if self.context.options.tool is None:
             self.context.o.auto(self._default_text)
-            return 0
+            return ReturnCode.OK
 
         tool_name = self.context.options.tool.replace('-', '_')
         tools_directory = get_tools_directory()
