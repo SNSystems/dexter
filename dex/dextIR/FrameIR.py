@@ -20,12 +20,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Serialization of information related to a call frame."""
-
 from dex.dextIR.LocIR import LocIR
 
 
 class FrameIR:
+    """Data class which represents a frame in the call stack"""
+
     def __init__(self, function: str, is_inlined: bool, loc: LocIR):
         self.function = function
         self.is_inlined = is_inlined

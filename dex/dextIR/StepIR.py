@@ -20,7 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Serialization of information related to a debugger step."""
+"""Classes which are used to represent debugger steps."""
 
 import json
 
@@ -51,7 +51,12 @@ class StepKind(Enum):
 
 
 class StepIR:
-    # watches: OrderedDict[string, ValueIR]
+    """A debugger step.
+
+    Args:
+        watches (OrderedDict): { expression (str), result (ValueIR) }
+    """
+
     def __init__(self,
                  step_index: int,
                  stop_reason: StopReason,

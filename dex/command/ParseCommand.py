@@ -40,6 +40,11 @@ from dex.command.commands.DexWatch import DexWatch
 
 
 def _get_valid_commands():
+    """Return all top level DExTer test commands.
+
+    Returns:
+        { name (str): command (class) }
+    """
     return {
       DexExpectProgramState.get_name() : DexExpectProgramState,
       DexExpectStepKind.get_name() : DexExpectStepKind,
@@ -60,8 +65,10 @@ def _get_command_name(command_raw: str) -> str:
 
 
 def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
-    """Return a dict which merges valid_commands and subcommands for
-    command_name.
+    """Merge valid_commands and command_name's subcommands into a new dict.
+
+    Returns:
+        { name (str): command (class) }
     """
     subcommands = valid_commands[command_name].get_subcommands()
     if subcommands:
@@ -70,6 +77,11 @@ def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
 
 
 def _eval_command(command_raw: str, valid_commands: dict) -> CommandBase:
+    """Build a command object from raw text.
+
+    Returns:
+        A dexter command object.
+    """
     command_name = _get_command_name(command_raw)
     valid_commands = _merge_subcommands(command_name, valid_commands)
     # pylint: disable=eval-used
@@ -100,8 +112,11 @@ def resolve_labels(command: CommandBase, commands: dict):
 
 
 def _find_start_of_command(line, valid_commands) -> int:
-    """Scan line for a valid command, return the index of the first character
-    of the command and the command. Return -1 if no command is found.
+    """Scan `line` for a string matching any key in `valid_commands`.
+
+    Returns:
+        int: the index of the first character of the matching string in `line`
+        or -1 if no command is found.
     """
     for command in valid_commands:
         start = line.rfind(command)
@@ -111,9 +126,24 @@ def _find_start_of_command(line, valid_commands) -> int:
 
 
 def _find_end_of_command(line, start, paren_balance) -> (int, int):
-    """Return (end, paren_balance) where end is 1 + the index of the last char
-    in the command or, if the parentheses are not balanced, the end of the line.
-    paren_balance will be 0 when the parentheses are balanced.
+    """Find the end of a command by looking for balanced parentheses.
+
+    Args:
+        line (str): String to scan.
+        start (int): Index into `line` to start looking.
+        paren_balance(int): paren_balance after previous call.
+
+    Note:
+        On the first call `start` should point at the opening parenthesis and
+        `paren_balance` should be set to 0. Subsequent calls should pass in the
+        returned `paren_balance`.
+
+    Returns:
+        ( end (int), paren_balance (int) )
+        Where end is 1 + the index of the last char in the command or, if the
+        parentheses are not balanced, the end of the line.
+
+        paren_balance will be 0 when the parentheses are balanced.
     """
     for end in range(start, len(line)):
         ch = line[end]

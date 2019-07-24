@@ -42,6 +42,13 @@ def state_from_dict(source: dict) -> ProgramState:
     return ProgramState(**source)
 
 class DexExpectProgramState(CommandBase):
+    """Expect to see a given program `state` a certain numer of `times`.
+
+    DexExpectProgramState(state [,**times])
+
+    See Commands.md for more info.
+    """
+
     def __init__(self, *args, **kwargs):
         if len(args) != 1:
             raise TypeError('expected exactly one unnamed arg')

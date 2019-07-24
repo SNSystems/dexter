@@ -81,6 +81,15 @@ def _check_watch_order(actual_watches, expected_values):
 
 
 class DexExpectWatchValue(CommandBase):
+    """Expect the C++ expression `expr` to evaluate to the list of `values`
+    sequentially.
+
+    DexExpectWatchValue(expr, *values [,**from_line=1][,**to_line=Max]
+                        [,**on_line])
+
+    See Commands.md for more info.
+    """
+
     def __init__(self, *args, **kwargs):
         if len(args) < 2:
             raise TypeError('expected at least two args')

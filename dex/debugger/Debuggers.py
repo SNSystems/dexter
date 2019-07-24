@@ -43,6 +43,10 @@ from dex.debugger.visualstudio.VisualStudio2017 import VisualStudio2017
 
 
 def _get_potential_debuggers():  # noqa
+    """Return a dict of the supported debuggers.
+    Returns:
+        { name (str): debugger (class) }
+    """
     return {
         LLDB.get_option_name(): LLDB,
         VisualStudio2015.get_option_name(): VisualStudio2015,
@@ -59,7 +63,7 @@ def _warn_meaningless_option(context, option):
          '--debugger={}'.format(context.options.debugger))
 
 
-def add_debugger_tool_arguments1(parser, defaults):
+def add_debugger_tool_base_arguments(parser, defaults):
     defaults.lldb_executable = 'lldb.exe' if is_native_windows() else 'lldb'
     parser.add_argument(
         '--lldb-executable',
@@ -74,7 +78,7 @@ def add_debugger_tool_arguments(parser, context, defaults):
     debuggers = Debuggers(context)
     potential_debuggers = sorted(debuggers.potential_debuggers().keys())
 
-    add_debugger_tool_arguments1(parser, defaults)
+    add_debugger_tool_base_arguments(parser, defaults)
 
     parser.add_argument(
         '--debugger',
@@ -110,7 +114,7 @@ def add_debugger_tool_arguments(parser, context, defaults):
         help='target architecture')
 
 
-def handle_debugger_tool_options1(context, defaults):  # noqa
+def handle_debugger_tool_base_options(context, defaults):  # noqa
     options = context.options
 
     if options.lldb_executable is None:
@@ -128,7 +132,7 @@ def handle_debugger_tool_options1(context, defaults):  # noqa
 def handle_debugger_tool_options(context, defaults):  # noqa
     options = context.options
 
-    handle_debugger_tool_options1(context, defaults)
+    handle_debugger_tool_base_options(context, defaults)
 
     if options.arch is None:
         options.arch = defaults.arch
