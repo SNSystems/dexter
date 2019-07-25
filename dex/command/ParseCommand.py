@@ -114,6 +114,8 @@ def resolve_labels(command: CommandBase, commands: dict):
 def _find_start_of_command(line, valid_commands) -> int:
     """Scan `line` for a string matching any key in `valid_commands`.
 
+    Commands escaped with `\` (E.g. `\DexLabel('a')`) are ignored.
+
     Returns:
         int: the index of the first character of the matching string in `line`
         or -1 if no command is found.
@@ -121,6 +123,9 @@ def _find_start_of_command(line, valid_commands) -> int:
     for command in valid_commands:
         start = line.rfind(command)
         if start != -1:
+            # Ignore escaped '\' commands.
+            if start > 0 and line[start-1] == '\\':
+                continue
             return start
     return -1
 
