@@ -1,0 +1,7 @@
+Purpose:
+    Check the `list-debuggers` subtool runs.
+
+RUN: dexter.py list-debuggers
+CHECK: lldb
+CHECK: vs2015
+CHECK: vs2017

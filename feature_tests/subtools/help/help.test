@@ -1,0 +1,9 @@
+Purpose:
+    Check the `help` subtool runs.
+
+RUN: dexter.py help
+CHECK: The following subtools are available:
+CHECK-DAG: help
+CHECK-DAG: test
+CHECK-DAG: annotate-expected-values
+CHECK-DAG: view
