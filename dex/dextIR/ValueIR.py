@@ -42,4 +42,9 @@ class ValueIR:
         self.is_irretrievable = is_irretrievable
 
     def __str__(self):
-        return self.value
+        if self.error_string is not None:
+            return '[{}]: error ({})'.format(self.expression, self.error_string)
+        if self.value is not None:
+            return '[{}]: ({}) {}'.format(self.expression, self.type_name, self.value)
+        return '[{}]: type: {}; could_evaluate: {}; irretrievable: {}; optimized_away: {}'.format(self.expression, self.type_name, self.could_evaluate, self.is_irretrievable, self.is_optimized_away)
+
