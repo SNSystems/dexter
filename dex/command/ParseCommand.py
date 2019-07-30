@@ -25,6 +25,8 @@ subset of Python is allowed, in order to prevent the possibility of unsafe
 Python code being embedded within DExTer commands.
 """
 
+import unittest
+
 from collections import defaultdict
 
 from dex.utils.Exceptions import CommandParseError
@@ -238,3 +240,140 @@ def find_all_commands(source_files):
             commands[command_name].update(file_commands[command_name])
 
     return dict(commands)
+
+
+class TestParseCommand(unittest.TestCase):
+    class MockCmd(CommandBase):
+        """A mock DExTer command for testing parsing.
+
+        Args:
+            value (str): Unique name for this instance.
+        """
+
+        def __init__(self, *args):
+           self.value = args[0]
+
+        def get_name():
+            return __class__.__name__
+
+        def eval(this):
+            pass
+
+
+    def __init__(self, *args):
+        super().__init__(*args)
+
+        self.valid_commands = {
+            TestParseCommand.MockCmd.get_name() : TestParseCommand.MockCmd
+        }
+
+
+    def _find_all_commands_in_lines(self, lines):
+        """Use DExTer parsing methods to find all the mock commands in lines.
+
+        Returns:
+            { cmd_name: { (path, line): command_obj } }
+        """
+        return _find_all_commands_in_file(__file__, lines, self.valid_commands)
+
+
+    def _find_all_mock_values_in_lines(self, lines):
+        """Use DExTer parsing methods to find all mock command values in lines.
+
+        Returns:
+            values (list(str)): MockCmd values found in lines.
+        """
+        cmds = self._find_all_commands_in_lines(lines)
+        mocks = cmds.get(TestParseCommand.MockCmd.get_name(), None)
+        return [v.value for v in mocks.values()] if mocks else []
+
+
+    def test_parse_inline(self):
+        """Commands can be embedded in other text."""
+
+        lines = [
+            'MockCmd("START") Lorem ipsum dolor sit amet, consectetur\n',
+            'adipiscing elit, MockCmd("EMBEDDED") sed doeiusmod tempor,\n',
+            'incididunt ut labore et dolore magna aliqua.\n'
+        ]
+
+        values = self._find_all_mock_values_in_lines(lines)
+
+        self.assertTrue('START' in values)
+        self.assertTrue('EMBEDDED' in values)
+
+
+    def test_parse_multi_line_comment(self):
+        """Multi-line commands can embed comments."""
+
+        lines = [
+            'Lorem ipsum dolor sit amet, consectetur\n',
+            'adipiscing elit, sed doeiusmod tempor,\n',
+            'incididunt ut labore et MockCmd(\n',
+            '    "WITH_COMMENT" # THIS IS A COMMENT\n',
+            ') dolore magna aliqua. Ut enim ad minim\n',
+        ]
+
+        values = self._find_all_mock_values_in_lines(lines)
+
+        self.assertTrue('WITH_COMMENT' in values)
+
+
+    # [TODO]: Fix parsing so this passes.
+    @unittest.expectedFailure
+    def test_parse_whitespace(self):
+        """Try to emulate python whitespace rules"""
+
+        lines = [
+            # Good
+            'MockCmd("NONE")\n',
+            'MockCmd    ("SPACE")\n',
+            'MockCmd\t\t("TABS")\n',
+            'MockCmd(    "ARG_SPACE"    )\n',
+            'MockCmd(\t\t"ARG_TABS"\t\t)\n',
+            'MockCmd(\n',
+            '"CMD_PAREN_LF")\n',
+            # Bad
+            'MockCmd\n',
+            '("XFAIL_CMD_LF_PAREN")\n',
+        ]
+
+        values = self._find_all_mock_values_in_lines(lines)
+
+        self.assertTrue('NONE' in values)
+        self.assertTrue('SPACE' in values)
+        self.assertTrue('TABS' in values)
+        self.assertTrue('ARG_SPACE' in values)
+        self.assertTrue('ARG_TABS' in values)
+        self.assertTrue('CMD_PAREN_LF' in values)
+
+        self.assertFalse('XFAIL_CMD_LF_PAREN' in values)
+
+
+    # [TODO]: Fix parsing so this passes.
+    @unittest.expectedFailure
+    def test_parse_share_line(self):
+        """More than one command can appear on one line."""
+
+        lines = [
+            'MockCmd("START") MockCmd("CONSECUTIVE") words '
+                'MockCmd("EMBEDDED") more words\n'
+        ]
+
+        values = self._find_all_mock_values_in_lines(lines)
+
+        self.assertTrue('START' in values)
+        self.assertTrue('CONSECUTIVE' in values)
+        self.assertTrue('EMBEDDED' in values)
+
+
+    def test_parse_escaped(self):
+        """Escaped commands are ignored."""
+
+        lines = [
+            'words \MockCmd("IGNORED") words words words\n'
+        ]
+
+        values = self._find_all_mock_values_in_lines(lines)
+
+        self.assertFalse('IGNORED' in values)
