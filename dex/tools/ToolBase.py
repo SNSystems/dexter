@@ -99,7 +99,7 @@ class ToolBase(object, metaclass=abc.ABCMeta):
             '--unittest',
             type=str,
             choices=['off', 'show-failures', 'show-all'],
-            default='show-failures',
+            default='off',
             help='run the DExTer codebase unit tests')
 
         suppress = ExtArgParse.SUPPRESS  # pylint: disable=no-member

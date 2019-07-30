@@ -311,13 +311,20 @@ For clang-based compilers, the `clang-opt-bisect` tool can be used to get a brea
 
 
 ## Contributing to DExTer
-[TODO] Add new testing policy info
 
-Before submitting any contributions please ensure that all unit tests and style/lint checks still pass. These can be run with the following command line flags:
-
-    dexter.py --unittest=show-failures --lint=full --time-report
+Before submitting any contributions please ensure that all tests and style/lint checks still pass.
 
 The command line to install the packages required for style and lint checking is:
 
     <python-executable> -m pip install pycodestyle pylama pylint yapf
 
+You will need [llvm-lit][0]. It can be built with llvm or installed as `lit` by
+by running:
+
+    python -m pip install lit
+
+[0]: https://llvm.org/docs/CommandGuide/lit.html
+
+The full test suite can be run with this command:
+
+    <lit-script> feature_tests
