@@ -1,0 +1,7 @@
+Purpose:
+    Run DExTer style tests.
+
+# lint=full takes a long time.
+# TODO: Fix all style issues in DExTer.
+RUN: dexter.py --lint=fast 2>&1 | FileCheck %s
+CHECK-NOT: error:
