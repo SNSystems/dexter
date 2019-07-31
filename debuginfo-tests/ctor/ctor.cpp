@@ -1,17 +1,6 @@
-// RUN: %clangxx %target_itanium_abi_host_triple -O0 -g %s -c -o %t.o
-// RUN: %clangxx %target_itanium_abi_host_triple %t.o -o %t.out
-// RUN: %test_debuginfo %s %t.out 
-
-
-// DEBUGGER: break 14
-// DEBUGGER: r
-// DEBUGGER: p *this
-// CHECK-NEXT-NOT: Cannot access memory at address 
-
 class A {
 public:
-	A() : zero(0), data(42)
-	{ // DexLabel('ctor_start')
+	A() : zero(0), data(42) { // DexLabel('ctor_start')
 	}
 private:
 	int zero;
@@ -24,5 +13,18 @@ int main() {
 }
 
 
-// DexExpectWatchValue('*this', '{...}', on_line='ctor_start')
+/*
+DexExpectProgramState({
+	'frames': [
+		{
+			'location': {
+				'lineno': 'ctor_start'
+			},
+			'watches': {
+				'*this': {'is_irretrievable': False}
+			}
+		}
+	]
+})
+*/
 

@@ -218,6 +218,7 @@ class LLDB(DebuggerBase):
             "use of undeclared identifier",
             "Couldn't lookup symbols",
             "reference to local variable",
+            "invalid use of 'this' outside of a non-static member function",
         ])
 
         is_optimized_away = any(s in error_string for s in [

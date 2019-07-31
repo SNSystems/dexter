@@ -93,8 +93,9 @@ class StackFrame:
         if self.watches:
             for name in iter(self.watches):
                 try:
-                    if other.watches[name].value != self.watches[name]:
-                        return False
+                    for attr in iter(self.watches[name]):
+                        if getattr(other.watches[name], attr) != self.watches[name][attr]:
+                            return False
                 except KeyError:
                     return False
 
