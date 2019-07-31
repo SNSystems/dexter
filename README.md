@@ -319,9 +319,9 @@ The command line to install the packages required for style and lint checking is
     <python-executable> -m pip install pycodestyle pylama pylint yapf
 
 You will need [llvm-lit][0]. It can be built with llvm or installed as `lit` by
-by running:
+running:
 
-    python -m pip install lit
+    <python-executable> -m pip install lit
 
 [0]: https://llvm.org/docs/CommandGuide/lit.html
 

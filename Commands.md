@@ -77,7 +77,7 @@ through the program.
 
 ### Description
 Expect the line every `DexExpectStepOrder` is found on to be stepped on in
-`order`. Each instance must have a set of unique ascending indicies.
+`order`. Each instance must have a set of unique ascending indices.
 
 ### Heuristic
 [TODO]
