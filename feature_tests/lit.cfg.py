@@ -25,7 +25,7 @@ config.excludes = ['Inputs']
 config.test_source_root = os.path.dirname(__file__)
 
 # Add Dexter to PATH.
-config.environment['PATH'] += ":{}".format(dexter_path)
+config.environment['PATH'] += "{}{}".format(os.pathsep, dexter_path)
 
 # test_exec_root: The root path where tests should be run.
 # Test scripts will be cached here.
