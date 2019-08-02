@@ -30,7 +30,7 @@ from collections import defaultdict, namedtuple, Counter
 import difflib
 import os
 from itertools import groupby
-from dex.command.commands.DexExpectWatchValue import StepValueInfo
+from dex.command.StepValueInfo import StepValueInfo
 
 
 PenaltyCommand = namedtuple('PenaltyCommand', ['pen_dict', 'max_penalty'])
@@ -125,6 +125,20 @@ class Heuristic(object):
             self.penalty_missing_step, self.penalty_misordered_steps
         ])
 
+        # Get DexExpectWatchType results.
+        try:
+            for command in steps.commands['DexExpectWatchType']:
+                command.eval(steps)
+                maximum_possible_penalty = min(3, len(
+                    command.values)) * worst_penalty
+                name, p = self._calculate_expect_watch_penalties(
+                    command, maximum_possible_penalty)
+                name = name + ' ExpectType'
+                self.penalties[name] = PenaltyCommand(p,
+                                                      maximum_possible_penalty)
+        except KeyError:
+            pass
+
         # Get DexExpectWatchValue results.
         try:
             for command in steps.commands['DexExpectWatchValue']:
@@ -133,6 +147,7 @@ class Heuristic(object):
                     command.values)) * worst_penalty
                 name, p = self._calculate_expect_watch_penalties(
                     command, maximum_possible_penalty)
+                name = name + ' ExpectValue'
                 self.penalties[name] = PenaltyCommand(p,
                                                       maximum_possible_penalty)
         except KeyError:
@@ -355,7 +370,7 @@ class Heuristic(object):
                     PenaltyInstance(v, current_penalty))
 
         for v in c.encountered_values:
-            penalties['<g>expected encountered values</>'].append(
+            penalties['<g>expected encountered watches</>'].append(
                 PenaltyInstance(v, 0))
 
         penalty_descriptions = [
@@ -438,8 +453,8 @@ class Heuristic(object):
                 for result, penalty in pen_cmd.pen_dict[category]:
                     if isinstance(result, StepValueInfo):
                         text = 'step {}'.format(result.step_index)
-                        if result.value_info.value:
-                            text += ' ({})'.format(result.value_info.value)
+                        if result.expected_value:
+                            text += ' ({})'.format(result.expected_value)
                     else:
                         text = str(result)
                     if penalty:

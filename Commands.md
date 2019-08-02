@@ -3,6 +3,7 @@
 * [DexExpectProgramState](Commands.md#DexExpectProgramState)
 * [DexExpectStepKind](Commands.md#DexExpectStepKind)
 * [DexExpectStepOrder](Commands.md#DexExpectStepOrder)
+* [DexExpectWatchType](Commands.md#DexExpectWatchType)
 * [DexExpectWatchValue](Commands.md#DexExpectWatchValue)
 * [DexUnreachable](Commands.md#DexUnreachable)
 * [DexWatch](Commands.md#DexWatch)
@@ -84,12 +85,39 @@ Expect the line every `DexExpectStepOrder` is found on to be stepped on in
 
 
 ---
+## DexExpectWatchType
+    DexExpectWatchType(expr, *types [,**from_line=1][,**to_line=Max]
+                        [,**on_line][,**require_in_order=True])
+
+    Args:
+        expr (str): expression to evaluate.
+
+    Arg list:
+        types (str): At least one expected type. NOTE: string type.
+
+    Keyword args:
+        from_line (int): Evaluate the expression from this line. Defaults to 1.
+        to_line (int): Evaluate the expression to this line. Defaults to end of
+            source.
+        on_line (int): Only evaluate the expression on this line. If provided,
+            this overrides from_line and to_line.
+        require_in_order (bool): If False the values can appear in any order.
+
+### Description
+Expect the expression `expr` to evaluate be evaluated and have each evaluation's
+type checked against the list of `types`
+
+### Heuristic
+[TODO]
+
+
+---
 ## DexExpectWatchValue
     DexExpectWatchValue(expr, *values [,**from_line=1][,**to_line=Max]
                         [,**on_line][,**require_in_order=True])
 
     Args:
-        expr (str): C++ expression to evaluate.
+        expr (str): expression to evaluate.
 
     Arg list:
         values (str): At least one expected value. NOTE: string type.
@@ -103,7 +131,7 @@ Expect the line every `DexExpectStepOrder` is found on to be stepped on in
         require_in_order (bool): If False the values can appear in any order.
 
 ### Description
-Expect the C++ expression `expr` to evaluate to the list of `values`
+Expect the expression `expr` to evaluate to the list of `values`
 sequentially.
 
 ### Heuristic
@@ -142,7 +170,7 @@ This command does not contribute to the heuristic score.
     DexWatch(*expressions)
 
     Arg list:
-        expressions (str): C++ `expression` to evaluate on this line.
+        expressions (str): `expression` to evaluate on this line.
 
 ### Description
 Evaluate the `expressions` on the line this command is found on. Use in
