@@ -217,6 +217,7 @@ class LLDB(DebuggerBase):
             "Can't run the expression locally",
             "use of undeclared identifier",
             "Couldn't lookup symbols",
+            "reference to local variable",
         ])
 
         is_optimized_away = any(s in error_string for s in [
@@ -236,10 +237,18 @@ class LLDB(DebuggerBase):
         if error_string == 'success':
             error_string = None
 
+        # attempt to find expression as a variable, if found, take the variable
+        # obj's type information as it's 'usually' more accurate.
+        var_result = self._thread.GetFrameAtIndex(frame_idx).FindVariable(expression)
+        if str(var_result.error) == 'success':
+            type_name = var_result.type.GetDisplayTypeName()
+        else:
+            type_name = result.type.GetDisplayTypeName()
+
         return ValueIR(
             expression=expression,
             value=value,
-            type_name=str(result.type),
+            type_name=type_name,
             error_string=error_string,
             could_evaluate=could_evaluate,
             is_optimized_away=is_optimized_away,

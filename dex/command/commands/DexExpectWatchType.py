@@ -1,7 +1,7 @@
 # DExTer : Debugging Experience Tester
 # ~~~~~~   ~         ~~         ~   ~~
 #
-# Copyright (c) 2018 by SN Systems Ltd., Sony Interactive Entertainment Inc.
+# Copyright (c) 2019 by SN Systems Ltd., Sony Interactive Entertainment Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,23 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+"""Command for specifying an expected set of types for a particular watch."""
 
-from dex.command.ParseCommand import find_all_commands
-from dex.command.StepValueInfo import StepValueInfo
+
+from dex.command.commands.DexExpectWatchBase import DexExpectWatchBase
+
+class DexExpectWatchType(DexExpectWatchBase):
+    """Expect the expression `expr` to evaluate be evaluated and have each
+    evaluation's type checked against the list of `types`.
+
+    DexExpectWatchType(expr, *types [,**from_line=1][,**to_line=Max]
+                        [,**on_line])
+
+    See Commands.md for more info.
+    """
+    @staticmethod
+    def get_name():
+        return __class__.__name__
+
+    def _get_expected_field(self, watch):
+        return watch.type_name

@@ -1,7 +1,7 @@
 # DExTer : Debugging Experience Tester
 # ~~~~~~   ~         ~~         ~   ~~
 #
-# Copyright (c) 2018 by SN Systems Ltd., Sony Interactive Entertainment Inc.
+# Copyright (c) 2019 by SN Systems Ltd., Sony Interactive Entertainment Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,5 +21,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from dex.command.ParseCommand import find_all_commands
-from dex.command.StepValueInfo import StepValueInfo
+
+class StepValueInfo(object):
+    def __init__(self, step_index, watch_info, expected_value):
+        self.step_index = step_index
+        self.watch_info = watch_info
+        self.expected_value = expected_value
+
+    def __str__(self):
+        return '{}:{}: expected value:{}'.format(self.step_index, self.watch_info, self.expected_value)
+
+    def __eq__(self, other):
+        return (self.watch_info.expression == other.watch_info.expression
+                and self.expected_value == other.expected_value)
+
+    def __hash__(self):
+        return hash(self.watch_info.expression, self.expected_value)

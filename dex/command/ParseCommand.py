@@ -35,6 +35,7 @@ from dex.command.CommandBase import CommandBase
 from dex.command.commands.DexExpectProgramState import DexExpectProgramState
 from dex.command.commands.DexExpectStepKind import DexExpectStepKind
 from dex.command.commands.DexExpectStepOrder import DexExpectStepOrder
+from dex.command.commands.DexExpectWatchType import DexExpectWatchType
 from dex.command.commands.DexExpectWatchValue import DexExpectWatchValue
 from dex.command.commands.DexLabel import DexLabel
 from dex.command.commands.DexUnreachable import DexUnreachable
@@ -51,6 +52,7 @@ def _get_valid_commands():
       DexExpectProgramState.get_name() : DexExpectProgramState,
       DexExpectStepKind.get_name() : DexExpectStepKind,
       DexExpectStepOrder.get_name() : DexExpectStepOrder,
+      DexExpectWatchType.get_name() : DexExpectWatchType,
       DexExpectWatchValue.get_name() : DexExpectWatchValue,
       DexLabel.get_name() : DexLabel,
       DexUnreachable.get_name() : DexUnreachable,
