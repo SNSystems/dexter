@@ -1,7 +1,10 @@
-// REQUIRES: not_asan
+// REQUIRES: not_asan, linux, clang, lldb
 //           Zorg configures the ASAN stage2 bots to not build the asan
 //           compiler-rt. Only run this test on non-asanified configurations.
 //
+// RUN: dexter.py test --fail-lt 1.0 -w \
+// RUN:     --builder clang-c --debugger lldb --cflags \
+// RUN:     "-O0 -glldb -fsanitize=address -fblocks -arch x86_64" -- %S
 
 struct S {
   int a[8];

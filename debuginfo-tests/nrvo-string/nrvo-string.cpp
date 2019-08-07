@@ -1,5 +1,18 @@
-// This ensures that DW_OP_deref is inserted when necessary, such as when NRVO
-// of a string object occurs in C++.
+// Purpose:
+//     This ensures that DW_OP_deref is inserted when necessary, such as when
+//     NRVO of a string object occurs in C++.
+//
+// REQUIRES: linux, clang, lldb
+//           Zorg configures the ASAN stage2 bots to not build the asan
+//           compiler-rt. Only run this test on non-asanified configurations.
+//
+// RUN: dexter.py test --fail-lt 1.0 -w \
+// RUN:     --builder clang --debugger lldb --cflags \
+// RUN:     "-O0 -glldb -fno-exceptions" -- %S
+//
+// RUN: dexter.py test --fail-lt 1.0 -w \
+// RUN:     --builder clang --debugger lldb --cflags \
+// RUN:     "-O1 -glldb -fno-exceptions" -- %S
 //
 // PR34513
 volatile int sideeffect = 0;

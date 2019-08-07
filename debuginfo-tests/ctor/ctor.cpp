@@ -1,3 +1,8 @@
+// REQUIRES: linux, clang, lldb
+//
+// RUN: dexter.py test --fail-lt 1.0 -w \
+// RUN:     --builder clang --debugger lldb --cflags "-O0 -glldb" -- %S
+
 class A {
 public:
 	A() : zero(0), data(42) { // DexLabel('ctor_start')
