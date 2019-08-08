@@ -50,8 +50,3 @@ if lit.util.which('clang') is not None:
 if lit.util.which('lldb') is not None:
     config.available_features.add('lldb')
 
-if config.llvm_use_sanitizer:
-    # Propagate path to symbolizer for ASan/MSan.
-    llvm_config.with_system_environment(
-        ['ASAN_SYMBOLIZER_PATH', 'MSAN_SYMBOLIZER_PATH'])<Paste>
-

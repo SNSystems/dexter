@@ -48,7 +48,7 @@ class ValueIR:
         if self.value is not None:
             return prefix + '({}) {}'.format(self.type_name, self.value)
         return (prefix +
-            'could_evaluate: {};'.format(self.could_evaluate) +
-            'irretrievable: {};'.format(self.is_irretrievable) +
-            'optimized_away: {};'.format(self.is_optimized_away))
+                'could_evaluate: {}; irretrievable: {}; optimized_away: {};'
+                    .format(self.could_evaluate, self.is_irretrievable,
+                            self.is_optimized_away))
 

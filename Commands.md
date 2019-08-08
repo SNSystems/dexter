@@ -25,7 +25,13 @@
                             'column': int,
                           },
                           'watches': {
-                            expr (str): value (str),
+                            expr (str): {
+                              'value': str,
+                              'type_name': str,
+                              'could_evaluate': bool,
+                              'is_optimized_away': bool,
+                              'is_irretrievable': bool,
+			    }
                           },
                         }
                       ]}
