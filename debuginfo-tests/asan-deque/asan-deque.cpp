@@ -10,7 +10,6 @@
 
 struct A {
   int a;
-  A(): a(0) {}
   A(int a) : a(a) {}
 };
 
@@ -38,5 +37,5 @@ int main() {
 // DexExpectWatchValue('deq[0].a', '1234', on_line='first')
 // DexExpectWatchValue('deq[1].a', '56789', on_line='first')
 
-// DexExpectWatchValue('deq[0].a', '56788', '0', on_line='second')
+// DexExpectWatchValue('deq[0].a', '56789', '0', on_line='second')
 

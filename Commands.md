@@ -25,6 +25,7 @@
                             'column': int,
                           },
                           'watches': {
+                            expr (str): value (str),
                             expr (str): {
                               'value': str,
                               'type_name': str,
@@ -48,8 +49,9 @@ To consider the states a match:
 
 * The `SourceLocation` must match in both states. Omitted fields in the
 `SourceLocation` dictionary are ignored; they always match.
-* Each `expr` in `watches` in the expected state must evaluate to the given
-`value`.
+* Each `expr` in `watches` in the expected state can either be a dictionary
+with the fields shown above, or a string representing its value. In either
+case, the actual value of `expr` in the debugger must match.
 * The function name and inline status are not considered.
 
 ### Heuristic

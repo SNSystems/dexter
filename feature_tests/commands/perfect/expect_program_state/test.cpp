@@ -29,7 +29,7 @@ DexExpectProgramState({
                 'lineno': 'check'
             },
             'watches': {
-                'lhs': {'value': '37'}, 'rhs': {'value': '0'}
+                'lhs': '37', 'rhs': '0'
             }
         },
         {
