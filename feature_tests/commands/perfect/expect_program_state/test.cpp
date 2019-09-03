@@ -34,17 +34,17 @@ DexExpectProgramState({
         },
         {
             'watches': {
-                'lhs': '111', 'rhs': '37'
+                'lhs': {'value': '111'}, 'rhs': {'value': '37'}
             }
         },
         {
             'watches': {
-                'lhs': '259', 'rhs': '111'
+                'lhs': {'value': '259'}, 'rhs': {'value': '111'}
             }
         },
         {
             'watches': {
-                'lhs': '111', 'rhs': '259'
+                'lhs': {'value': '111'}, 'rhs': {'value': '259'}
             }
         }
     ]
