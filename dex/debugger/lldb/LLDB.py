@@ -229,6 +229,7 @@ class LLDB(DebuggerBase):
             "couldn't get the value of variable",
             "couldn't read its memory",
             "couldn't read from memory",
+            "Cannot access memory at address",
         ])
 
         if could_evaluate and not is_irretrievable and not is_optimized_away:
