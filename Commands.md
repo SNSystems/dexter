@@ -73,6 +73,18 @@ through the program.
 `kind` must be one of: `'FUNC'`, `'FUNC_EXTERNAL'`, `'FUNC_UNKNOWN'`,
 `'FORWARD'`, `'SAME'`, `'BACKWARD'`, `'UNKNOWN'`.
 
+`FUNC`: The first step into a function which is defined in the test
+directory.</br>
+`FUNC_EXTERNAL`: A step over a function which is not defined in the test
+directory.</br>
+`FUNC_UNKNOWN`: The first step over a function an unknown definition
+location.</br>
+`FORWARD`: A step to a location after the previous step location in this
+frame.</br>
+`BACKWARD`: A step to a location before the previous step location in this
+frame.</br>
+`SAME`: A step to the same location as the previous step in this frame.</br>
+
 ### Heuristic
 [TODO]
 
