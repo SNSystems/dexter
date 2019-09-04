@@ -66,5 +66,5 @@ int main (int argc, char const *argv[])
 }
 
 // LLDB does not print artificial members.
-// DexExpectWatchValue('a.m_ptr', 12, on_line='ret')
+// DexExpectWatchValue('a.m_int', '12', on_line='ret')
 

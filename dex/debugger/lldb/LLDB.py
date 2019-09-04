@@ -216,6 +216,7 @@ class LLDB(DebuggerBase):
         could_evaluate = not any(s in error_string for s in [
             "Can't run the expression locally",
             "use of undeclared identifier",
+            "no member named",
             "Couldn't lookup symbols",
             "reference to local variable",
             "invalid use of 'this' outside of a non-static member function",
