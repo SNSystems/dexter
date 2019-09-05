@@ -86,6 +86,16 @@ class DextIR:
     def num_steps(self):
         return len(self.steps)
 
+    def _get_prev_step_in_this_frame(self, step):
+        """Find the latest recorded step in the same frame as step.
+
+        Returns:
+            StepIR or None if there is no previous step in this frame.
+        """
+        return next((s for s in reversed(self.steps)
+            if s.current_function == step.current_function
+            and s.num_frames == step.num_frames), None)
+
     def _get_new_step_kind(self, context, step):
         if step.current_function is None:
             return StepKind.UNKNOWN
@@ -98,8 +108,12 @@ class DextIR:
         if prev_step.current_function is None:
             return StepKind.UNKNOWN
 
-        if prev_step.current_function != step.current_function:
+        if prev_step.num_frames < step.num_frames:
             return _step_kind_func(context, step)
+
+        if prev_step.num_frames > step.num_frames:
+            frame_step = self._get_prev_step_in_this_frame(step)
+            prev_step = frame_step if frame_step is not None else prev_step
 
         # We're in the same func as prev step, check lineo/column.
         if prev_step.current_location > step.current_location:

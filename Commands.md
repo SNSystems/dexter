@@ -79,11 +79,22 @@ directory.</br>
 directory.</br>
 `FUNC_UNKNOWN`: The first step over a function an unknown definition
 location.</br>
-`FORWARD`: A step to a location after the previous step location in this
+`FORWARD`: A step to a `location` after the previous step location in this
 frame.</br>
-`BACKWARD`: A step to a location before the previous step location in this
+`BACKWARD`: A step to a `location` before the previous step location in this
 frame.</br>
-`SAME`: A step to the same location as the previous step in this frame.</br>
+`SAME`: A step to the same `location` as the previous step in this frame.</br>
+
+NOTE: `location` comparisions consider both line number _and_ column.
+Consider the following example:
+
+    return cows(moo());
+    ^      ^    ^-- 1st step
+    ^      ^-- 2nd step
+    ^-- 3rd step
+
+This code includes two `BACKWARD` steps because the column number decreases
+between each step.
 
 ### Heuristic
 [TODO]
