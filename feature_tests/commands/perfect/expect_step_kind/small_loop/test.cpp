@@ -1,7 +1,7 @@
 // Purpose:
 //      Check that \DexExpectStepKind correctly counts function calls in loops
 //      where the last source line in the loop is a call. Expect steps out
-//      of a function to a line before the call to count as 'BACKWARD'.
+//      of a function to a line before the call to count as 'VERTICAL_BACKWARD'.
 //
 // REQUIRES: linux, clang, lldb
 //
@@ -22,4 +22,4 @@ int main()
     return 0;
 }
 
-// DexExpectStepKind('BACKWARD', 2)
+// DexExpectStepKind('VERTICAL_BACKWARD', 2)

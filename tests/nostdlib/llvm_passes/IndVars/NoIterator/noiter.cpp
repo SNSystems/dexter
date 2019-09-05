@@ -39,6 +39,6 @@ main()
 
 // DexExpectWatchValue('i', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '200', '66', from_line=1, to_line=50)
 // DexExpectWatchValue('sum', '0', '1', '4', '9', '16', '25', '36', '49', '64', '81', '100', '166', from_line=1, to_line=50)
-// DexExpectStepKind('BACKWARD', 10)
+// DexExpectStepKind('VERTICAL_BACKWARD', 10)
 // DexExpectStepKind('FUNC', 21)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

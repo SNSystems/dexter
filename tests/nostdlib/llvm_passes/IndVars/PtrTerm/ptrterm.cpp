@@ -35,6 +35,6 @@ main()
 
 // DexExpectWatchValue('i', '31', from_line=1, to_line=50)
 // DexExpectWatchValue('sum', '100', '131', from_line=1, to_line=50)
-// DexExpectStepKind('BACKWARD', 10)
+// DexExpectStepKind('VERTICAL_BACKWARD', 10)
 // DexExpectStepKind('FUNC', 21)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

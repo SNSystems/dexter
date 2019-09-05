@@ -48,6 +48,6 @@ main()
 // detect its unconditional execution. But, we still don't see the line
 // numbers for some reason.
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

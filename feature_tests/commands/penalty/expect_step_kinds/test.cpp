@@ -24,4 +24,4 @@ int main()
 
 // DexExpectStepKind('FUNC', 5)
 // DexExpectStepKind('FUNC_EXTERNAL', 2)
-// DexExpectStepKind('BACKWARD', 2)
+// DexExpectStepKind('VERTICAL_BACKWARD', 2)

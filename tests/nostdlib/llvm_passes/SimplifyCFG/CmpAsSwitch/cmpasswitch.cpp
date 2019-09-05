@@ -15,7 +15,7 @@ main()
 // looks semi-impossible; leave this test here as it features a backwards step
 
 // DexExpectWatchValue('read1', '4', '8', from_line=1, to_line=50)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)
 

@@ -56,4 +56,4 @@ int main(int argc, char** argv)
 
 
 // DexExpectStepKind('SAME', 0)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)

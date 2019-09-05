@@ -41,6 +41,6 @@ main()
 // the return value though
 
 // DexExpectWatchValue('bar', '303', from_line=1, to_line=50)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

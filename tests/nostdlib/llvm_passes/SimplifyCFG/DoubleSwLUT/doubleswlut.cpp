@@ -42,6 +42,6 @@ main()
 // but _two_ LUTs. Test for running over the live lines (which we expect to
 // get optimized out).
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

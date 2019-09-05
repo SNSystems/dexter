@@ -1,8 +1,9 @@
 // Purpose:
-//      Check that \DexExpectStepKind correctly counts 'BACKWARD' steps for a
-//      trivial test. Expect one 'BACKWARD' for every step onto a lesser source
-//      line number in the same function. Expect one 'FORWARD' for every step
-//      onto a greater source line number in the same function.
+//      Check that \DexExpectStepKind correctly counts 'VERTICAL_BACKWARD' steps
+//      for a trivial test. Expect one 'VERTICAL_BACKWARD' for every step onto
+//      a lesser source line number in the same function. Expect one
+//      'VERTICAL_FORWARD' for every step onto a greater source line number in
+//      the same function.
 //
 // REQUIRES: linux, clang, lldb
 //
@@ -19,5 +20,5 @@ int main()
     return 0;
 }
 
-// DexExpectStepKind('BACKWARD', 2)
-// DexExpectStepKind('FORWARD', 3)
+// DexExpectStepKind('VERTICAL_BACKWARD', 2)
+// DexExpectStepKind('VERTICAL_FORWARD', 3)

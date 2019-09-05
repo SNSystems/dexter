@@ -86,4 +86,4 @@ main(int argc, char **argv)
 // DexExpectWatchValue('quux', '0', '5', from_line=38, to_line=52)
 
 // DexExpectStepKind('FUNC_EXTERNAL', 0)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)

@@ -14,7 +14,7 @@ main()
     read1 /= read2;    // DexWatch('read1', 'read2')
     break;             // DexWatch('read1', 'read2')
   }                    // DexWatch('read1', 'read2')
- 
+
   return read1;        // DexWatch('read1', 'read2')
 }
 
@@ -27,6 +27,6 @@ main()
 
 // DexExpectWatchValue('read1', '4', '1', from_line=1, to_line=50)
 // DexExpectWatchValue('read2', '4', from_line=1, to_line=50)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

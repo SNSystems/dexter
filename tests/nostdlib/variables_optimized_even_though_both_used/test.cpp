@@ -32,4 +32,4 @@ int main()
 // DexExpectWatchValue('da', '-78.400000000000006', on_line=18)
 // DexExpectWatchValue('b', '24.899999999999999', on_line=18)
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)

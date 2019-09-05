@@ -36,9 +36,9 @@ baz(int *p0, int *p1, int *p2)
 int
 main()
 {
-  volatile int zero = 0; 
-  volatile int one = 1; 
-  volatile int two = 2; 
+  volatile int zero = 0;
+  volatile int one = 1;
+  volatile int two = 2;
   g0 = zero; // DexWatch('g0', 'g1', 'g2')
   g1 = one;  // DexWatch('g0', 'g1', 'g2')
   g2 = two;  // DexWatch('g0', 'g1', 'g2')
@@ -53,4 +53,4 @@ main()
 // DexExpectWatchValue('g2', '0', '2', from_line=1, to_line=50)
 
 // DexExpectStepKind('FUNC_EXTERNAL', 0)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)

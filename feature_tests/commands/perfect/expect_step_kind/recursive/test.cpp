@@ -1,7 +1,7 @@
 // Purpose:
 //      Check that \DexExpectStepKind correctly handles recursive calls.
 //      Specifically, ensure recursive calls count towards 'FUNC' and not
-//      'BACKWARD'.
+//      'VERTICAL_BACKWARD'.
 //
 // REQUIRES: linux, clang, lldb
 //
@@ -23,4 +23,4 @@ int main()
 
 // main, func, func, func
 // DexExpectStepKind('FUNC', 4)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)

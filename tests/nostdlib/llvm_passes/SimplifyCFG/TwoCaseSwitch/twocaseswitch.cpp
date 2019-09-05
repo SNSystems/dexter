@@ -23,6 +23,6 @@ main()
 // Stimulates ConvertTwoCaseSwitch, gets folded into two conditional moves
 // on x86, thus step 4 will be optimised out. The others should not be seen.
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)
