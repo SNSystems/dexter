@@ -71,7 +71,7 @@ Expect to see a particular step `kind` a number of `times` while stepping
 through the program.
 
 `kind` must be one of: `'FUNC'`, `'FUNC_EXTERNAL'`, `'FUNC_UNKNOWN'`,
-`'FORWARD'`, `'SAME'`, `'BACKWARD'`, `'UNKNOWN'`.
+`'VERTICAL_FORWARD'`, `'VERTICAL_BACKWARD'`, `'SAME'`, `'UNKNOWN'`.
 
 `FUNC`: The first step into a function which is defined in the test
 directory.</br>
@@ -79,22 +79,11 @@ directory.</br>
 directory.</br>
 `FUNC_UNKNOWN`: The first step over a function an unknown definition
 location.</br>
-`FORWARD`: A step to a `location` after the previous step location in this
+`VERTICAL_FORWARD`: A step onto a line after the previous step line in this
 frame.</br>
-`BACKWARD`: A step to a `location` before the previous step location in this
-frame.</br>
-`SAME`: A step to the same `location` as the previous step in this frame.</br>
-
-NOTE: `location` comparisions consider both line number _and_ column.
-Consider the following example:
-
-    return cows(moo());
-    ^      ^    ^-- 1st step
-    ^      ^-- 2nd step
-    ^-- 3rd step
-
-This code includes two `BACKWARD` steps because the column number decreases
-between each step.
+`VERTICAL_BACKWARD`: A step onto a line before the previous step line in
+this frame.</br>
+`SAME`: A step onto the same line as the previous step in this frame.</br>
 
 ### Heuristic
 [TODO]

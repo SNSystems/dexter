@@ -44,9 +44,9 @@ class StepKind(Enum):
     FUNC = 0
     FUNC_EXTERNAL = 1
     FUNC_UNKNOWN = 2
-    FORWARD = 3
+    VERTICAL_FORWARD = 3
     SAME = 4
-    BACKWARD = 5
+    VERTICAL_BACKWARD = 5
     UNKNOWN = 6
 
 

@@ -115,12 +115,12 @@ class DextIR:
             frame_step = self._get_prev_step_in_this_frame(step)
             prev_step = frame_step if frame_step is not None else prev_step
 
-        # We're in the same func as prev step, check lineo/column.
-        if prev_step.current_location > step.current_location:
-            return StepKind.BACKWARD
+        # We're in the same func as prev step, check lineo.
+        if prev_step.current_location.lineno > step.current_location.lineno:
+            return StepKind.VERTICAL_BACKWARD
 
-        if prev_step.current_location < step.current_location:
-            return StepKind.FORWARD
+        if prev_step.current_location.lineno < step.current_location.lineno:
+            return StepKind.VERTICAL_FORWARD
 
         # This step is in exactly the same location as the prev step.
         return StepKind.SAME
