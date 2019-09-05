@@ -122,6 +122,13 @@ class DextIR:
         if prev_step.current_location.lineno < step.current_location.lineno:
             return StepKind.VERTICAL_FORWARD
 
+        # We're on the same line as prev step, check column.
+        if prev_step.current_location.column > step.current_location.column:
+            return StepKind.HORIZONTAL_BACKWARD
+
+        if prev_step.current_location.column < step.current_location.column:
+            return StepKind.HORIZONTAL_FORWARD
+
         # This step is in exactly the same location as the prev step.
         return StepKind.SAME
 

@@ -48,6 +48,8 @@ class StepKind(Enum):
     SAME = 4
     VERTICAL_BACKWARD = 5
     UNKNOWN = 6
+    HORIZONTAL_FORWARD = 7
+    HORIZONTAL_BACKWARD = 8
 
 
 class StepIR:
