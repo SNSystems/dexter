@@ -56,7 +56,6 @@ class Tool(ToolBase):
             poptions = pickle.load(fp)
             poptions.working_directory = (
                 self.context.options.working_directory[:])
-            poptions.lint = self.context.options.lint
             poptions.unittest = self.context.options.unittest
             poptions.dextIR_path = self.context.options.dextIR_path
             self.context.options = poptions

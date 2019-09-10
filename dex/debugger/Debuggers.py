@@ -195,8 +195,7 @@ def get_debugger_steps(context):
         args = [
             sys.executable, dexter_py, 'run-debugger-internal-', steps_path,
             options_path, '--working-directory', context.working_directory.path,
-            '--unittest=off', '--lint=off',
-            '--indent-timer-level={}'.format(Timer.indent + 2)
+            '--unittest=off', '--indent-timer-level={}'.format(Timer.indent + 2)
         ]
         try:
             with Timer('running external debugger process'):

@@ -312,11 +312,7 @@ For clang-based compilers, the `clang-opt-bisect` tool can be used to get a brea
 
 ## Contributing to DExTer
 
-Before submitting any contributions please ensure that all tests and style/lint checks still pass.
-
-The command line to install the packages required for style and lint checking is:
-
-    <python-executable> -m pip install pycodestyle pylama pylint yapf
+Before submitting any contributions please ensure that all tests still pass.
 
 You will need [llvm-lit][0]. It can be built with llvm or installed as `lit` by
 running:
