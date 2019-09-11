@@ -202,7 +202,6 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
         try:
             raw_text = "".join(cmd_text_list)
             command = _eval_command(raw_text, valid_commands)
-            command_name = _get_command_name(raw_text)
             command.path = path
             command.lineno = lineno
             command.raw_text = raw_text
