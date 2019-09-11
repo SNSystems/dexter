@@ -3,7 +3,6 @@ Purpose:
 
 RUN: dexter.py help | FileCheck %s
 CHECK: The following subtools are available:
-CHECK: annotate-expected-values
 CHECK: clang-opt-bisect
 CHECK: help
 CHECK: list-debuggers

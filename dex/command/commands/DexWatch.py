@@ -28,9 +28,8 @@ from dex.command.CommandBase import CommandBase
 
 
 class DexWatch(CommandBase):
-    """Evaluate the `expressions` on the line this command is found on. Use in
-    combination with `annotate-expected-values` to generate
-    `DexExpectWatchValues` commands for this source file.
+    """[Deprecated] Evaluate each given `expression` when the debugger steps onto the
+    line this command is found on
 
     DexWatch(*expressions)
 

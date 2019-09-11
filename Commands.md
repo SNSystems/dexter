@@ -197,10 +197,8 @@ This command does not contribute to the heuristic score.
         expressions (str): `expression` to evaluate on this line.
 
 ### Description
-Evaluate the `expressions` on the line this command is found on. Use in
-combination with `annotate-expected-values` to generate `DexExpectWatchValues`
-commands for this source file.
+[Deprecated] Evaluate each given `expression` when the debugger steps onto the
+line this command is found on.
 
 ### Heuristic
-This command is only used to help generate `DexExpectWatchValues`. It does not
-contribute to the heuristic score.
+[Deprecated]
