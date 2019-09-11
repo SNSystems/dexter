@@ -26,6 +26,7 @@ Python code being embedded within DExTer commands.
 """
 
 import unittest
+from copy import copy
 
 from collections import defaultdict
 
@@ -166,32 +167,44 @@ def _find_end_of_command(line, start, paren_balance) -> (int, int):
     return (end, paren_balance)
 
 
+class TextPoint():
+    def __init__(self, line, char):
+        self.line = line
+        self.char = char
+
+    def get_lineno(self):
+        return self.line + 1
+
+    def get_column(self):
+        return self.char + 1
+
+
 def _find_all_commands_in_file(path, file_lines, valid_commands):
     commands = defaultdict(dict)
     err = CommandParseError()
     err.filename = path
     paren_balance = 0
-    for lineno, line in enumerate(file_lines):
-        start = 0 # Index from which we start parsing
-        lineno += 1  # Line numbers start at 1.
-        err.lineno = lineno
+    region_start = TextPoint(0, 0)
+    for region_start.line, line in enumerate(file_lines):
+        region_start.char = 0
+
+        err.lineno = region_start.get_lineno()
         err.src = line.rstrip()
 
         # If parens are currently balanced we can look for a new command
         if paren_balance == 0:
-            start = _find_start_of_command(line, valid_commands)
-            if start == -1:
+            region_start.char = _find_start_of_command(line, valid_commands)
+            if region_start.char == -1:
                 continue
 
-            command_name = _get_command_name(line[start:])
-            command_lineno = lineno
-            command_column = start + 1 # Column numbers start at 1.
+            command_name = _get_command_name(line[region_start.char:])
+            cmd_point = copy(region_start)
             cmd_text_list = [command_name]
-            start += len(command_name) # Start searching for parens after cmd.
+            region_start.char += len(command_name) # Start searching for parens after cmd.
 
-        end, paren_balance = _find_end_of_command(line, start, paren_balance)
+        end, paren_balance = _find_end_of_command(line, region_start.char, paren_balance)
         # Add this text blob to the command
-        cmd_text_list.append(line[start:end])
+        cmd_text_list.append(line[region_start.char:end])
 
         # If the parens are unbalanced start reading the next line in an attempt
         # to find the end of the command.
@@ -203,27 +216,27 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
             raw_text = "".join(cmd_text_list)
             command = _eval_command(raw_text, valid_commands)
             command.path = path
-            command.lineno = lineno
+            command.lineno = cmd_point.get_lineno()
             command.raw_text = raw_text
             resolve_labels(command, commands)
-            assert (path, lineno) not in commands[command_name], (
+            assert (path, cmd_point.get_lineno()) not in commands[command_name], (
                 command_name, commands[command_name])
-            commands[command_name][path, lineno] = command
+            commands[command_name][path, cmd_point.get_lineno()] = command
         except SyntaxError as e:
             err.info = str(e.msg)
             err.caret = '{}<r>^</>'.format(
-                ' ' * (command_column + e.offset - 1))
+                ' ' * (cmd_point.get_column() + e.offset - 1))
             raise err
         except TypeError as e:
             err.info = str(e).replace('__init__() ', '')
             err.caret = '{}<r>{}</>'.format(
-                ' ' * (command_column), '^' * (len(err.src) - command_column))
+                ' ' * (cmd_point.get_column()), '^' * (len(err.src) - cmd_point.get_column()))
             raise err
 
     if paren_balance != 0:
         err.info = (
             "Unbalanced parenthesis starting at line {} column {}".format(
-                command_lineno, command_column + len(command_name)))
+                cmd_point.get_lineno(), cmd_point.get_column() + len(command_name)))
         raise err
     return dict(commands)
 
