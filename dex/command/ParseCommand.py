@@ -179,17 +179,22 @@ class TextPoint():
         return self.char + 1
 
 
-def _find_all_commands_in_file(path, file_lines, valid_commands):
-    commands = defaultdict(dict)
+def format_parse_err(msg: str, path: str, lines: list, point: TextPoint) -> CommandParseError:
     err = CommandParseError()
     err.filename = path
+    err.src = lines[point.line].rstrip()
+    err.lineno = point.get_lineno()
+    err.info = msg
+    err.caret = '{}<r>^</>'.format(' ' * (point.char))
+    return err
+
+
+def _find_all_commands_in_file(path, file_lines, valid_commands):
+    commands = defaultdict(dict)
     paren_balance = 0
     region_start = TextPoint(0, 0)
     for region_start.line, line in enumerate(file_lines):
         region_start.char = 0
-
-        err.lineno = region_start.get_lineno()
-        err.src = line.rstrip()
 
         # If parens are currently balanced we can look for a new command
         if paren_balance == 0:
@@ -223,21 +228,24 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
                 command_name, commands[command_name])
             commands[command_name][path, cmd_point.get_lineno()] = command
         except SyntaxError as e:
-            err.info = str(e.msg)
-            err.caret = '{}<r>^</>'.format(
-                ' ' * (cmd_point.get_column() + e.offset - 1))
-            raise err
+            # This err should point to the problem line.
+            err_point = copy(cmd_point)
+            # To e the command start is the absolute start, so use as offset.
+            err_point.line += e.lineno - 1 # e.lineno is a position, not index.
+            err_point.char += e.offset - 1 # e.offset is a position, not index.
+            raise format_parse_err(e.msg, path, file_lines, err_point)
         except TypeError as e:
-            err.info = str(e).replace('__init__() ', '')
-            err.caret = '{}<r>{}</>'.format(
-                ' ' * (cmd_point.get_column()), '^' * (len(err.src) - cmd_point.get_column()))
-            raise err
+            # This err should always point to the end of the command name.
+            err_point = copy(cmd_point)
+            err_point.char += len(command_name)
+            raise format_parse_err(str(e), path, file_lines, err_point)
 
     if paren_balance != 0:
-        err.info = (
-            "Unbalanced parenthesis starting at line {} column {}".format(
-                cmd_point.get_lineno(), cmd_point.get_column() + len(command_name)))
-        raise err
+        # This err should always point to the end of the command name.
+        err_point = copy(cmd_point)
+        err_point.char += len(command_name)
+        msg = "Unbalanced parenthesis starting here"
+        raise format_parse_err(msg, path, file_lines, err_point)
     return dict(commands)
 
 
