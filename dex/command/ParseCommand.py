@@ -124,9 +124,10 @@ def resolve_labels(command: CommandBase, commands: dict):
         raise syntax_error
 
 
-def _search_line_for_cmd_start(line: str, valid_commands: dict) -> int:
+def _search_line_for_cmd_start(line: str, start: int, valid_commands: dict) -> int:
     """Scan `line` for a string matching any key in `valid_commands`.
 
+    Start searching from `start`.
     Commands escaped with `\` (E.g. `\DexLabel('a')`) are ignored.
 
     Returns:
@@ -134,12 +135,12 @@ def _search_line_for_cmd_start(line: str, valid_commands: dict) -> int:
         or -1 if no command is found.
     """
     for command in valid_commands:
-        start = line.rfind(command)
-        if start != -1:
+        idx = line.find(command, start)
+        if idx != -1:
             # Ignore escaped '\' commands.
-            if start > 0 and line[start-1] == '\\':
+            if idx > 0 and line[idx - 1] == '\\':
                 continue
-            return start
+            return idx
     return -1
 
 
@@ -208,60 +209,65 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
     commands = defaultdict(dict)
     paren_balance = 0
     region_start = TextPoint(0, 0)
-    for region_start.line, line in enumerate(file_lines):
+    for region_start.line in range(len(file_lines)):
+        line = file_lines[region_start.line]
         region_start.char = 0
 
-        # If parens are currently balanced we can look for a new command.
-        if paren_balance == 0:
-            region_start.char = _search_line_for_cmd_start(line, valid_commands)
-            if region_start.char == -1:
-                continue
+        # Search this line till we find no more commands.
+        while True:
+            # If parens are currently balanced we can look for a new command.
+            if paren_balance == 0:
+                region_start.char = _search_line_for_cmd_start(line, region_start.char, valid_commands)
+                if region_start.char == -1:
+                    break # Read next line.
 
-            command_name = _get_command_name(line[region_start.char:])
-            cmd_point = copy(region_start)
-            cmd_text_list = [command_name]
+                command_name = _get_command_name(line[region_start.char:])
+                cmd_point = copy(region_start)
+                cmd_text_list = [command_name]
 
-            region_start.char += len(command_name) # Start searching for parens after cmd.
-            skip_horizontal_whitespace(line, region_start)
-            if region_start.char >= len(line) or line[region_start.char] != '(':
-                raise format_parse_err(
-                    "Missing open parenthesis", path, file_lines, region_start)
+                region_start.char += len(command_name) # Start searching for parens after cmd.
+                skip_horizontal_whitespace(line, region_start)
+                if region_start.char >= len(line) or line[region_start.char] != '(':
+                    raise format_parse_err(
+                        "Missing open parenthesis", path, file_lines, region_start)
 
-        end, paren_balance = _search_line_for_cmd_end(line, region_start.char, paren_balance)
-        # Add this text blob to the command.
-        cmd_text_list.append(line[region_start.char:end])
+            end, paren_balance = _search_line_for_cmd_end(line, region_start.char, paren_balance)
+            # Add this text blob to the command.
+            cmd_text_list.append(line[region_start.char:end])
+            # Move parse ptr to end of line or parens
+            region_start.char = end
 
-        # If the parens are unbalanced start reading the next line in an attempt
-        # to find the end of the command.
-        if paren_balance != 0:
-            continue
+            # If the parens are unbalanced start reading the next line in an attempt
+            # to find the end of the command.
+            if paren_balance != 0:
+                break  # Read next line.
 
-        # Parens are balanced, we have a full command to evaluate.
-        raw_text = "".join(cmd_text_list)
-        try:
-            command = _build_command(
-                valid_commands[command_name],
-                raw_text,
-                path,
-                cmd_point.get_lineno(),
-            )
-        except SyntaxError as e:
-            # This err should point to the problem line.
-            err_point = copy(cmd_point)
-            # To e the command start is the absolute start, so use as offset.
-            err_point.line += e.lineno - 1 # e.lineno is a position, not index.
-            err_point.char += e.offset - 1 # e.offset is a position, not index.
-            raise format_parse_err(e.msg, path, file_lines, err_point)
-        except TypeError as e:
-            # This err should always point to the end of the command name.
-            err_point = copy(cmd_point)
-            err_point.char += len(command_name)
-            raise format_parse_err(str(e), path, file_lines, err_point)
-
-        resolve_labels(command, commands)
-        assert (path, command.lineno) not in commands[command_name], (
-            command_name, commands[command_name])
-        commands[command_name][path, command.lineno] = command
+            # Parens are balanced, we have a full command to evaluate.
+            raw_text = "".join(cmd_text_list)
+            try:
+                command = _build_command(
+                    valid_commands[command_name],
+                    raw_text,
+                    path,
+                    cmd_point.get_lineno(),
+                )
+            except SyntaxError as e:
+                # This err should point to the problem line.
+                err_point = copy(cmd_point)
+                # To e the command start is the absolute start, so use as offset.
+                err_point.line += e.lineno - 1 # e.lineno is a position, not index.
+                err_point.char += e.offset - 1 # e.offset is a position, not index.
+                raise format_parse_err(e.msg, path, file_lines, err_point)
+            except TypeError as e:
+                # This err should always point to the end of the command name.
+                err_point = copy(cmd_point)
+                err_point.char += len(command_name)
+                raise format_parse_err(str(e), path, file_lines, err_point)
+            else:
+                resolve_labels(command, commands)
+                assert (path, cmd_point) not in commands[command_name], (
+                    command_name, commands[command_name])
+                commands[command_name][path, cmd_point] = command
 
     if paren_balance != 0:
         # This err should always point to the end of the command name.
@@ -403,8 +409,6 @@ class TestParseCommand(unittest.TestCase):
         self.assertTrue('CMD_PAREN_LF' in values)
 
 
-    # [TODO]: Fix parsing so this passes.
-    @unittest.expectedFailure
     def test_parse_share_line(self):
         """More than one command can appear on one line."""
 
