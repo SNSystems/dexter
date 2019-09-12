@@ -1,0 +1,3 @@
+CHECK:parser error:{{.*}}test.cpp(14): expected at least two args
+CHECK:// DexExpectWatchValue()
+CHECK:                      ^

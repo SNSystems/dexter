@@ -320,6 +320,12 @@ class TestParseCommand(unittest.TestCase):
 
         self.assertTrue('WITH_COMMENT' in values)
 
+    def test_parse_empty(self):
+        """Empty files are silently ignored."""
+
+        lines = []
+        values = self._find_all_mock_values_in_lines(lines)
+        self.assertTrue(len(values) == 0)
 
     # [TODO]: Fix parsing so this passes.
     @unittest.expectedFailure
