@@ -1,4 +1,4 @@
-// Test debugging experience of structs when passed by RVO.
+// Test debugging experience of structs when returned using RVO.
 
 int global = 0;
 
