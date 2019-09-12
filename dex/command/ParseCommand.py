@@ -358,13 +358,20 @@ class TestParseCommand(unittest.TestCase):
         values = self._find_all_mock_values_in_lines(lines)
         self.assertTrue(len(values) == 0)
 
-    # [TODO]: Fix parsing so this passes.
-    @unittest.expectedFailure
-    def test_parse_whitespace(self):
+    def test_parse_bad_whitespace(self):
+        """Throw exception when parsing badly formed whitespace."""
+        lines = [
+            'MockCmd\n',
+            '("XFAIL_CMD_LF_PAREN")\n',
+        ]
+
+        with self.assertRaises(CommandParseError):
+            values = self._find_all_mock_values_in_lines(lines)
+
+    def test_parse_good_whitespace(self):
         """Try to emulate python whitespace rules"""
 
         lines = [
-            # Good
             'MockCmd("NONE")\n',
             'MockCmd    ("SPACE")\n',
             'MockCmd\t\t("TABS")\n',
@@ -372,9 +379,6 @@ class TestParseCommand(unittest.TestCase):
             'MockCmd(\t\t"ARG_TABS"\t\t)\n',
             'MockCmd(\n',
             '"CMD_PAREN_LF")\n',
-            # Bad
-            'MockCmd\n',
-            '("XFAIL_CMD_LF_PAREN")\n',
         ]
 
         values = self._find_all_mock_values_in_lines(lines)
@@ -385,8 +389,6 @@ class TestParseCommand(unittest.TestCase):
         self.assertTrue('ARG_SPACE' in values)
         self.assertTrue('ARG_TABS' in values)
         self.assertTrue('CMD_PAREN_LF' in values)
-
-        self.assertFalse('XFAIL_CMD_LF_PAREN' in values)
 
 
     # [TODO]: Fix parsing so this passes.
