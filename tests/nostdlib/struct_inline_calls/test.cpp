@@ -1,4 +1,5 @@
-// Tests members of a struct can still be read and have the correct values.
+// Tests members of a struct can still be read and have the correct values after
+// inlining.
 
 struct foo {
   static const size_t size = 7;
