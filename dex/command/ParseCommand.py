@@ -81,17 +81,25 @@ def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
     return valid_commands
 
 
-def _eval_command(command_raw: str, valid_commands: dict) -> CommandBase:
+def _build_command(command_type, raw_text: str, path: str, lineno: str) -> CommandBase:
     """Build a command object from raw text.
+
+    This function will call eval().
+
+    Raises:
+        Any exception that eval() can raise.
 
     Returns:
         A dexter command object.
     """
-    command_name = _get_command_name(command_raw)
-    valid_commands = _merge_subcommands(command_name, valid_commands)
+    valid_commands = _merge_subcommands(
+        command_type.get_name(), { command_type.get_name(): command_type })
     # pylint: disable=eval-used
-    command = eval(command_raw, valid_commands)
+    command = eval(raw_text, valid_commands)
     # pylint: enable=eval-used
+    command.raw_text = raw_text
+    command.path = path
+    command.lineno = lineno
     return command
 
 
@@ -116,7 +124,7 @@ def resolve_labels(command: CommandBase, commands: dict):
         raise syntax_error
 
 
-def _find_start_of_command(line, valid_commands) -> int:
+def _search_line_for_cmd_start(line: str, valid_commands: dict) -> int:
     """Scan `line` for a string matching any key in `valid_commands`.
 
     Commands escaped with `\` (E.g. `\DexLabel('a')`) are ignored.
@@ -135,12 +143,12 @@ def _find_start_of_command(line, valid_commands) -> int:
     return -1
 
 
-def _find_end_of_command(line, start, paren_balance) -> (int, int):
+def _search_line_for_cmd_end(line: str, start: int, paren_balance: int) -> (int, int):
     """Find the end of a command by looking for balanced parentheses.
 
     Args:
-        line (str): String to scan.
-        start (int): Index into `line` to start looking.
+        line: String to scan.
+        start: Index into `line` to start looking.
         paren_balance(int): paren_balance after previous call.
 
     Note:
@@ -149,7 +157,7 @@ def _find_end_of_command(line, start, paren_balance) -> (int, int):
         returned `paren_balance`.
 
     Returns:
-        ( end (int), paren_balance (int) )
+        ( end,  paren_balance )
         Where end is 1 + the index of the last char in the command or, if the
         parentheses are not balanced, the end of the line.
 
@@ -196,9 +204,9 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
     for region_start.line, line in enumerate(file_lines):
         region_start.char = 0
 
-        # If parens are currently balanced we can look for a new command
+        # If parens are currently balanced we can look for a new command.
         if paren_balance == 0:
-            region_start.char = _find_start_of_command(line, valid_commands)
+            region_start.char = _search_line_for_cmd_start(line, valid_commands)
             if region_start.char == -1:
                 continue
 
@@ -207,8 +215,8 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
             cmd_text_list = [command_name]
             region_start.char += len(command_name) # Start searching for parens after cmd.
 
-        end, paren_balance = _find_end_of_command(line, region_start.char, paren_balance)
-        # Add this text blob to the command
+        end, paren_balance = _search_line_for_cmd_end(line, region_start.char, paren_balance)
+        # Add this text blob to the command.
         cmd_text_list.append(line[region_start.char:end])
 
         # If the parens are unbalanced start reading the next line in an attempt
@@ -217,16 +225,14 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
             continue
 
         # Parens are balanced, we have a full command to evaluate.
+        raw_text = "".join(cmd_text_list)
         try:
-            raw_text = "".join(cmd_text_list)
-            command = _eval_command(raw_text, valid_commands)
-            command.path = path
-            command.lineno = cmd_point.get_lineno()
-            command.raw_text = raw_text
-            resolve_labels(command, commands)
-            assert (path, cmd_point.get_lineno()) not in commands[command_name], (
-                command_name, commands[command_name])
-            commands[command_name][path, cmd_point.get_lineno()] = command
+            command = _build_command(
+                valid_commands[command_name],
+                raw_text,
+                path,
+                cmd_point.get_lineno(),
+            )
         except SyntaxError as e:
             # This err should point to the problem line.
             err_point = copy(cmd_point)
@@ -239,6 +245,11 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
             err_point = copy(cmd_point)
             err_point.char += len(command_name)
             raise format_parse_err(str(e), path, file_lines, err_point)
+        else:
+            resolve_labels(command, commands)
+            assert (path, command.lineno) not in commands[command_name], (
+                command_name, commands[command_name])
+            commands[command_name][path, command.lineno] = command
 
     if paren_balance != 0:
         # This err should always point to the end of the command name.

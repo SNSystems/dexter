@@ -32,6 +32,7 @@ class CommandBase(object, metaclass=abc.ABCMeta):
     def __init__(self):
         self.path = None
         self.lineno = None
+        self.raw_text = ''
 
     def get_label_args(self):
         return list()
