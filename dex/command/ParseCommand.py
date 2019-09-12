@@ -197,6 +197,13 @@ def format_parse_err(msg: str, path: str, lines: list, point: TextPoint) -> Comm
     return err
 
 
+def skip_horizontal_whitespace(line, point):
+    for idx, char in enumerate(line[point.char:]):
+        if char not in ' \t':
+            point.char += idx
+            return
+
+
 def _find_all_commands_in_file(path, file_lines, valid_commands):
     commands = defaultdict(dict)
     paren_balance = 0
@@ -213,7 +220,12 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
             command_name = _get_command_name(line[region_start.char:])
             cmd_point = copy(region_start)
             cmd_text_list = [command_name]
+
             region_start.char += len(command_name) # Start searching for parens after cmd.
+            skip_horizontal_whitespace(line, region_start)
+            if region_start.char >= len(line) or line[region_start.char] != '(':
+                raise format_parse_err(
+                    "Missing open parenthesis", path, file_lines, region_start)
 
         end, paren_balance = _search_line_for_cmd_end(line, region_start.char, paren_balance)
         # Add this text blob to the command.
