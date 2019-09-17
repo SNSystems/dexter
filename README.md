@@ -98,14 +98,8 @@ At the end of the test is the following line:
 
     DexExpectStepKind('FUNC_EXTERNAL', 0)
 
-Each time the debugger steps, DExTer classifies the 'kind'. For example:
-* `VERTICAL_FORWARD` - meaning the new source location is later in the same function
-* `VERTICAL_BACKWARD` - meaning the new source location is earlier in the same function
-* `FUNC` - meaning the new location is in a different function
-* `FUNC_EXTERNAL` - meaning the new location is not within the test file.
-
-The [DexExpectStepKind][3] command indicates that we do not expect the debugger to
-step outside of the test file.
+This [DexExpectStepKind][3] command indicates that we do not expect the debugger
+to step into a file outside of the test directory.
 
 [1]: Commands.md#DexLabel
 [2]: Commands.md#DexExpectWatchValue

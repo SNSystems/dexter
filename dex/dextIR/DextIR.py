@@ -87,7 +87,7 @@ class DextIR:
         return len(self.steps)
 
     def _get_prev_step_in_this_frame(self, step):
-        """Find the latest recorded step in the same frame as step.
+        """Find the most recent step in the same frame as `step`.
 
         Returns:
             StepIR or None if there is no previous step in this frame.
