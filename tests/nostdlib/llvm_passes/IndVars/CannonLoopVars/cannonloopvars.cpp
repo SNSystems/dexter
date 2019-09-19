@@ -24,6 +24,6 @@ main()
 
 // DexExpectWatchValue('blah', '3', from_line=1, to_line=50)
 // DexExpectWatchValue('i', '0', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', from_line=1, to_line=50)
-// DexExpectStepKind('BACKWARD', 10)
+// DexExpectStepKind('VERTICAL_BACKWARD', 10)
 // DexExpectStepKind('FUNC', 2)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

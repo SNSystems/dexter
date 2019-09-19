@@ -21,6 +21,6 @@ main()
 // represented and correct. However, it looks like we drop metadata when
 // the returns are merged into a select/phi instruction.
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

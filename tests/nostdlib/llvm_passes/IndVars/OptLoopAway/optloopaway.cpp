@@ -9,6 +9,6 @@ main()
   return 1; // DexExpectStepOrder(11)
 } // DexExpectStepOrder(12)
 
-// DexExpectStepKind('BACKWARD', 10)
+// DexExpectStepKind('VERTICAL_BACKWARD', 10)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

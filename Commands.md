@@ -70,8 +70,24 @@ case, the actual value of `expr` in the debugger must match.
 Expect to see a particular step `kind` a number of `times` while stepping
 through the program.
 
-`kind` must be one of: `'FUNC'`, `'FUNC_EXTERNAL'`, `'FUNC_UNKNOWN'`,
-`'FORWARD'`, `'SAME'`, `'BACKWARD'`, `'UNKNOWN'`.
+`kind` must be one of:
+
+`FUNC`: The first step into a function which is defined in the test
+directory.</br>
+`FUNC_EXTERNAL`: A step over a function which is not defined in the test
+directory.</br>
+`FUNC_UNKNOWN`: The first step over a function an unknown definition
+location.</br>
+`VERTICAL_FORWARD`: A step onto a line after the previous step line in this
+frame.</br>
+`VERTICAL_BACKWARD`: A step onto a line before the previous step line in
+this frame.</br>
+`HORIZONTAL_FORWARD`: A step forward on the same line as the previous step in
+this frame.</br>
+`HORIZONTAL_BACKWARD`: A step backward on the same line as the previous step
+in this frame.</br>
+`SAME`: A step onto the same line and column as the previous step in this
+frame.</br>
 
 ### Heuristic
 [TODO]

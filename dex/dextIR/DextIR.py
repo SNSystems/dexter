@@ -86,27 +86,55 @@ class DextIR:
     def num_steps(self):
         return len(self.steps)
 
+    def _get_prev_step_in_this_frame(self, step):
+        """Find the most recent step in the same frame as `step`.
+
+        Returns:
+            StepIR or None if there is no previous step in this frame.
+        """
+        return next((s for s in reversed(self.steps)
+            if s.current_function == step.current_function
+            and s.num_frames == step.num_frames), None)
+
+    def _get_new_step_kind(self, context, step):
+        if step.current_function is None:
+            return StepKind.UNKNOWN
+
+        if len(self.steps) == 0:
+            return _step_kind_func(context, step)
+
+        prev_step = self.steps[-1]
+
+        if prev_step.current_function is None:
+            return StepKind.UNKNOWN
+
+        if prev_step.num_frames < step.num_frames:
+            return _step_kind_func(context, step)
+
+        if prev_step.num_frames > step.num_frames:
+            frame_step = self._get_prev_step_in_this_frame(step)
+            prev_step = frame_step if frame_step is not None else prev_step
+
+        # We're in the same func as prev step, check lineo.
+        if prev_step.current_location.lineno > step.current_location.lineno:
+            return StepKind.VERTICAL_BACKWARD
+
+        if prev_step.current_location.lineno < step.current_location.lineno:
+            return StepKind.VERTICAL_FORWARD
+
+        # We're on the same line as prev step, check column.
+        if prev_step.current_location.column > step.current_location.column:
+            return StepKind.HORIZONTAL_BACKWARD
+
+        if prev_step.current_location.column < step.current_location.column:
+            return StepKind.HORIZONTAL_FORWARD
+
+        # This step is in exactly the same location as the prev step.
+        return StepKind.SAME
+
     def new_step(self, context, step):
         assert isinstance(step, StepIR), type(step)
-        if step.current_function is None:
-            step.step_kind = StepKind.UNKNOWN
-        else:
-            try:
-                prev_step = self.steps[-1]
-            except IndexError:
-                step.step_kind = _step_kind_func(context, step)
-            else:
-                if prev_step.current_function is None:
-                    step.step_kind = StepKind.UNKNOWN
-                elif prev_step.current_function != step.current_function:
-                    step.step_kind = _step_kind_func(context, step)
-                elif prev_step.current_location == step.current_location:
-                    step.step_kind = StepKind.SAME
-                elif prev_step.current_location > step.current_location:
-                    step.step_kind = StepKind.BACKWARD
-                elif prev_step.current_location < step.current_location:
-                    step.step_kind = StepKind.FORWARD
-
+        step.step_kind = self._get_new_step_kind(context, step)
         self.steps.append(step)
         return step
 

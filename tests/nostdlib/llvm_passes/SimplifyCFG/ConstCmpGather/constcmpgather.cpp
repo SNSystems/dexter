@@ -50,4 +50,4 @@ main()
 
 // The printf...
 // DexExpectStepKind('FUNC_EXTERNAL', 1)
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)

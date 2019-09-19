@@ -19,7 +19,7 @@ bar(float a1, float a2, float b1, float b2, float c1, float c2, float d1, float 
   return g;
 }
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectWatchValue('a1', '4')
 // DexExpectWatchValue('a2', '4')
 // DexExpectWatchValue('b1', '4')

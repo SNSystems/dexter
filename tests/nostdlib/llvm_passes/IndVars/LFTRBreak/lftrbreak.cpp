@@ -34,6 +34,6 @@ main()
 // condition, which is deeply misleading.
 // Not clear if this is LLVM or GDB though, because lldb seems to do ok
 
-// DexExpectStepKind('BACKWARD', 5)
+// DexExpectStepKind('VERTICAL_BACKWARD', 5)
 // DexExpectStepKind('FUNC', 13)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

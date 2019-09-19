@@ -28,6 +28,6 @@ main()
 // transformed but) stays the same enough that we should see the
 // assignment of 1 to bar. But don't.
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)

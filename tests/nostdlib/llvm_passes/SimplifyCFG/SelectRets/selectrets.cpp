@@ -18,6 +18,6 @@ main()
 // moves on x86, thus making any line numbers with 'return' on them likely
 // inaccurate. The slightly bad score for O2 is thus expected
 
-// DexExpectStepKind('BACKWARD', 0)
+// DexExpectStepKind('VERTICAL_BACKWARD', 0)
 // DexExpectStepKind('FUNC', 1)
 // DexExpectStepKind('FUNC_EXTERNAL', 0)
