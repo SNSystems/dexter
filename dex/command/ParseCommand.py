@@ -245,11 +245,11 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
             err_point = copy(cmd_point)
             err_point.char += len(command_name)
             raise format_parse_err(str(e), path, file_lines, err_point)
-        else:
-            resolve_labels(command, commands)
-            assert (path, command.lineno) not in commands[command_name], (
-                command_name, commands[command_name])
-            commands[command_name][path, command.lineno] = command
+
+        resolve_labels(command, commands)
+        assert (path, command.lineno) not in commands[command_name], (
+            command_name, commands[command_name])
+        commands[command_name][path, command.lineno] = command
 
     if paren_balance != 0:
         # This err should always point to the end of the command name.
