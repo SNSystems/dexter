@@ -103,7 +103,7 @@ class TestToolBase(ToolBase):
         options.results_directory = os.path.abspath(options.results_directory)
         if not os.path.isdir(options.results_directory):
             try:
-                os.makedirs(options.results_directory)
+                os.makedirs(options.results_directory, exist_ok=True)
             except OSError as e:
                 raise Error(
                     '<d>could not create directory</> <r>"{}"</> <y>({})</>'.
