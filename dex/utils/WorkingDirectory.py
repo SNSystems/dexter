@@ -37,7 +37,7 @@ class WorkingDirectory(object):
 
         dir_ = kwargs.get('dir', None)
         if dir_ and not os.path.isdir(dir_):
-            os.makedirs(dir_)
+            os.makedirs(dir_, exist_ok=True)
         self.path = tempfile.mkdtemp(*args, **kwargs)
 
     def __enter__(self):
