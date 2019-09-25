@@ -83,8 +83,8 @@ def get_tool_names():
     """ Returns a list of expected DExTer Tools
     """
     return [
-        'annotate-expected-values', 'clang-opt-bisect', 'help',
-        'list-debuggers', 'no-tool-', 'run-debugger-internal-', 'test', 'view'
+        'clang-opt-bisect', 'help', 'list-debuggers', 'no-tool-',
+        'run-debugger-internal-', 'test', 'view'
     ]
 
 
