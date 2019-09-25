@@ -90,12 +90,6 @@ class ToolBase(object, metaclass=abc.ABCMeta):
             default=False,
             help='suppress warning output')
         self.parser.add_argument(
-            '--lint',
-            type=str,
-            choices=['off', 'fast', 'full'],
-            default='off',
-            help='run linting tools on DExTer codebase')
-        self.parser.add_argument(
             '--unittest',
             type=str,
             choices=['off', 'show-failures', 'show-all'],

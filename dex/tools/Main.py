@@ -22,8 +22,8 @@
 # THE SOFTWARE.
 """This is the main entry point.
 It implements some functionality common to all subtools such as command line
-parsing and running the unit-testing and linting harnesses, before calling the
-requested subtool.
+parsing and running the unit-testing harnesses, before calling the reequested
+subtool.
 """
 
 import imp
@@ -34,7 +34,6 @@ from dex.utils import PrettyOutput, Timer
 from dex.utils import ExtArgParse as argparse
 from dex.utils import get_root_directory
 from dex.utils.Exceptions import Error, ToolArgumentError
-from dex.utils.Linting import linting_ok
 from dex.utils.UnitTests import unit_tests_ok
 from dex.utils.Version import version
 from dex.utils import WorkingDirectory
@@ -164,9 +163,6 @@ def tool_main(context, tool, args):
 
         if (options.unittest != 'off' and not unit_tests_ok(context)):
             raise Error('<d>unit test failures</>')
-
-        if options.lint != 'off' and not linting_ok(context):
-            raise Error('<d>linting failures</>')
 
         if options.colortest:
             context.o.colortest()
