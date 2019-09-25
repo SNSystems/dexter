@@ -26,6 +26,7 @@ Python code being embedded within DExTer commands.
 """
 
 import unittest
+from copy import copy
 
 from collections import defaultdict
 
@@ -80,17 +81,25 @@ def _merge_subcommands(command_name: str, valid_commands: dict) -> dict:
     return valid_commands
 
 
-def _eval_command(command_raw: str, valid_commands: dict) -> CommandBase:
+def _build_command(command_type, raw_text: str, path: str, lineno: str) -> CommandBase:
     """Build a command object from raw text.
+
+    This function will call eval().
+
+    Raises:
+        Any exception that eval() can raise.
 
     Returns:
         A dexter command object.
     """
-    command_name = _get_command_name(command_raw)
-    valid_commands = _merge_subcommands(command_name, valid_commands)
+    valid_commands = _merge_subcommands(
+        command_type.get_name(), { command_type.get_name(): command_type })
     # pylint: disable=eval-used
-    command = eval(command_raw, valid_commands)
+    command = eval(raw_text, valid_commands)
     # pylint: enable=eval-used
+    command.raw_text = raw_text
+    command.path = path
+    command.lineno = lineno
     return command
 
 
@@ -115,7 +124,7 @@ def resolve_labels(command: CommandBase, commands: dict):
         raise syntax_error
 
 
-def _find_start_of_command(line, valid_commands) -> int:
+def _search_line_for_cmd_start(line: str, valid_commands: dict) -> int:
     """Scan `line` for a string matching any key in `valid_commands`.
 
     Commands escaped with `\` (E.g. `\DexLabel('a')`) are ignored.
@@ -134,12 +143,12 @@ def _find_start_of_command(line, valid_commands) -> int:
     return -1
 
 
-def _find_end_of_command(line, start, paren_balance) -> (int, int):
+def _search_line_for_cmd_end(line: str, start: int, paren_balance: int) -> (int, int):
     """Find the end of a command by looking for balanced parentheses.
 
     Args:
-        line (str): String to scan.
-        start (int): Index into `line` to start looking.
+        line: String to scan.
+        start: Index into `line` to start looking.
         paren_balance(int): paren_balance after previous call.
 
     Note:
@@ -148,7 +157,7 @@ def _find_end_of_command(line, start, paren_balance) -> (int, int):
         returned `paren_balance`.
 
     Returns:
-        ( end (int), paren_balance (int) )
+        ( end,  paren_balance )
         Where end is 1 + the index of the last char in the command or, if the
         parentheses are not balanced, the end of the line.
 
@@ -166,32 +175,49 @@ def _find_end_of_command(line, start, paren_balance) -> (int, int):
     return (end, paren_balance)
 
 
-def _find_all_commands_in_file(path, file_lines, valid_commands):
-    commands = defaultdict(dict)
+class TextPoint():
+    def __init__(self, line, char):
+        self.line = line
+        self.char = char
+
+    def get_lineno(self):
+        return self.line + 1
+
+    def get_column(self):
+        return self.char + 1
+
+
+def format_parse_err(msg: str, path: str, lines: list, point: TextPoint) -> CommandParseError:
     err = CommandParseError()
     err.filename = path
-    paren_balance = 0
-    for lineno, line in enumerate(file_lines):
-        start = 0 # Index from which we start parsing
-        lineno += 1  # Line numbers start at 1.
-        err.lineno = lineno
-        err.src = line.rstrip()
+    err.src = lines[point.line].rstrip()
+    err.lineno = point.get_lineno()
+    err.info = msg
+    err.caret = '{}<r>^</>'.format(' ' * (point.char))
+    return err
 
-        # If parens are currently balanced we can look for a new command
+
+def _find_all_commands_in_file(path, file_lines, valid_commands):
+    commands = defaultdict(dict)
+    paren_balance = 0
+    region_start = TextPoint(0, 0)
+    for region_start.line, line in enumerate(file_lines):
+        region_start.char = 0
+
+        # If parens are currently balanced we can look for a new command.
         if paren_balance == 0:
-            start = _find_start_of_command(line, valid_commands)
-            if start == -1:
+            region_start.char = _search_line_for_cmd_start(line, valid_commands)
+            if region_start.char == -1:
                 continue
 
-            command_name = _get_command_name(line[start:])
-            command_lineno = lineno
-            command_column = start + 1 # Column numbers start at 1.
+            command_name = _get_command_name(line[region_start.char:])
+            cmd_point = copy(region_start)
             cmd_text_list = [command_name]
-            start += len(command_name) # Start searching for parens after cmd.
+            region_start.char += len(command_name) # Start searching for parens after cmd.
 
-        end, paren_balance = _find_end_of_command(line, start, paren_balance)
-        # Add this text blob to the command
-        cmd_text_list.append(line[start:end])
+        end, paren_balance = _search_line_for_cmd_end(line, region_start.char, paren_balance)
+        # Add this text blob to the command.
+        cmd_text_list.append(line[region_start.char:end])
 
         # If the parens are unbalanced start reading the next line in an attempt
         # to find the end of the command.
@@ -199,33 +225,38 @@ def _find_all_commands_in_file(path, file_lines, valid_commands):
             continue
 
         # Parens are balanced, we have a full command to evaluate.
+        raw_text = "".join(cmd_text_list)
         try:
-            raw_text = "".join(cmd_text_list)
-            command = _eval_command(raw_text, valid_commands)
-            command_name = _get_command_name(raw_text)
-            command.path = path
-            command.lineno = lineno
-            command.raw_text = raw_text
-            resolve_labels(command, commands)
-            assert (path, lineno) not in commands[command_name], (
-                command_name, commands[command_name])
-            commands[command_name][path, lineno] = command
+            command = _build_command(
+                valid_commands[command_name],
+                raw_text,
+                path,
+                cmd_point.get_lineno(),
+            )
         except SyntaxError as e:
-            err.info = str(e.msg)
-            err.caret = '{}<r>^</>'.format(
-                ' ' * (command_column + e.offset - 1))
-            raise err
+            # This err should point to the problem line.
+            err_point = copy(cmd_point)
+            # To e the command start is the absolute start, so use as offset.
+            err_point.line += e.lineno - 1 # e.lineno is a position, not index.
+            err_point.char += e.offset - 1 # e.offset is a position, not index.
+            raise format_parse_err(e.msg, path, file_lines, err_point)
         except TypeError as e:
-            err.info = str(e).replace('__init__() ', '')
-            err.caret = '{}<r>{}</>'.format(
-                ' ' * (command_column), '^' * (len(err.src) - command_column))
-            raise err
+            # This err should always point to the end of the command name.
+            err_point = copy(cmd_point)
+            err_point.char += len(command_name)
+            raise format_parse_err(str(e), path, file_lines, err_point)
+
+        resolve_labels(command, commands)
+        assert (path, command.lineno) not in commands[command_name], (
+            command_name, commands[command_name])
+        commands[command_name][path, command.lineno] = command
 
     if paren_balance != 0:
-        err.info = (
-            "Unbalanced parenthesis starting at line {} column {}".format(
-                command_lineno, command_column + len(command_name)))
-        raise err
+        # This err should always point to the end of the command name.
+        err_point = copy(cmd_point)
+        err_point.char += len(command_name)
+        msg = "Unbalanced parenthesis starting here"
+        raise format_parse_err(msg, path, file_lines, err_point)
     return dict(commands)
 
 
@@ -320,6 +351,12 @@ class TestParseCommand(unittest.TestCase):
 
         self.assertTrue('WITH_COMMENT' in values)
 
+    def test_parse_empty(self):
+        """Empty files are silently ignored."""
+
+        lines = []
+        values = self._find_all_mock_values_in_lines(lines)
+        self.assertTrue(len(values) == 0)
 
     # [TODO]: Fix parsing so this passes.
     @unittest.expectedFailure
