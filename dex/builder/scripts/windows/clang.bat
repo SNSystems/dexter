@@ -5,7 +5,7 @@ for %%I in (%SOURCE_INDEXES%) do (
   if errorlevel 1 goto :FAIL
 )
 
-clang++.exe -fuse-ld=lld %OBJECT_FILES% -o %EXECUTABLE_FILE% -Wl,-subsystem:windows,-ENTRY:mainCRTStartup %LINKER_OPTIONS%
+clang++.exe -fuse-ld=lld %LINKER_OPTIONS% %OBJECT_FILES% -o %EXECUTABLE_FILE%
 if errorlevel 1 goto :FAIL
 goto :END
 

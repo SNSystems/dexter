@@ -11,7 +11,7 @@ for %%I in (%SOURCE_INDEXES%) do (
   if errorlevel 1 goto :FAIL
 )
 
-clang-cl.exe %OBJECT_FILES% /Fe%EXECUTABLE_FILE% /link /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup %LINKER_OPTIONS%
+clang-cl.exe %LINKER_OPTIONS% %OBJECT_FILES% /Fe%EXECUTABLE_FILE%
 if errorlevel 1 goto :FAIL
 goto :END
 
