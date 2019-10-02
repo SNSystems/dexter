@@ -39,6 +39,7 @@ from dex.utils.Warning import warn
 
 from dex.debugger.dbgeng.dbgeng import DbgEng
 from dex.debugger.lldb.LLDB import LLDB
+from dex.debugger.gdb.Gdb import Gdb
 from dex.debugger.visualstudio.VisualStudio2015 import VisualStudio2015
 from dex.debugger.visualstudio.VisualStudio2017 import VisualStudio2017
 
@@ -51,6 +52,7 @@ def _get_potential_debuggers():  # noqa
     return {
         DbgEng.get_option_name(): DbgEng,
         LLDB.get_option_name(): LLDB,
+        Gdb.get_option_name(): Gdb,
         VisualStudio2015.get_option_name(): VisualStudio2015,
         VisualStudio2017.get_option_name(): VisualStudio2017
     }

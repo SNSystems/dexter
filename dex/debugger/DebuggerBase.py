@@ -60,6 +60,11 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
             self.add_breakpoints()
         except DebuggerException:
             self._loading_error = sys.exc_info()
+            self._custom_exit()
+        except:
+            self._custom_exit()
+            raise
+
         return self
 
     def __exit__(self, *args):

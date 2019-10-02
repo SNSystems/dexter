@@ -1,0 +1,50 @@
+# This is python, that the unit tests try to import by default...
+SOCKET_PATH = './sock/foot'
+SOCKET_DIR = './sock'
+import sys
+import os
+try:
+  import rpyc
+  from rpyc.utils.server import OneShotServer
+
+  os.mkdir(SOCKET_DIR, mode=0o700)
+
+  class GdbTrampoline(rpyc.Service):
+    def __init__(self):
+      self.bps = []
+      self.events = []
+      super(GdbTrampoline, self).__init__()
+
+    @property
+    def exposed_gdb(self):
+      return gdb
+
+    def clear_events(self):
+      self.events.clear()
+
+    def register_stuff(self):
+      def exited(evt):
+        self.events.append("exited")
+      def stopped(evt):
+        if isinstance(evt, gdb.BreakpointEvent):
+          self.events.append("break")
+        elif isinstance(evt, gdb.SignalEvent):
+          self.events.append("signal")
+        else:
+          self.events.append("unknown")
+      gdb.events.exited.connect(exited)
+      gdb.events.stop.connect(stopped)
+
+    def ping(self):
+      return None
+
+  # Setup server that allows remote connectors to access any attribute of gdb
+  s = OneShotServer(GdbTrampoline, socket_path=SOCKET_PATH, protocol_config={'allow_all_attrs' : True})
+  # Go
+  s.start()
+except:
+  import traceback
+  traceback.print_exc()
+
+# Always quit, whatever happens
+sys.exit(0)
