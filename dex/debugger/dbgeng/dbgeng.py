@@ -26,6 +26,7 @@ import os
 
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
+from dex.dextIR import ProgramState, StackFrame, SourceLocation
 from dex.utils.Exceptions import DebuggerException, LoadDebuggerException
 from dex.utils.ReturnCode import ReturnCode
 
@@ -100,19 +101,34 @@ class DbgEng(DebuggerBase):
 
     def get_step_info(self):
         frames = self.step_info
+        state_frames = []
 
         # For now assume the base function is the... function, ignoring
         # inlining.
         dex_frames = []
-        for x in frames:
+        for i, x in enumerate(frames):
           # XXX Might be able to get columns out through
           # GetSourceEntriesByOffset, not a priority now
           loc = LocIR(path=x.source_file, lineno=x.line_no, column=0)
           new_frame = FrameIR(function=x.function_name, is_inlined=False, loc=loc)
           dex_frames.append(new_frame)
 
+          state_frame = StackFrame(function=new_frame.function,
+                                   is_inlined=new_frame.is_inlined,
+                                   location=SourceLocation(path=x.source_file,
+                                                           lineno=x.line_no,
+                                                           column=0),
+                                   watches={})
+          for expr in map(
+              lambda watch, idx=i: self.evaluate_expression(watch, idx),
+              self.watches):
+              state_frame.watches[expr.expression] = expr
+          state_frames.append(state_frame)
+
         return StepIR(
-            step_index=self.step_index, frames=dex_frames, stop_reason=StopReason.STEP)
+            step_index=self.step_index, frames=dex_frames,
+            stop_reason=StopReason.STEP,
+            program_state=ProgramState(state_frames))
 
     @property
     def is_running(self):
@@ -122,7 +138,8 @@ class DbgEng(DebuggerBase):
     def is_finished(self):
         return self.finished
 
-    def evaluate_expression(self, expression):
+    def evaluate_expression(self, expression, frame_idx=0):
+        # TODO: evaluate expressions in the right stack frame?
         res = self.client.Control.Evaluate(expression)
         if res is not None:
           result, typename = self.client.Control.Evaluate(expression)

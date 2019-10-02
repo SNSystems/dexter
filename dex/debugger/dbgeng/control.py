@@ -300,7 +300,7 @@ class Control(object):
   def WaitForEvent(self, timeout=100):
     # No flags are taken by WaitForEvent, hence 0
     ret = self.vt.WaitForEvent(self.control, 0, timeout)
-    aborter(ret, "WaitforEvent", legit=[S_FALSE])
+    aborter(ret, "WaitforEvent", ignore=[S_FALSE])
     return ret
 
   def AddBreakpoint2(self, offset=None, enabled=None):
@@ -353,7 +353,7 @@ class Control(object):
   def Evaluate(self, expr):
     ptr = DEBUG_VALUE()
     res = self.vt.Evaluate(self.control, expr.encode("ascii"), DebugValueType.DEBUG_VALUE_INVALID, byref(ptr), None)
-    aborter(res, "Evaluate", legit=[E_INTERNALEXCEPTION, E_FAIL])
+    aborter(res, "Evaluate", ignore=[E_INTERNALEXCEPTION, E_FAIL])
     if res != 0:
       return None
 

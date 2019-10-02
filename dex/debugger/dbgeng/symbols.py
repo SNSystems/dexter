@@ -285,7 +285,7 @@ class Symbols(object):
 
   def SetScopeFrameByIndex(self, idx):
     res = self.vt.SetScopeFrameByIndex(self.symbols, idx)
-    aborter(res, "SetScopeFrameByIndex", legit=[E_EINVAL])
+    aborter(res, "SetScopeFrameByIndex", ignore=[E_EINVAL])
     return res != E_EINVAL
 
   def GetOffsetByName(self, name):
@@ -362,7 +362,7 @@ class Symbols(object):
   def GetSymbolPath(self):
     # Query for length of buffer to allocate
     res = self.vt.GetSymbolPath(self.symbols, None, 0, byref(self.ulong))
-    aborter(res, "GetSymbolPath", legit=[S_FALSE])
+    aborter(res, "GetSymbolPath", ignore=[S_FALSE])
 
     # Fetch 'length' length symbol path string
     length = self.ulong.value
@@ -375,7 +375,7 @@ class Symbols(object):
   def GetSourcePath(self):
     # Query for length of buffer to allocate
     res = self.vt.GetSourcePath(self.symbols, None, 0, byref(self.ulong))
-    aborter(res, "GetSourcePath", legit=[S_FALSE])
+    aborter(res, "GetSourcePath", ignore=[S_FALSE])
 
     # Fetch a string of len 'length'
     length = self.ulong.value
@@ -414,7 +414,7 @@ class Symbols(object):
     res = self.vt.GetLineByOffset(self.symbols, offs, None, None, 0, byref(self.ulong), None)
     if res == E_FAIL:
       return None # Sometimes we just can't get line numbers, of course
-    aborter(res, "GetLineByOffset", legit=[S_FALSE])
+    aborter(res, "GetLineByOffset", ignore=[S_FALSE])
 
     # Allocate filename buffer and query for line number too
     filenamelen = self.ulong.value
@@ -428,7 +428,7 @@ class Symbols(object):
   def GetModuleNameString(self, whichname, base):
     # Initial query for name string length
     res = self.vt.GetModuleNameString(self.symbols, whichname, DEBUG_ANY_ID, base, None, 0, byref(self.ulong))
-    aborter(res, "GetModuleNameString", legit=[S_FALSE])
+    aborter(res, "GetModuleNameString", ignore=[S_FALSE])
 
     module_name_len = self.ulong.value
     module_name = (c_char * module_name_len)()
@@ -472,7 +472,7 @@ class Symbols(object):
     all_modules = []
     while res != E_EINVAL:
       res = self.vt.GetModuleParameters(self.symbols, 1, None, idx, byref(params))
-      aborter(res, "GetModuleParameters", legit=[E_EINVAL])
+      aborter(res, "GetModuleParameters", ignore=[E_EINVAL])
       all_modules.append(make_debug_module_params(params))
       idx += 1
     return all_modules
