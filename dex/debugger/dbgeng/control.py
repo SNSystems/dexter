@@ -22,10 +22,10 @@ PDEBUG_STACK_FRAME_EX = POINTER(DEBUG_STACK_FRAME_EX)
 
 class DEBUG_VALUE_U(Union):
   _fields_ = [
-      ("I8", c_ubyte),
-      ("I16", c_ushort),
-      ("I32", c_ulong),
-      ("I64", c_ulong), # slight hack
+      ("I8", c_byte),
+      ("I16", c_short),
+      ("I32", c_int),
+      ("I64", c_long),
       ("F32", c_float),
       ("F64", c_double),
       ("RawBytes", c_ubyte * 24) # Force length to 24b.
@@ -359,7 +359,8 @@ class Control(object):
 
     val_type = DebugValueType(ptr.Type)
 
-    # Here's a map from debug value types to fields
+    # Here's a map from debug value types to fields. Unclear what happens
+    # with unsigned values, as DbgEng doesn't present any unsigned fields.
 
     extract_map = {
       DebugValueType.DEBUG_VALUE_INT8    : ("I8", "char"),
