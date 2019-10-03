@@ -147,11 +147,22 @@ def setup_everything(binfile):
 
   break_on_all_but_main(Client.Control, Client.Symbols, offset)
 
+  # Set the default action on all exceptions to be "quit and detach". If we
+  # don't, dbgeng will merrily spin at the exception site forever.
+  filts = Client.Control.GetNumberEventFilters()
+  for x in range(filts[0], filts[0] + filts[1]):
+    Client.Control.SetExceptionFilterSecondCommand(x, "qd")
+
   return Client, hProcess
 
 def step_once(client):
   client.Control.Execute("p")
-  client.Control.WaitForEvent()
+  try:
+    client.Control.WaitForEvent()
+  except Exception as e:
+    if client.Control.GetExecutionStatus() == control.DebugStatus.DEBUG_STATUS_NO_DEBUGGEE:
+      return None # Debuggee has gone away, likely due to an exception.
+    raise e
   # Could assert here that we're in the "break" state
   client.Control.GetExecutionStatus()
   return probe_state(client)

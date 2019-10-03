@@ -62,6 +62,8 @@ class IDebugControl7(Structure):
 
 class IDebugControl7Vtbl(Structure):
   wrp = partial(CFUNCTYPE, c_long, POINTER(IDebugControl7))
+  idc_getnumbereventfilters = wrp(c_ulong_p, c_ulong_p, c_ulong_p)
+  idc_setexceptionfiltersecondcommand = wrp(c_ulong, c_char_p)
   idc_waitforevent = wrp(c_long, c_long)
   idc_execute = wrp(c_long, c_char_p, c_long)
   idc_setexpressionsyntax = wrp(c_ulong)
@@ -152,7 +154,7 @@ class IDebugControl7Vtbl(Structure):
       ("GetExtensionFunction", c_void_p),
       ("GetWindbgExtensionApis32", c_void_p),
       ("GetWindbgExtensionApis64", c_void_p),
-      ("GetNumberEventFilters", c_void_p),
+      ("GetNumberEventFilters", idc_getnumbereventfilters),
       ("GetEventFilterText", c_void_p),
       ("GetEventFilterCommand", c_void_p),
       ("SetEventFilterCommand", c_void_p),
@@ -163,7 +165,7 @@ class IDebugControl7Vtbl(Structure):
       ("GetExceptionFilterParameters", c_void_p),
       ("SetExceptionFilterParameters", c_void_p),
       ("GetExceptionFilterSecondCommand", c_void_p),
-      ("SetExceptionFilterSecondCommand", c_void_p),
+      ("SetExceptionFilterSecondCommand", idc_setexceptionfiltersecondcommand),
       ("WaitForEvent", idc_waitforevent),
       ("GetLastEventInformation", c_void_p),
       ("GetCurrentTimeDate", c_void_p),
@@ -302,6 +304,23 @@ class Control(object):
     ret = self.vt.WaitForEvent(self.control, 0, timeout)
     aborter(ret, "WaitforEvent", ignore=[S_FALSE])
     return ret
+
+  def GetNumberEventFilters(self):
+    specific_events = c_ulong()
+    specific_exceptions = c_ulong()
+    arbitrary_exceptions = c_ulong()
+    res = self.vt.GetNumberEventFilters(self.control, byref(specific_events),
+                                    byref(specific_exceptions),
+                                    byref(arbitrary_exceptions))
+    aborter(res, "GetNumberEventFilters")
+    return (specific_events.value, specific_exceptions.value,
+            arbitrary_exceptions.value)
+
+  def SetExceptionFilterSecondCommand(self, index, command):
+    buf = create_string_buffer(command.encode('ascii'))
+    res = self.vt.SetExceptionFilterSecondCommand(self.control, index, buf)
+    aborter(res, "SetExceptionFilterSecondCommand")
+    return
 
   def AddBreakpoint2(self, offset=None, enabled=None):
     breakpoint = POINTER(DebugBreakpoint2)()
