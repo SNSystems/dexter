@@ -143,7 +143,9 @@ class DbgEng(DebuggerBase):
         # as it appears to reserve '.' for other purposes.
         fixed_expr = expression.replace('.', '->')
 
-        # TODO: evaluate expressions in the right stack frame?
+        orig_scope_idx = self.client.Symbols.GetCurrentScopeFrameIndex()
+        self.client.Symbols.SetScopeFrameByIndex(frame_idx)
+
         res = self.client.Control.Evaluate(fixed_expr)
         if res is not None:
           result, typename = self.client.Control.Evaluate(fixed_expr)
@@ -151,6 +153,8 @@ class DbgEng(DebuggerBase):
         else:
           result, typename = (None, None)
           could_eval = False
+
+        self.client.Symbols.SetScopeFrameByIndex(orig_scope_idx)
 
         return ValueIR(
             expression=expression,
