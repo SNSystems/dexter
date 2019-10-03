@@ -155,4 +155,4 @@ class DbgEng(DebuggerBase):
             error_string="",
             could_evaluate=could_eval,
             is_optimized_away=False,
-            is_irretrievable=False)
+            is_irretrievable=not could_eval)
