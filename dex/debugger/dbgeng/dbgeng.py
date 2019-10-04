@@ -139,14 +139,22 @@ class DbgEng(DebuggerBase):
         return self.finished
 
     def evaluate_expression(self, expression, frame_idx=0):
-        # TODO: evaluate expressions in the right stack frame?
-        res = self.client.Control.Evaluate(expression)
+        # XXX: cdb insists on using '->' to examine fields of structures,
+        # as it appears to reserve '.' for other purposes.
+        fixed_expr = expression.replace('.', '->')
+
+        orig_scope_idx = self.client.Symbols.GetCurrentScopeFrameIndex()
+        self.client.Symbols.SetScopeFrameByIndex(frame_idx)
+
+        res = self.client.Control.Evaluate(fixed_expr)
         if res is not None:
-          result, typename = self.client.Control.Evaluate(expression)
+          result, typename = self.client.Control.Evaluate(fixed_expr)
           could_eval = True
         else:
           result, typename = (None, None)
           could_eval = False
+
+        self.client.Symbols.SetScopeFrameByIndex(orig_scope_idx)
 
         return ValueIR(
             expression=expression,
@@ -155,4 +163,4 @@ class DbgEng(DebuggerBase):
             error_string="",
             could_evaluate=could_eval,
             is_optimized_away=False,
-            is_irretrievable=False)
+            is_irretrievable=not could_eval)
