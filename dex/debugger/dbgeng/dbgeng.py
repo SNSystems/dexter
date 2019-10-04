@@ -43,6 +43,13 @@ class DbgEng(DebuggerBase):
         super(DbgEng, self).__init__(context, *args)
 
     def _custom_init(self):
+        import platform
+        arch = platform.architecture()[0]
+        machine = platform.machine()
+        if arch == '32bit' and machine == 'AMD64':
+          # This python process is 32 bits, but is sitting on a 64 bit machine.
+          # Bad things may happen, don't support it.
+          raise Exception('Can\'t run Dexter on 32 bit python in a 64 bit environment')
         try:
           res = setup.setup_everything(self.context.options.executable)
           self.client, self.hProcess = res
