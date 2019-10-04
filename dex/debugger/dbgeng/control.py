@@ -61,7 +61,7 @@ class IDebugControl7(Structure):
   pass
 
 class IDebugControl7Vtbl(Structure):
-  wrp = partial(CFUNCTYPE, c_long, POINTER(IDebugControl7))
+  wrp = partial(WINFUNCTYPE, c_long, POINTER(IDebugControl7))
   idc_getnumbereventfilters = wrp(c_ulong_p, c_ulong_p, c_ulong_p)
   idc_setexceptionfiltersecondcommand = wrp(c_ulong, c_char_p)
   idc_waitforevent = wrp(c_long, c_long)

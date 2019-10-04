@@ -23,7 +23,7 @@ class DebugBreakpoint2(Structure):
   pass
 
 class DebugBreakpoint2Vtbl(Structure):
-  wrp = partial(CFUNCTYPE, c_long, POINTER(DebugBreakpoint2))
+  wrp = partial(WINFUNCTYPE, c_long, POINTER(DebugBreakpoint2))
   idb_setoffset = wrp(c_ulonglong)
   idb_setflags = wrp(c_ulong)
   _fields_ = [

@@ -100,7 +100,7 @@ class IDebugSymbols5(Structure):
   pass
 
 class IDebugSymbols5Vtbl(Structure):
-  wrp = partial(CFUNCTYPE, c_long, POINTER(IDebugSymbols5))
+  wrp = partial(WINFUNCTYPE, c_long, POINTER(IDebugSymbols5))
   ids_getsymboloptions = wrp(c_ulong_p)
   ids_setsymboloptions = wrp(c_ulong)
   ids_getmoduleparameters = wrp(c_ulong, c_ulong64_p, c_ulong, PDEBUG_MODULE_PARAMETERS)

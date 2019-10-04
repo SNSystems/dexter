@@ -10,7 +10,7 @@ class IDebugSymbolGroup2(Structure):
   pass
 
 class IDebugSymbolGroup2Vtbl(Structure):
-  wrp = partial(CFUNCTYPE, c_long, POINTER(IDebugSymbolGroup2))
+  wrp = partial(WINFUNCTYPE, c_long, POINTER(IDebugSymbolGroup2))
   ids_getnumbersymbols = wrp(c_ulong_p)
   ids_getsymbolname = wrp(c_ulong, c_char_p, c_ulong, c_ulong_p)
   ids_getsymboltypename = wrp(c_ulong, c_char_p, c_ulong, c_ulong_p)

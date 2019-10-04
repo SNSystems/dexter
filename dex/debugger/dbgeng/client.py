@@ -23,7 +23,7 @@ class IDebugClient7(Structure):
   pass
 
 class IDebugClient7Vtbl(Structure):
-  wrp = partial(CFUNCTYPE, c_long, POINTER(IDebugClient7))
+  wrp = partial(WINFUNCTYPE, c_long, POINTER(IDebugClient7))
   idc_queryinterface = wrp(POINTER(IID), POINTER(c_void_p))
   idc_attachprocess = wrp(c_longlong, c_long, c_long)
   idc_detachprocesses = wrp()
