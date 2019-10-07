@@ -24,10 +24,10 @@
 
 import abc
 from itertools import chain
+import os
 import sys
 import time
 import traceback
-
 
 from dex.dextIR import DebuggerIR, ValueIR
 from dex.utils.Exceptions import DebuggerException
@@ -155,9 +155,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
                 self._update_step_watches(step_info)
                 self.steps.new_step(self.context, step_info)
 
-            if (step_info.current_frame
-                    and (step_info.current_location.path in
-                         self.context.options.source_files)):
+            if self.in_source_file(step_info):
                 self.step()
             else:
                 self.go()
@@ -166,6 +164,13 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         else:
             raise DebuggerException(
                 'maximum number of steps reached ({})'.format(max_steps))
+
+    def in_source_file(self, step_info):
+        if not step_info.current_frame:
+            return False
+        return any(os.path.samefile(step_info.current_location.path, f) \
+                   for f in self.context.options.source_files)
+
     @abc.abstractmethod
     def _load_interface(self):
         pass
