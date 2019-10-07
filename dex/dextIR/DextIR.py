@@ -21,6 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 from collections import OrderedDict
+import os
 from typing import List
 
 from dex.dextIR.BuilderIR import BuilderIR
@@ -29,11 +30,13 @@ from dex.dextIR.StepIR import StepIR, StepKind
 
 
 def _step_kind_func(context, step):
-    if step.current_location.path in context.options.source_files:
-        return StepKind.FUNC
-
-    if step.current_location.path is None:
+    if (step.current_location.path is None or
+        not os.path.exists(step.current_location.path)):
         return StepKind.FUNC_UNKNOWN
+
+    if any(os.path.samefile(step.current_location.path, f)
+           for f in context.options.source_files):
+        return StepKind.FUNC
 
     return StepKind.FUNC_EXTERNAL
 
