@@ -10,7 +10,7 @@ class IDebugSystemObjects4(Structure):
   pass
 
 class IDebugSystemObjects4Vtbl(Structure):
-  wrp = partial(CFUNCTYPE, c_long, POINTER(IDebugSystemObjects4))
+  wrp = partial(WINFUNCTYPE, c_long, POINTER(IDebugSystemObjects4))
   ids_getnumberprocesses = wrp(POINTER(c_ulong))
   ids_getprocessidsbyindex = wrp(c_ulong, c_ulong, c_ulong_p, c_ulong_p)
   ids_setcurrentprocessid = wrp(c_ulong)
