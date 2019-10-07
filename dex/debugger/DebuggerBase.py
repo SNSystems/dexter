@@ -118,7 +118,8 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         try:
             # Iterate over all watches of the types named in watch_cmds
             for watch in towatch:
-                if (os.path.samefile(watch.path, loc.path)
+                if (os.path.exists(loc.path)
+                        and os.path.samefile(watch.path, loc.path)
                         and watch.lineno == loc.lineno):
                     result = watch.eval(self)
                     step_info.watches.update(result)
@@ -167,6 +168,8 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
 
     def in_source_file(self, step_info):
         if not step_info.current_frame:
+            return False
+        if not os.path.exists(step_info.current_location.path):
             return False
         return any(os.path.samefile(step_info.current_location.path, f) \
                    for f in self.context.options.source_files)

@@ -30,7 +30,8 @@ from dex.dextIR.StepIR import StepIR, StepKind
 
 
 def _step_kind_func(context, step):
-    if step.current_location.path is None:
+    if (step.current_location.path is None or
+        not os.path.exists(step.current_location.path)):
         return StepKind.FUNC_UNKNOWN
 
     if any(os.path.samefile(step.current_location.path, f)
