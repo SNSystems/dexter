@@ -27,6 +27,7 @@
 
 import abc
 import difflib
+import os
 
 from dex.command.CommandBase import CommandBase
 from dex.command.StepValueInfo import StepValueInfo
@@ -183,7 +184,8 @@ class DexExpectWatchBase(CommandBase):
         for step in step_collection.steps:
             loc = step.current_location
 
-            if (loc.path == self.path and loc.lineno in self.line_range):
+            if (os.path.samefile(loc.path, self.path) and
+                loc.lineno in self.line_range):
                 try:
                     watch = step.program_state.frames[0].watches[self.expression]
                 except KeyError:
