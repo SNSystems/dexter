@@ -37,7 +37,8 @@ class LocIR:
         return '{}({}:{})'.format(self.path, self.lineno, self.column)
 
     def __eq__(self, rhs):
-        return (self.path == rhs.path and self.lineno == rhs.lineno
+        return (os.path.samefile(self.path, rhs.path)
+                and self.lineno == rhs.lineno
                 and self.column == rhs.column)
 
     def __lt__(self, rhs):

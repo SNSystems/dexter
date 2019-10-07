@@ -25,6 +25,7 @@ subset of Python is allowed, in order to prevent the possibility of unsafe
 Python code being embedded within DExTer commands.
 """
 
+import os
 import unittest
 from copy import copy
 
@@ -109,7 +110,7 @@ def resolve_labels(command: CommandBase, commands: dict):
     command_label_args = command.get_label_args()
     for command_arg in command_label_args:
         for dex_label in list(dex_labels.values()):
-            if (dex_label.path == command.path and
+            if (os.path.samefile(dex_label.path, command.path) and
                 dex_label.eval() == command_arg):
                 command.resolve_label(dex_label.get_as_pair())
     # labels for command should be resolved by this point.

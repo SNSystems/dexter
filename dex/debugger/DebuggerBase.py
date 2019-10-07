@@ -118,7 +118,7 @@ class DebuggerBase(object, metaclass=abc.ABCMeta):
         try:
             # Iterate over all watches of the types named in watch_cmds
             for watch in towatch:
-                if (watch.path == loc.path
+                if (os.path.samefile(watch.path, loc.path)
                         and watch.lineno == loc.lineno):
                     result = watch.eval(self)
                     step_info.watches.update(result)
