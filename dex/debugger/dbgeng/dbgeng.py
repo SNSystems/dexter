@@ -23,6 +23,7 @@
 
 import sys
 import os
+import platform
 
 from dex.debugger.DebuggerBase import DebuggerBase
 from dex.dextIR import FrameIR, LocIR, StepIR, StopReason, ValueIR
@@ -30,9 +31,11 @@ from dex.dextIR import ProgramState, StackFrame, SourceLocation
 from dex.utils.Exceptions import DebuggerException, LoadDebuggerException
 from dex.utils.ReturnCode import ReturnCode
 
-from . import setup
-from . import probe_process
-from . import breakpoint
+if platform.system() == "Windows":
+  # Don't load on linux; _load_interface will croak before any names are used.
+  from . import setup
+  from . import probe_process
+  from . import breakpoint
 
 class DbgEng(DebuggerBase):
     def __init__(self, context, *args):
@@ -43,13 +46,6 @@ class DbgEng(DebuggerBase):
         super(DbgEng, self).__init__(context, *args)
 
     def _custom_init(self):
-        import platform
-        arch = platform.architecture()[0]
-        machine = platform.machine()
-        if arch == '32bit' and machine == 'AMD64':
-          # This python process is 32 bits, but is sitting on a 64 bit machine.
-          # Bad things may happen, don't support it.
-          raise Exception('Can\'t run Dexter on 32 bit python in a 64 bit environment')
         try:
           res = setup.setup_everything(self.context.options.executable)
           self.client, self.hProcess = res
@@ -61,7 +57,17 @@ class DbgEng(DebuggerBase):
         setup.cleanup(self.client, self.hProcess)
 
     def _load_interface(self):
-        pass
+        arch = platform.architecture()[0]
+        machine = platform.machine()
+        if arch == '32bit' and machine == 'AMD64':
+          # This python process is 32 bits, but is sitting on a 64 bit machine.
+          # Bad things may happen, don't support it.
+          raise LoadDebuggerException('Can\'t run Dexter dbgeng on 32 bit python in a 64 bit environment')
+
+        if platform.system() != 'Windows':
+          raise LoadDebuggerException('DbgEng supports Windows only')
+
+        # Otherwise, everything was imported earlier
 
     @classmethod
     def get_name(cls):
