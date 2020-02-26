@@ -1,3 +1,0 @@
-CHECK:parser error:{{.*}}test.cpp(16): Unbalanced parenthesis starting here
-CHECK:DexExpectWatchValue(
-CHECK:                   ^
