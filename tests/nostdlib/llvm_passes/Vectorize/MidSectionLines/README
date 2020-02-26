@@ -1,8 +1,0 @@
-I can't currently think up a good way to represent this in dexter: we
-get line numbers on the "middle section" of the vectorized loop, i.e.
-where the loop reduction variable is moved back to a scalar register to
-optionally go around the scalar portion of the loop. Those lines just
-lead to misleading behaviours; but given that during the vectorized
-part of the loop we bounce randomly around lines (due to ILP I suspect)
-it's difficult to write a robust test (IMO) saying what line numbers
-we _should_ step over.

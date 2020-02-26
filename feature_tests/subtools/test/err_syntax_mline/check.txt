@@ -1,3 +1,0 @@
-CHECK:parser error:{{.*}}test.cpp(17): invalid syntax
-CHECK:    ,'a', 3, 3, 3, 3, on_line=0)
-CHECK:    ^
